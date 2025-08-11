@@ -1,0 +1,62 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'com.diffplug.spotless' version '6.25.0'
+}
+
+group = 'com.dev-ganesh'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(23)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+spotless {
+	java {
+		target 'src/**/*.java'
+		googleJavaFormat('1.17.0') // or use prettier, eclipse, etc.
+		importOrder()
+		removeUnusedImports()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+}
+
+
+dependencies {
+	compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	//For Sending Emails
+	implementation("org.springframework.boot:spring-boot-starter-mail:3.5.0")
+
+	//For Map Struct
+	implementation("org.mapstruct:mapstruct:1.6.3")
+	annotationProcessor('org.mapstruct:mapstruct-processor:1.6.3')
+
+	// For DAO Mapping
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+
+	// For JWT Implementation
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'         // Main API (build & parse JWT)
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'           // Internal logic (needed at runtime)
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'        // Enables storing objects as JSON in JWT
+
+	runtimeOnly 'org.postgresql:postgresql'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
