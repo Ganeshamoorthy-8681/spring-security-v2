@@ -7,19 +7,16 @@ import com.spring.security.domain.entity.User;
 import com.spring.security.exceptions.AuthenticationException;
 import com.spring.security.exceptions.DaoLayerException;
 import com.spring.security.util.AuthUtil;
-import lombok.SneakyThrows;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 /**
  * Custom AuthenticationProvider implementation for authenticating users based on account-specific
@@ -55,38 +52,37 @@ public class AccountUserAuthProvider implements AuthenticationProvider {
    */
   @Override
   public Authentication authenticate(Authentication authentication) {
-      try {
-        AccountUserAuthToken token = (AccountUserAuthToken) authentication;
-        String email = token.getName();
-        String password = Optional.ofNullable(token.getCredentials()).map(Object::toString).orElse(null);
-        Long accountId = token.getAccountId();
+    try {
+      AccountUserAuthToken token = (AccountUserAuthToken) authentication;
+      String email = token.getName();
+      String password =
+          Optional.ofNullable(token.getCredentials()).map(Object::toString).orElse(null);
+      Long accountId = token.getAccountId();
+      log.info("Authenticating user: {} for account: {}", email, accountId);
+      User user = fetchUserByAccountAndEmail(accountId, email);
+      validatePassword(password, user.getPassword());
+      UserDetails userDetails = buildUserDetails(user);
 
-        log.info("Authenticating user: {} for account: {}", email, accountId);
+      return new AccountUserAuthToken(
+          userDetails, user.getPassword(), accountId, userDetails.getAuthorities());
 
-        User user = fetchUserByAccountAndEmail(accountId, email);
-        validatePassword(password, user.getPassword());
-
-        UserDetails userDetails = buildUserDetails(user);
-
-        return new AccountUserAuthToken(userDetails, user.getPassword(), accountId, userDetails.getAuthorities());
-
-      } catch (UsernameNotFoundException | BadCredentialsException e) {
-        log.warn("Authentication failed: {}", e.getMessage());
-        throw e;
-      } catch (Exception e) {
-        log.error("Unexpected error during authentication", e);
-        throw new AuthenticationException("Internal error occurred during authentication", e);
-      }
+    } catch (UsernameNotFoundException | BadCredentialsException e) {
+      log.warn("Authentication failed: {}", e.getMessage());
+      throw e;
+    } catch (Exception e) {
+      log.error("Unexpected error during authentication", e);
+      throw new AuthenticationException("Internal error occurred during authentication", e);
+    }
   }
 
-    /**
-     * Fetches a user by account ID and email.
-     *
-     * @param accountId the ID of the account
-     * @param email the email of the user
-     * @return the User object if found
-     * @throws DaoLayerException if there is an error accessing the database
-     */
+  /**
+   * Fetches a user by account ID and email.
+   *
+   * @param accountId the ID of the account
+   * @param email the email of the user
+   * @return the User object if found
+   * @throws DaoLayerException if there is an error accessing the database
+   */
   private User fetchUserByAccountAndEmail(Long accountId, String email) throws DaoLayerException {
     User user = userDao.findByAccountIdAndEmail(accountId, email);
     if (user == null) {
@@ -116,11 +112,10 @@ public class AccountUserAuthProvider implements AuthenticationProvider {
    */
   private UserDetails buildUserDetails(User user) {
     return new CustomUserDetails(
-            user.getAccountId(),
-            user.getEmail(),
-            user.getPassword(),
-            AuthUtil.getAuthorities(user.getRoles())
-    );
+        user.getAccountId(),
+        user.getEmail(),
+        user.getPassword(),
+        AuthUtil.getAuthorities(user.getRoles()));
   }
 
   /**

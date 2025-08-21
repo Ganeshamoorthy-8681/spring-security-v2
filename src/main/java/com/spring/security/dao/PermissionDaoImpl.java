@@ -2,11 +2,9 @@ package com.spring.security.dao;
 
 import com.spring.security.dao.mapper.PermissionMapper;
 import com.spring.security.domain.entity.Permission;
-import java.util.List;
-
 import com.spring.security.exceptions.DaoLayerException;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,9 +35,9 @@ public class PermissionDaoImpl implements PermissionDao {
   public List<Permission> list() throws DaoLayerException {
     try {
       return permissionMapper.list();
-    }catch (Exception e){
-        log.warn("Error while listing permissions", e);
-        throw new DaoLayerException("Error while listing permissions",e);
+    } catch (Exception e) {
+      log.warn("Error while listing permissions", e);
+      throw new DaoLayerException("Error while listing permissions", e);
     }
   }
 }

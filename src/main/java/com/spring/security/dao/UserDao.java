@@ -2,7 +2,6 @@ package com.spring.security.dao;
 
 import com.spring.security.domain.entity.User;
 import com.spring.security.exceptions.DaoLayerException;
-
 import java.util.Map;
 
 public interface UserDao {
@@ -36,7 +35,7 @@ public interface UserDao {
    * @param email the email of the user to retrieve
    * @return the user with the specified email, or null if not found
    */
-  User findByEmail(String email)throws DaoLayerException;
+  User findByEmail(String email) throws DaoLayerException;
 
   /**
    * Updates the password of a user based on the provided update and condition maps.
@@ -44,5 +43,6 @@ public interface UserDao {
    * @param updateMap a map containing the fields to be updated, including the new password
    * @param conditionMap a map containing conditions to identify which user(s) to update
    */
-  void update(Map<String, Object> updateMap, Map<String, Object> conditionMap) throws DaoLayerException;
+  void update(Map<String, Object> updateMap, Map<String, Object> conditionMap)
+      throws DaoLayerException;
 }

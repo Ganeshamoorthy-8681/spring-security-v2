@@ -18,6 +18,13 @@ public final class AuthUtil {
    */
   public static List<SimpleGrantedAuthority> getAuthorities(Collection<Role> roles) {
 
+    for (Role role : roles) {
+      System.out.println(role.getName());
+      for (Permission permission : role.getPermissions()) {
+        System.out.println("Permission: " + permission.getName());
+      }
+    }
+
     return roles.stream()
         .flatMap(
             role ->

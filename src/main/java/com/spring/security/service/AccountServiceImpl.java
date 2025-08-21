@@ -6,12 +6,11 @@ import com.spring.security.dao.AccountDao;
 import com.spring.security.domain.entity.Account;
 import com.spring.security.domain.entity.enums.AccountStatus;
 import com.spring.security.domain.mapper.AccountMapper;
-import java.util.Map;
-
 import com.spring.security.exceptions.DaoLayerException;
 import com.spring.security.exceptions.ResourceAlreadyExistException;
 import com.spring.security.exceptions.ResourceNotFoundException;
 import com.spring.security.exceptions.ServiceLayerException;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -36,14 +35,15 @@ public class AccountServiceImpl implements AccountService {
    * @param accountCreateRequestDto the data transfer object containing account creation details
    */
   @Override
-  public AccountResponseDto create(AccountCreateRequestDto accountCreateRequestDto) throws ServiceLayerException {
+  public AccountResponseDto create(AccountCreateRequestDto accountCreateRequestDto)
+      throws ServiceLayerException {
 
     try {
 
       Account account =
-              AccountMapper.ACCOUNT_MAPPER.convertAccountCreateRequestToAccount(
+          AccountMapper.ACCOUNT_MAPPER.convertAccountCreateRequestToAccount(
               accountCreateRequestDto, AccountStatus.CREATED);
-      if(isAccountExists(account.getName())){
+      if (isAccountExists(account.getName())) {
         log.warn("Account with name '{}' already exists", account.getName());
         throw new ResourceAlreadyExistException("Account with this name already exists");
       }
@@ -51,9 +51,8 @@ public class AccountServiceImpl implements AccountService {
       return AccountMapper.ACCOUNT_MAPPER.convertAccountToAccountResponseDto(account);
     } catch (DaoLayerException e) {
       log.error("Error creating account: {}", e.getMessage());
-      throw new ServiceLayerException("Failed to create account",e);
+      throw new ServiceLayerException("Failed to create account", e);
     }
-
   }
 
   /**
@@ -64,21 +63,21 @@ public class AccountServiceImpl implements AccountService {
    * @throws ServiceLayerException if an error occurs while retrieving the account
    */
   @Override
-    public AccountResponseDto findByAccountName(String accountName) throws ServiceLayerException {
-        try {
-        Account account = accountDao.findByName(accountName);
+  public AccountResponseDto findByAccountName(String accountName) throws ServiceLayerException {
+    try {
+      Account account = accountDao.findByName(accountName);
 
-        if (account == null) {
-            log.warn("Account with name '{}' not found", accountName);
-            throw new ResourceNotFoundException("Account not found");
-        }
+      if (account == null) {
+        log.warn("Account with name '{}' not found", accountName);
+        throw new ResourceNotFoundException("Account not found");
+      }
 
-        return AccountMapper.ACCOUNT_MAPPER.convertAccountToAccountResponseDto(account);
-        } catch (DaoLayerException e) {
-        log.error("Error finding account by name: {}", e.getMessage());
-        throw new ServiceLayerException("Failed to find account by name", e);
-        }
+      return AccountMapper.ACCOUNT_MAPPER.convertAccountToAccountResponseDto(account);
+    } catch (DaoLayerException e) {
+      log.error("Error finding account by name: {}", e.getMessage());
+      throw new ServiceLayerException("Failed to find account by name", e);
     }
+  }
 
   /**
    * Checks if an account with the given name already exists.

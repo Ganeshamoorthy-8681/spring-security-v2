@@ -6,12 +6,11 @@ import com.spring.security.dao.RoleDao;
 import com.spring.security.domain.entity.Role;
 import com.spring.security.domain.mapper.PermissionMapper;
 import com.spring.security.domain.mapper.RoleMapper;
-import java.util.List;
-
 import com.spring.security.exceptions.DaoLayerException;
 import com.spring.security.exceptions.ResourceAlreadyExistException;
 import com.spring.security.exceptions.ResourceNotFoundException;
 import com.spring.security.exceptions.ServiceLayerException;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -31,19 +30,26 @@ public class RoleServiceImpl implements RoleService {
    * @param roleCreateRequestDto the data transfer object containing role creation details
    */
   @Override
-  public RoleResponseDto create(RoleCreateRequestDto roleCreateRequestDto, Long accountId) throws ServiceLayerException {
+  public RoleResponseDto create(RoleCreateRequestDto roleCreateRequestDto, Long accountId)
+      throws ServiceLayerException {
 
     try {
       if (isRoleExists(roleCreateRequestDto.getName(), accountId)) {
-        log.warn("Role with name: {} already exists for account ID: {}", roleCreateRequestDto.getName(), accountId);
-        throw new ResourceAlreadyExistException("Role with name " + roleCreateRequestDto.getName() + " already exists");
+        log.warn(
+            "Role with name: {} already exists for account ID: {}",
+            roleCreateRequestDto.getName(),
+            accountId);
+        throw new ResourceAlreadyExistException(
+            "Role with name " + roleCreateRequestDto.getName() + " already exists");
       }
-      Role role =
-              roleDao.create(RoleMapper.ROLE_MAPPER.convertCreteRequestToRole(
-                              roleCreateRequestDto,
-                              accountId,
-                              PermissionMapper.PERMISSION_MAPPER.convertPermissionDtoToPermission(
-                                      roleCreateRequestDto.getPermissions())));
+
+      Role convertedRole =
+          RoleMapper.ROLE_MAPPER.convertCreteRequestToRole(
+              roleCreateRequestDto,
+              accountId,
+              PermissionMapper.PERMISSION_MAPPER.convertPermissionDtoToPermission(
+                  roleCreateRequestDto.getPermissions()));
+      Role role = roleDao.create(convertedRole);
       return RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role);
     } catch (DaoLayerException e) {
       log.error("Failed to create role for account ID: {}", accountId, e);
@@ -58,7 +64,7 @@ public class RoleServiceImpl implements RoleService {
    * @param accountId the unique identifier of the account
    * @return true if the role exists, false otherwise
    */
-  private boolean isRoleExists(String roleName, Long accountId){
+  private boolean isRoleExists(String roleName, Long accountId) {
     try {
       findByName(roleName, accountId);
       return true;
@@ -77,7 +83,7 @@ public class RoleServiceImpl implements RoleService {
   public List<RoleResponseDto> list(Long accountId) throws ServiceLayerException {
     try {
       return RoleMapper.ROLE_MAPPER.convertRoleListToResponseDtoList(roleDao.list(accountId));
-    } catch (DaoLayerException e){
+    } catch (DaoLayerException e) {
       log.error("Failed to retrieve roles for account ID: {}", accountId, e);
       throw new ServiceLayerException("Failed to retrieve roles", e);
     }
@@ -96,10 +102,10 @@ public class RoleServiceImpl implements RoleService {
     try {
       Role role = roleDao.findById(roleId, accountId);
 
-        if (role == null) {
-            log.warn("Role with ID: {} not found for account ID: {}", roleId, accountId);
-            throw new ResourceNotFoundException("Role not found with ID: " + roleId);
-        }
+      if (role == null) {
+        log.warn("Role with ID: {} not found for account ID: {}", roleId, accountId);
+        throw new ResourceNotFoundException("Role not found with ID: " + roleId);
+      }
       return RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role);
 
     } catch (DaoLayerException e) {
@@ -111,22 +117,22 @@ public class RoleServiceImpl implements RoleService {
   /**
    * Finds a role by its name and the account ID it belongs to.
    *
-   * @param roleName  the name of the role
+   * @param roleName the name of the role
    * @param accountId the unique identifier of the account to which the role belongs
    * @return the role response data transfer object if found, otherwise null
    */
   @Override
   public RoleResponseDto findByName(String roleName, Long accountId) throws ServiceLayerException {
     try {
-        Role role = roleDao.findByName(roleName, accountId);
-        if (role == null) {
-            log.warn("Role with name: {} not found for account ID: {}", roleName, accountId);
-            throw new ResourceNotFoundException("Role not found with name: " + roleName);
-        }
-        return RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role);
-        } catch (DaoLayerException e) {
-        log.error("Failed to find role with name: {} for account ID: {}", roleName, accountId, e);
-        throw new ServiceLayerException("Failed to find role", e);
+      Role role = roleDao.findByName(roleName, accountId);
+      if (role == null) {
+        log.warn("Role with name: {} not found for account ID: {}", roleName, accountId);
+        throw new ResourceNotFoundException("Role not found with name: " + roleName);
+      }
+      return RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role);
+    } catch (DaoLayerException e) {
+      log.error("Failed to find role with name: {} for account ID: {}", roleName, accountId, e);
+      throw new ServiceLayerException("Failed to find role", e);
     }
   }
 }

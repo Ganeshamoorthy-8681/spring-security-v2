@@ -4,18 +4,13 @@ import com.spring.security.component.JwtTokenGenerator;
 import com.spring.security.config.tokens.AccountUserAuthToken;
 import com.spring.security.config.tokens.RootUserAuthToken;
 import com.spring.security.exceptions.AuthenticationException;
-import com.spring.security.exceptions.JwtTokenParseException;
-import com.spring.security.exceptions.PreconditionViolationException;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -50,22 +45,20 @@ public class JwtFilter extends OncePerRequestFilter {
       HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
 
-
     log.info("requestURI={}", request.getRequestURI());
 
     String authHeader = request.getHeader("Authorization");
 
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-      String jwt = authHeader.substring(7); // remove "Bearer "
+    if (authHeader != null && authHeader.startsWith("Bearer")) {
+      String jwt = authHeader.replace("Bearer", "").trim(); // remove "Bearer "
 
       try {
         Claims claims = jwtTokenGenerator.getClaims(jwt);
-
         String email = (String) claims.get("email");
-
         boolean isRoot = (boolean) claims.get("isRoot");
 
-        Long accountId = Optional.ofNullable(claims.get("accountId"))
+        Long accountId =
+            Optional.ofNullable(claims.get("accountId"))
                 .filter(Number.class::isInstance)
                 .map(Number.class::cast)
                 .map(Number::longValue)
@@ -89,8 +82,8 @@ public class JwtFilter extends OncePerRequestFilter {
           SecurityContextHolder.getContext().setAuthentication(authenticated);
         }
 
-      }  catch (Exception e) {
-          throw new AuthenticationException("Failed to Validate",e);
+      } catch (Exception e) {
+        throw new AuthenticationException("Failed to Validate", e);
       }
     }
 

@@ -2,14 +2,12 @@ package com.spring.security.config.authproviders;
 
 import static com.spring.security.util.AuthUtil.getAuthorities;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spring.security.config.tokens.RootUserAuthToken;
 import com.spring.security.dao.UserDao;
 import com.spring.security.domain.entity.CustomUserDetails;
 import com.spring.security.domain.entity.User;
-import java.util.Optional;
-
 import com.spring.security.exceptions.DaoLayerException;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -60,18 +58,14 @@ public class RootUserAuthProvider implements AuthenticationProvider {
 
     RootUserAuthToken token = (RootUserAuthToken) authentication;
     String email = token.getName();
-    String password = Optional.ofNullable(token.getCredentials())
-            .map(Object::toString)
-            .orElse(null);
+    String password =
+        Optional.ofNullable(token.getCredentials()).map(Object::toString).orElse(null);
 
     User user = loadUserByEmail(email);
     validatePassword(user, password);
 
-    UserDetails userDetails = new CustomUserDetails(
-            user.getEmail(),
-            user.getPassword(),
-            getAuthorities(user.getRoles())
-    );
+    UserDetails userDetails =
+        new CustomUserDetails(user.getEmail(), user.getPassword(), getAuthorities(user.getRoles()));
 
     return new RootUserAuthToken(userDetails, user.getPassword(), userDetails.getAuthorities());
   }
@@ -91,9 +85,10 @@ public class RootUserAuthProvider implements AuthenticationProvider {
         log.error("User not found with email: {}", email);
         throw new UsernameNotFoundException("User not found with email: " + email);
       }
-      if(!isRootUser(user)){
+      if (!isRootUser(user)) {
         log.error("User with email {} is not a root user", email);
-        throw new BadCredentialsException("User is not a root user, try with account user credentials");
+        throw new BadCredentialsException(
+            "User is not a root user, try with account user credentials");
       }
       return user;
     } catch (DaoLayerException e) {
@@ -116,7 +111,6 @@ public class RootUserAuthProvider implements AuthenticationProvider {
     }
   }
 
-
   /**
    * Checks if the user is a root user.
    *
@@ -124,8 +118,7 @@ public class RootUserAuthProvider implements AuthenticationProvider {
    * @return true if the user is a root user, false otherwise
    */
   private boolean isRootUser(User user) {
-    return user.getRoles().stream()
-            .anyMatch(role -> role.getName().equalsIgnoreCase("ROOT"));
+    return user.getRoles().stream().anyMatch(role -> role.getName().equalsIgnoreCase("ROOT"));
   }
 
   /**

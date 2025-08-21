@@ -19,7 +19,7 @@ public class OtpGeneratorImpl implements OtpGenerator {
     try {
       // 6-digit OTP
       return String.valueOf((int) ((Math.random() * 900000) + 100000));
-    } catch (Exception e){
+    } catch (Exception e) {
       throw new OtpGenerationFailedException("Failed to generate OTP", e);
     }
   }

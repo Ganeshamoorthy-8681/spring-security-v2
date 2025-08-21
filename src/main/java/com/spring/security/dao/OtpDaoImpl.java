@@ -2,9 +2,8 @@ package com.spring.security.dao;
 
 import com.spring.security.dao.mapper.OtpMapper;
 import com.spring.security.domain.entity.OtpCode;
-import java.util.Map;
-
 import com.spring.security.exceptions.DaoLayerException;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -33,14 +32,14 @@ public class OtpDaoImpl implements OtpDao {
     try {
       int rowCount = otpMapper.create(otpCode);
 
-      if(rowCount < 1){
+      if (rowCount < 1) {
         log.warn("Failed to create OTP for email: {}", otpCode.getEmail());
         throw new DaoLayerException("Failed to create OTP");
       }
 
     } catch (Exception e) {
       log.error("Error creating OTP for email: {}", otpCode.getEmail(), e);
-      throw new DaoLayerException("Failed to create OTP",e);
+      throw new DaoLayerException("Failed to create OTP", e);
     }
   }
 
@@ -57,7 +56,7 @@ public class OtpDaoImpl implements OtpDao {
       return otpMapper.find(email);
     } catch (Exception e) {
       log.error("Error retrieving OTP for email: {}", email, e);
-      throw new DaoLayerException("Failed to retrieve OTP",e);
+      throw new DaoLayerException("Failed to retrieve OTP", e);
     }
   }
 
@@ -69,17 +68,18 @@ public class OtpDaoImpl implements OtpDao {
    * @param conditions A map containing the conditions that must be met for the update to occur.
    */
   @Override
-  public void update(Map<String, Object> updates, Map<String, Object> conditions) throws DaoLayerException {
+  public void update(Map<String, Object> updates, Map<String, Object> conditions)
+      throws DaoLayerException {
 
     try {
       int rowCount = otpMapper.update("otp_codes", updates, conditions);
-      if (rowCount < 1){
+      if (rowCount < 1) {
         log.warn("No OTP was updated with conditions: {}", conditions);
         throw new DaoLayerException("Failed to update OTP");
       }
     } catch (Exception e) {
       log.error("Error updating OTP for email: {}", conditions.get("email"), e);
-      throw new DaoLayerException("Failed to update OTP",e);
+      throw new DaoLayerException("Failed to update OTP", e);
     }
   }
 
@@ -97,7 +97,7 @@ public class OtpDaoImpl implements OtpDao {
         throw new DaoLayerException("Failed to delete OTP");
       }
     } catch (DaoLayerException e) {
-      throw new DaoLayerException("Failed to delete OTP",e);
+      throw new DaoLayerException("Failed to delete OTP", e);
     }
   }
 }

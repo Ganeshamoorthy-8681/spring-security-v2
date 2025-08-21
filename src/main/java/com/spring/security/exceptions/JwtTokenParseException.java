@@ -7,11 +7,11 @@ package com.spring.security.exceptions;
  */
 public class JwtTokenParseException extends BaseException {
 
-    public JwtTokenParseException(String message) {
-        super(message);
-    }
+  public JwtTokenParseException(String message) {
+    super(message);
+  }
 
-    public JwtTokenParseException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public JwtTokenParseException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }

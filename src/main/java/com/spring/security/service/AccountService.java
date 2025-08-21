@@ -12,7 +12,8 @@ public interface AccountService {
    *
    * @param accountCreateRequestDto the data transfer object containing account creation details
    */
-  AccountResponseDto create(AccountCreateRequestDto accountCreateRequestDto) throws ServiceLayerException;
+  AccountResponseDto create(AccountCreateRequestDto accountCreateRequestDto)
+      throws ServiceLayerException;
 
   /**
    * Retrieves an account by its ID.
@@ -21,7 +22,6 @@ public interface AccountService {
    * @return the account associated with the given ID
    */
   AccountResponseDto findById(Long id) throws ServiceLayerException;
-
 
   /**
    * Retrieves an account by its name.

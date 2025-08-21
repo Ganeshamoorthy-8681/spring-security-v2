@@ -16,39 +16,39 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/otp")
 public class OtpController {
 
-    private final UserService userService;
+  private final UserService userService;
 
-    /**
-     * Constructor for OtpController.
-     *
-     * @param userService the UserService to be used by this controller
-     */
-    OtpController(UserService userService){
-     this.userService = userService;
-    }
+  /**
+   * Constructor for OtpController.
+   *
+   * @param userService the UserService to be used by this controller
+   */
+  OtpController(UserService userService) {
+    this.userService = userService;
+  }
 
+  /**
+   * Validates an OTP for a user.
+   *
+   * @param requestDto the request data transfer object containing the OTP to validate
+   * @return a ResponseEntity indicating the result of the validation
+   */
+  @PostMapping("/validate")
+  public ResponseEntity<OtpValidateResponseDto> validateOtp(
+      @RequestBody OtpValidateRequestDto requestDto) throws ServiceLayerException {
+    return new ResponseEntity<>(userService.validateOtp(requestDto), HttpStatus.OK);
+  }
 
-    /**
-     * Validates an OTP for a user.
-     *
-     * @param requestDto the request data transfer object containing the OTP to validate
-     * @return a ResponseEntity indicating the result of the validation
-     */
-    @PostMapping("/validate")
-    public ResponseEntity<OtpValidateResponseDto> validateOtp(@RequestBody OtpValidateRequestDto requestDto) throws ServiceLayerException {
-        return new ResponseEntity<>(userService.validateOtp(requestDto), HttpStatus.OK);
-    }
-
-    /**
-     * Resends an OTP to the user's email.
-     *
-     * @param requestDto the request data transfer object containing the user's email
-     * @return a ResponseEntity indicating that the OTP has been resent
-     */
-    @PostMapping("/resend")
-    public ResponseEntity<Void> resendOtp(@RequestBody OtpResendRequestDto requestDto) throws ServiceLayerException {
-        userService.resendOtp(requestDto.getEmail());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
+  /**
+   * Resends an OTP to the user's email.
+   *
+   * @param requestDto the request data transfer object containing the user's email
+   * @return a ResponseEntity indicating that the OTP has been resent
+   */
+  @PostMapping("/resend")
+  public ResponseEntity<Void> resendOtp(@RequestBody OtpResendRequestDto requestDto)
+      throws ServiceLayerException {
+    userService.resendOtp(requestDto.getEmail());
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 }

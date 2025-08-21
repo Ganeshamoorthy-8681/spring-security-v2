@@ -3,7 +3,6 @@ package com.spring.security.service;
 import com.spring.security.controller.dto.request.RoleCreateRequestDto;
 import com.spring.security.controller.dto.response.RoleResponseDto;
 import com.spring.security.exceptions.ServiceLayerException;
-
 import java.util.List;
 
 /**
@@ -18,7 +17,8 @@ public interface RoleService {
    * @param roleCreateRequestDto the data transfer object containing role creation details
    * @param accountId the unique identifier of the account to which the role belongs
    */
-  RoleResponseDto create(RoleCreateRequestDto roleCreateRequestDto, Long accountId) throws ServiceLayerException;
+  RoleResponseDto create(RoleCreateRequestDto roleCreateRequestDto, Long accountId)
+      throws ServiceLayerException;
 
   /**
    * Retrieves a list of roles associated with a specific account ID.
@@ -37,12 +37,12 @@ public interface RoleService {
    */
   RoleResponseDto findById(Long roleId, Long accountId) throws ServiceLayerException;
 
-    /**
-     * Finds a role by its name and the account ID it belongs to.
-     *
-     * @param roleName the name of the role
-     * @param accountId the unique identifier of the account to which the role belongs
-     * @return the role response data transfer object if found, otherwise null
-     */
+  /**
+   * Finds a role by its name and the account ID it belongs to.
+   *
+   * @param roleName the name of the role
+   * @param accountId the unique identifier of the account to which the role belongs
+   * @return the role response data transfer object if found, otherwise null
+   */
   RoleResponseDto findByName(String roleName, Long accountId) throws ServiceLayerException;
 }

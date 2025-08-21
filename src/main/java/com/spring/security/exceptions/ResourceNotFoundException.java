@@ -5,8 +5,7 @@ package com.spring.security.exceptions;
  */
 public class ResourceNotFoundException extends ServiceLayerException {
 
-    public ResourceNotFoundException(String message) {
-        super(message);
-    }
-
+  public ResourceNotFoundException(String message) {
+    super(message);
+  }
 }

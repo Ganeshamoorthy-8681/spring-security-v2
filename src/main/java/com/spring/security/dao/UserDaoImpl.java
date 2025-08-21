@@ -3,12 +3,11 @@ package com.spring.security.dao;
 import com.spring.security.dao.mapper.UserMapper;
 import com.spring.security.domain.entity.Role;
 import com.spring.security.domain.entity.User;
+import com.spring.security.exceptions.DaoLayerException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import com.spring.security.exceptions.DaoLayerException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,26 +56,24 @@ public class UserDaoImpl implements UserDao {
         throw new DaoLayerException("Failed to create user");
       }
 
-    } catch (Exception e){
-        log.error("Error creating user {}: {}", user.getEmail(), e.getMessage());
-        throw new DaoLayerException("Failed to create user",e);
+    } catch (Exception e) {
+      log.error("Error creating user {}: {}", user.getEmail(), e.getMessage());
+      throw new DaoLayerException("Failed to create user", e);
     }
-
-
   }
-    /**
-     * Assigns roles to the user in the database.
-     *
-     * @param user the user whose roles are to be assigned
-     * @throws DaoLayerException if there is an error during the database operation
-     */
+
+  /**
+   * Assigns roles to the user in the database.
+   *
+   * @param user the user whose roles are to be assigned
+   * @throws DaoLayerException if there is an error during the database operation
+   */
   private void assignRoles(User user) throws DaoLayerException {
 
     try {
 
-      List<Long> roleIds = Optional.ofNullable(user.getRoles())
-              .orElse(Collections.emptyList())
-              .stream()
+      List<Long> roleIds =
+          Optional.ofNullable(user.getRoles()).orElse(Collections.emptyList()).stream()
               .map(Role::getId)
               .toList();
 
@@ -91,9 +88,8 @@ public class UserDaoImpl implements UserDao {
       }
     } catch (Exception e) {
       log.error("Error inserting roles for user {}: {}", user.getEmail(), e.getMessage());
-      throw new DaoLayerException("Failed to assign roles to user",e);
+      throw new DaoLayerException("Failed to assign roles to user", e);
     }
-
   }
 
   /**
@@ -108,10 +104,10 @@ public class UserDaoImpl implements UserDao {
     try {
       return userMapper.findByAccountIdAndUserId(accountId, id);
     } catch (Exception e) {
-      log.error("Error retrieving user with ID {} for account {}: {}", id, accountId, e.getMessage());
-      throw new DaoLayerException("Failed to retrieve user",e);
+      log.error(
+          "Error retrieving user with ID {} for account {}: {}", id, accountId, e.getMessage());
+      throw new DaoLayerException("Failed to retrieve user", e);
     }
-
   }
 
   /**
@@ -125,9 +121,13 @@ public class UserDaoImpl implements UserDao {
 
     try {
       return userMapper.findByAccountIdAndEmail(accountId, email);
-    } catch (Exception e){
-        log.error("Error retrieving user with email {} for account {}: {}", email, accountId, e.getMessage());
-        throw new DaoLayerException("Failed to retrieve user by email",e);
+    } catch (Exception e) {
+      log.error(
+          "Error retrieving user with email {} for account {}: {}",
+          email,
+          accountId,
+          e.getMessage());
+      throw new DaoLayerException("Failed to retrieve user by email", e);
     }
   }
 
@@ -142,9 +142,9 @@ public class UserDaoImpl implements UserDao {
 
     try {
       return userMapper.findByEmail(email);
-    } catch (Exception e){
+    } catch (Exception e) {
       log.error("Error retrieving user with email {} for  {}", email, e.getMessage());
-      throw new DaoLayerException("Failed to retrieve user by email",e);
+      throw new DaoLayerException("Failed to retrieve user by email", e);
     }
   }
 
@@ -155,7 +155,8 @@ public class UserDaoImpl implements UserDao {
    * @param conditionMap a map containing conditions to identify which user(s) to update
    */
   @Override
-  public void update(Map<String, Object> updateMap, Map<String, Object> conditionMap) throws DaoLayerException {
+  public void update(Map<String, Object> updateMap, Map<String, Object> conditionMap)
+      throws DaoLayerException {
 
     try {
       int rowCount = userMapper.update("users", updateMap, conditionMap);
@@ -167,7 +168,7 @@ public class UserDaoImpl implements UserDao {
 
     } catch (Exception e) {
       log.error("Error updating user with conditions {}: {}", conditionMap, e.getMessage());
-      throw new DaoLayerException("Failed to update user",e);
+      throw new DaoLayerException("Failed to update user", e);
     }
   }
 }

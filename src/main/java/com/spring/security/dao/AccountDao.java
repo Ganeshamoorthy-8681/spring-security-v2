@@ -2,7 +2,6 @@ package com.spring.security.dao;
 
 import com.spring.security.domain.entity.Account;
 import com.spring.security.exceptions.DaoLayerException;
-
 import java.util.Map;
 
 /**
@@ -25,7 +24,6 @@ public interface AccountDao {
    * @return the account with the specified ID, or null if not found
    */
   Account findById(Long id) throws DaoLayerException;
-
 
   /**
    * Retrieves an account by its name.

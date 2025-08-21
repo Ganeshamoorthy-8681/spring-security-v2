@@ -1,7 +1,5 @@
 package com.spring.security.config;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import com.spring.security.component.JwtTokenGenerator;
 import com.spring.security.config.authproviders.AccountUserAuthProvider;
 import com.spring.security.config.authproviders.RootUserAuthProvider;
@@ -31,8 +29,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity()
 public class SecurityConfig {
 
-  @Autowired
-  private AuthEntryPoint customAuthenticationEntryPoint;
+  @Autowired private AuthEntryPoint customAuthenticationEntryPoint;
 
   /**
    * AuthenticationManager bean is used to authenticate the user credentials. It uses the custom
@@ -40,7 +37,7 @@ public class SecurityConfig {
    */
   @Bean
   public AuthenticationManager authenticationManager(
-          AccountUserAuthProvider accountUserAuthProvider, RootUserAuthProvider rootUserAuthProvider) {
+      AccountUserAuthProvider accountUserAuthProvider, RootUserAuthProvider rootUserAuthProvider) {
     return new ProviderManager(accountUserAuthProvider, rootUserAuthProvider);
   }
 
@@ -60,26 +57,24 @@ public class SecurityConfig {
       throws Exception {
     JwtFilter jwtFilter = new JwtFilter(jwtTokenGenerator, authenticationManager);
 
-    return http
-            .csrf(AbstractHttpConfigurer::disable)
-            .exceptionHandling(ex -> ex
-                    .authenticationEntryPoint(customAuthenticationEntryPoint))
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(
-                            "/api/v1/auth/**",
-                            "/api/v1/accounts/*/users/root/create",
-                            "/api/v1/accounts/*/users/set-password",
-                            "/api/v1/accounts/*/users/forgot-password",
-                            "/api/v1/accounts/create",
-                            "/api/v1/otp/**"
-                    ).permitAll()
-                    .anyRequest().authenticated())
-            .sessionManagement(session -> session
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .httpBasic(Customizer.withDefaults())
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
-
+    return http.csrf(AbstractHttpConfigurer::disable)
+        .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthenticationEntryPoint))
+        .authorizeHttpRequests(
+            auth ->
+                auth.requestMatchers(
+                        "/api/v1/auth/**",
+                        "/api/v1/accounts/*/users/root/create",
+                        "/api/v1/accounts/*/users/set-password",
+                        "/api/v1/accounts/*/users/forgot-password",
+                        "/api/v1/accounts/create",
+                        "/api/v1/otp/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated())
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .httpBasic(Customizer.withDefaults())
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+        .build();
   }
-
 }

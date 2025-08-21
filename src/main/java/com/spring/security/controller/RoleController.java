@@ -39,7 +39,8 @@ public class RoleController {
   @PostMapping("/create")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ROLE:CREATE')")
   public ResponseEntity<RoleResponseDto> create(
-      @PathVariable Long accountId, @RequestBody RoleCreateRequestDto roleCreateRequestDto) throws ServiceLayerException {
+      @PathVariable Long accountId, @RequestBody RoleCreateRequestDto roleCreateRequestDto)
+      throws ServiceLayerException {
     RoleResponseDto roleResponseDto = roleService.create(roleCreateRequestDto, accountId);
     return new ResponseEntity<>(roleResponseDto, HttpStatus.CREATED);
   }
@@ -67,8 +68,8 @@ public class RoleController {
    */
   @GetMapping("/list")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ROLE:LIST')")
-  public ResponseEntity<List<RoleResponseDto>> list(
-      @PathVariable Long accountId) throws ServiceLayerException {
+  public ResponseEntity<List<RoleResponseDto>> list(@PathVariable Long accountId)
+      throws ServiceLayerException {
     List<RoleResponseDto> roleResponseDtos = roleService.list(accountId);
     return new ResponseEntity<>(roleResponseDtos, HttpStatus.OK);
   }
@@ -87,5 +88,4 @@ public class RoleController {
     RoleResponseDto roleResponseDto = roleService.findByName(name, accountId);
     return new ResponseEntity<>(roleResponseDto, HttpStatus.OK);
   }
-
 }

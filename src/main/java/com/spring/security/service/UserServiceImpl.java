@@ -3,15 +3,15 @@ package com.spring.security.service;
 import static com.spring.security.domain.mapper.UserMapper.USER_MAPPER;
 
 import com.spring.security.component.OtpGenerator;
+import com.spring.security.controller.dto.request.OtpValidateRequestDto;
 import com.spring.security.controller.dto.request.RoleCreateRequestDto;
 import com.spring.security.controller.dto.request.RootUserCreateRequestDto;
 import com.spring.security.controller.dto.request.UserCreateRequestDto;
-import com.spring.security.controller.dto.request.OtpValidateRequestDto;
+import com.spring.security.controller.dto.response.OtpValidateResponseDto;
 import com.spring.security.controller.dto.response.OtpValidationStatus;
 import com.spring.security.controller.dto.response.RoleResponseDto;
 import com.spring.security.controller.dto.response.UserCreateResponseDto;
 import com.spring.security.controller.dto.response.UserResponseDto;
-import com.spring.security.controller.dto.response.OtpValidateResponseDto;
 import com.spring.security.dao.UserDao;
 import com.spring.security.domain.entity.OtpCode;
 import com.spring.security.domain.entity.Role;
@@ -21,17 +21,15 @@ import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
 import com.spring.security.domain.mapper.RoleMapper;
 import com.spring.security.domain.mapper.UserMapper;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-
 import com.spring.security.exceptions.DaoLayerException;
 import com.spring.security.exceptions.EmailServiceException;
 import com.spring.security.exceptions.OtpGenerationFailedException;
 import com.spring.security.exceptions.ResourceAlreadyExistException;
 import com.spring.security.exceptions.ResourceNotFoundException;
 import com.spring.security.exceptions.ServiceLayerException;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,18 +81,19 @@ public class UserServiceImpl implements UserService {
    * @param requestDto the request dto containing user details
    */
   @Override
-  public UserCreateResponseDto createUser(UserCreateRequestDto requestDto, Long accountId) throws ServiceLayerException {
+  public UserCreateResponseDto createUser(UserCreateRequestDto requestDto, Long accountId)
+      throws ServiceLayerException {
 
     try {
       User user =
-              USER_MAPPER.convertUserCreateRequestDtoToUser(
-                      requestDto, UserType.PASSWORD, UserStatus.CREATED, accountId);
+          USER_MAPPER.convertUserCreateRequestDtoToUser(
+              requestDto, UserType.PASSWORD, UserStatus.CREATED, accountId);
 
-        // Check if user already exists
-        if (isUserAlreadyExists(accountId, user.getEmail())) {
-            log.error("User with email {} already exists in account {}", user.getEmail(), accountId);
-            throw new ResourceAlreadyExistException("User already exists");
-        }
+      // Check if user already exists
+      if (isUserAlreadyExists(accountId, user.getEmail())) {
+        log.error("User with email {} already exists in account {}", user.getEmail(), accountId);
+        throw new ResourceAlreadyExistException("User already exists");
+      }
 
       User createdUser = userDao.create(user);
       // Sends an email for verification
@@ -104,8 +103,7 @@ public class UserServiceImpl implements UserService {
     } catch (DaoLayerException e) {
       log.error("Failed to create user: {}", e.getMessage());
       throw new ServiceLayerException("Failed to create user");
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       log.error("Unexpected error occurred while creating user: {}", e.getMessage());
       throw new ServiceLayerException("Unexpected error occurred while creating user");
     }
@@ -125,22 +123,25 @@ public class UserServiceImpl implements UserService {
 
     try {
 
-      if(isUserAlreadyExists(accountId, userCreateRequestDto.getEmail())) {
-        log.error("Root user with email {} already exists in account {}", userCreateRequestDto.getEmail(), accountId);
+      if (isUserAlreadyExists(accountId, userCreateRequestDto.getEmail())) {
+        log.error(
+            "Root user with email {} already exists in account {}",
+            userCreateRequestDto.getEmail(),
+            accountId);
         throw new ResourceAlreadyExistException("Root user already exists");
       }
 
-      RoleResponseDto roleResponseDto =  createRootRole(accountId);
+      RoleResponseDto roleResponseDto = createRootRole(accountId);
 
       if (roleResponseDto == null) {
         log.error("Failed to create root role for user creation");
         throw new ServiceLayerException("Failed to create roles for root user");
       }
       List<Role> roles =
-              List.of(RoleMapper.ROLE_MAPPER.convertRoleResponseDtoToRole(roleResponseDto));
+          List.of(RoleMapper.ROLE_MAPPER.convertRoleResponseDtoToRole(roleResponseDto));
       User user =
-              USER_MAPPER.convertRootUserCreateRequestDtoToUser(
-                      userCreateRequestDto, UserType.PASSWORD, UserStatus.CREATED, accountId, roles);
+          USER_MAPPER.convertRootUserCreateRequestDtoToUser(
+              userCreateRequestDto, UserType.PASSWORD, UserStatus.CREATED, accountId, roles);
       User createdUser = userDao.create(user);
       // Sends an email for verification
       sendOtpToEmail(createdUser.getEmail());
@@ -150,7 +151,7 @@ public class UserServiceImpl implements UserService {
       log.error("Failed to create root user: {}", e.getMessage());
       throw new ServiceLayerException("Failed to create root user");
 
-    }  catch (Exception e) {
+    } catch (Exception e) {
       log.error("Unexpected error occurred while creating Root  user: {}", e.getMessage());
       throw new ServiceLayerException("Unexpected error occurred while creating user");
     }
@@ -171,7 +172,6 @@ public class UserServiceImpl implements UserService {
       return false;
     }
   }
-
 
   /**
    * Creates a root role for the root user.
@@ -194,19 +194,20 @@ public class UserServiceImpl implements UserService {
    * @return the user with the specified ID, or null if not found
    */
   @Override
-  public UserResponseDto findByAccountIdAndUserId(Long accountId, Long id) throws ServiceLayerException {
+  public UserResponseDto findByAccountIdAndUserId(Long accountId, Long id)
+      throws ServiceLayerException {
     try {
 
       User user = userDao.findById(accountId, id);
 
-      if( user == null) {
+      if (user == null) {
         log.warn("User with ID {} not found in account {}", id, accountId);
         throw new ResourceNotFoundException("User not found");
       }
       return USER_MAPPER.convertUserToUserResponseDto(user);
     } catch (DaoLayerException e) {
-        log.error("Failed to find user by ID {}: {}", id, e.getMessage());
-        throw new ServiceLayerException("Failed to find user by ID");
+      log.error("Failed to find user by ID {}: {}", id, e.getMessage());
+      throw new ServiceLayerException("Failed to find user by ID");
     }
   }
 
@@ -217,10 +218,11 @@ public class UserServiceImpl implements UserService {
    * @return the user with the specified email, or null if not found
    */
   @Override
-  public UserResponseDto findByAccountIdAndEmail(Long accountId, String email) throws ServiceLayerException {
-    try{
+  public UserResponseDto findByAccountIdAndEmail(Long accountId, String email)
+      throws ServiceLayerException {
+    try {
       User user = userDao.findByAccountIdAndEmail(accountId, email);
-      if(user == null) {
+      if (user == null) {
         log.warn("User with email {} not found in account {}", email, accountId);
         throw new ResourceNotFoundException("User not found");
       }
@@ -241,10 +243,10 @@ public class UserServiceImpl implements UserService {
       String otp = otpGenerator.generateOtp();
       otpService.create(email, otp);
       sendEmail(email, otp);
-    } catch (OtpGenerationFailedException | EmailServiceException e){
-        log.error("Failed to generate OTP for email {}: {}", email, e.getMessage());
-        throw new ServiceLayerException("Failed to generate OTP",e);
-        }
+    } catch (OtpGenerationFailedException | EmailServiceException e) {
+      log.error("Failed to generate OTP for email {}: {}", email, e.getMessage());
+      throw new ServiceLayerException("Failed to generate OTP", e);
+    }
   }
 
   /**
@@ -265,7 +267,8 @@ public class UserServiceImpl implements UserService {
    */
   @Override
   @Transactional(rollbackFor = ServiceLayerException.class)
-  public OtpValidateResponseDto validateOtp(OtpValidateRequestDto otpRequestDto) throws ServiceLayerException {
+  public OtpValidateResponseDto validateOtp(OtpValidateRequestDto otpRequestDto)
+      throws ServiceLayerException {
 
     try {
       OtpCode otpCode = otpService.find(otpRequestDto.getEmail());
@@ -277,14 +280,15 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-    /**
-     * Processes the OTP validation request.
-     *
-     * @param request the OTP validation request containing email and OTP
-     * @param otpCode the OTP code associated with the email
-     * @return the response indicating the status of the OTP validation
-     */
-  private OtpValidateResponseDto processOtpValidation(OtpValidateRequestDto request, OtpCode otpCode) throws ServiceLayerException {
+  /**
+   * Processes the OTP validation request.
+   *
+   * @param request the OTP validation request containing email and OTP
+   * @param otpCode the OTP code associated with the email
+   * @return the response indicating the status of the OTP validation
+   */
+  private OtpValidateResponseDto processOtpValidation(
+      OtpValidateRequestDto request, OtpCode otpCode) throws ServiceLayerException {
     OtpValidateResponseDto response = new OtpValidateResponseDto();
 
     if (otpCode == null) {
@@ -309,15 +313,15 @@ public class UserServiceImpl implements UserService {
     return response;
   }
 
-    /**
-     * Activates the user if they are a root user and updates their status to active.
-     * @param request the OTP validation request containing account ID and email
-     *
-     */
+  /**
+   * Activates the user if they are a root user and updates their status to active.
+   *
+   * @param request the OTP validation request containing account ID and email
+   */
   private void activateUserIfRequired(OtpValidateRequestDto request) throws ServiceLayerException {
 
     try {
-       UserResponseDto user = findByAccountIdAndEmail(request.getAccountId(), request.getEmail());
+      UserResponseDto user = findByAccountIdAndEmail(request.getAccountId(), request.getEmail());
 
       if (isRootUser(user)) {
         accountService.updateStatus(request.getAccountId(), AccountStatus.ACTIVE);
@@ -328,7 +332,6 @@ public class UserServiceImpl implements UserService {
       log.error("Failed to activate user: {}", e.getMessage());
       throw new ServiceLayerException("Failed to activate user");
     }
-
   }
 
   /**
@@ -349,7 +352,8 @@ public class UserServiceImpl implements UserService {
    * @param password the new password to set for the user
    */
   @Override
-  public void updateUserPassword(Long accountId, String email, String password) throws ServiceLayerException {
+  public void updateUserPassword(Long accountId, String email, String password)
+      throws ServiceLayerException {
 
     try {
       Map<String, Object> updateMap = Map.of("password", passwordEncoder.encode(password));
@@ -366,10 +370,11 @@ public class UserServiceImpl implements UserService {
    * Updates the status of a user identified by their account ID and email.
    *
    * @param accountId the ID of the account to which the user belongs
-   * @param email     the email of the user whose status is to be updated
+   * @param email the email of the user whose status is to be updated
    */
   @Override
-  public void updateUserStatus(Long accountId, String email, UserStatus status) throws ServiceLayerException {
+  public void updateUserStatus(Long accountId, String email, UserStatus status)
+      throws ServiceLayerException {
 
     try {
       Map<String, Object> updateMap = Map.of("status", status);
@@ -381,27 +386,24 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-
   /**
    * Sends a forgot password request for the user identified by their account ID and email.
    *
    * @param accountId the ID of the account to which the user belongs
-   * @param email     the email of the user who has forgotten their password
+   * @param email the email of the user who has forgotten their password
    */
   @Override
   public void forgotPassword(Long accountId, String email) {
     // Need to implement forgot password functionality
   }
 
-    /**
-     * Checks if the user is a root user.
-     *
-     * @param user the user to check
-     * @return true if the user is a root user, false otherwise
-     */
+  /**
+   * Checks if the user is a root user.
+   *
+   * @param user the user to check
+   * @return true if the user is a root user, false otherwise
+   */
   private boolean isRootUser(UserResponseDto user) {
-    return user.getRoles().stream()
-            .anyMatch(role -> role.getName().equalsIgnoreCase("ROOT"));
+    return user.getRoles().stream().anyMatch(role -> role.getName().equalsIgnoreCase("ROOT"));
   }
-
 }

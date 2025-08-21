@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS roles (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(50) NOT NULL,
     description VARCHAR(255),
     account_id INT,
     FOREIGN KEY (account_id) REFERENCES accounts(id)

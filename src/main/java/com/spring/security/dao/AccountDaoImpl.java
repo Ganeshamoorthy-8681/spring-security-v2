@@ -2,9 +2,8 @@ package com.spring.security.dao;
 
 import com.spring.security.dao.mapper.AccountMapper;
 import com.spring.security.domain.entity.Account;
-import java.util.Map;
-
 import com.spring.security.exceptions.DaoLayerException;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,13 +34,13 @@ public class AccountDaoImpl implements AccountDao {
 
     try {
       int rowCount = accountMapper.create(account);
-      if(rowCount < 1){
+      if (rowCount < 1) {
         throw new DaoLayerException("Failed to create account");
       }
       return account;
     } catch (Exception e) {
       log.error("Error creating account: {}", e.getMessage());
-      throw new DaoLayerException("Failed to create account",e);
+      throw new DaoLayerException("Failed to create account", e);
     }
   }
 
@@ -57,7 +56,7 @@ public class AccountDaoImpl implements AccountDao {
       return accountMapper.findById(id);
     } catch (Exception e) {
       log.error("Error retrieving account with ID {}: {}", id, e.getMessage());
-      throw new DaoLayerException("Failed to retrieve account",e);
+      throw new DaoLayerException("Failed to retrieve account", e);
     }
   }
 
@@ -73,7 +72,7 @@ public class AccountDaoImpl implements AccountDao {
       return accountMapper.findByName(accountName);
     } catch (Exception e) {
       log.error("Error retrieving account with name {}: {}", accountName, e.getMessage());
-      throw new DaoLayerException("Failed to retrieve account by name",e);
+      throw new DaoLayerException("Failed to retrieve account by name", e);
     }
   }
 
@@ -84,18 +83,19 @@ public class AccountDaoImpl implements AccountDao {
    * @param conditions a map containing the conditions for the update operation
    */
   @Override
-  public void update(Map<String, Object> updates, Map<String, Object> conditions) throws DaoLayerException {
+  public void update(Map<String, Object> updates, Map<String, Object> conditions)
+      throws DaoLayerException {
 
     try {
       int rowCount = accountMapper.update("accounts", updates, conditions);
 
       if (rowCount < 1) {
-          throw new DaoLayerException("Failed to update account");
+        throw new DaoLayerException("Failed to update account");
       }
 
     } catch (Exception e) {
       log.error("Error updating account: {}", e.getMessage());
-      throw new DaoLayerException("Failed to update account",e);
+      throw new DaoLayerException("Failed to update account", e);
     }
   }
 }

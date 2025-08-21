@@ -2,7 +2,6 @@ package com.spring.security.dao;
 
 import com.spring.security.domain.entity.Role;
 import com.spring.security.exceptions.DaoLayerException;
-
 import java.util.List;
 
 /**
@@ -34,9 +33,9 @@ public interface RoleDao {
    */
   List<Role> list(Long accountId) throws DaoLayerException;
 
-
   /**
    * Finds a role by its name and account ID.
+   *
    * @param name the name of the role to be found
    * @param accountId the unique identifier of the account associated with the role
    * @return the role with the specified name and account ID, or null if not found

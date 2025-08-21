@@ -3,7 +3,6 @@ package com.spring.security.service;
 import com.spring.security.controller.dto.request.LoginRequestDto;
 import com.spring.security.controller.dto.request.RootLoginRequestDto;
 import com.spring.security.exceptions.AuthenticationException;
-import com.spring.security.exceptions.JwtTokenGenerationFailedException;
 
 /**
  * Interface for the login service that handles user authentication. It provides methods to

@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
- * EmailServiceImpl is a service class that implements the EmailService interface.
- * It provides functionality to send emails using JavaMailSender.
+ * EmailServiceImpl is a service class that implements the EmailService interface. It provides
+ * functionality to send emails using JavaMailSender.
  */
 @Service
 @Slf4j

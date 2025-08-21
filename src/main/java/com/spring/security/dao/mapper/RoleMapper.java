@@ -49,7 +49,7 @@ public interface RoleMapper {
           + "WHERE rp.role_id = #{roleId}")
   List<Permission> getPermissionsByRoleId(Long roleId);
 
-  //Root role is not included in the list used internally for ROOT LEVEL access control
+  // Root role is not included in the list used internally for ROOT LEVEL access control
   @Select("SELECT * FROM roles WHERE account_id = #{accountId} AND name != 'ROOT' ")
   @ResultMap("roleResultMap")
   List<Role> listByAccountId(Long accountId);

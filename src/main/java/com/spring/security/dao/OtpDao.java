@@ -2,7 +2,6 @@ package com.spring.security.dao;
 
 import com.spring.security.domain.entity.OtpCode;
 import com.spring.security.exceptions.DaoLayerException;
-
 import java.util.Map;
 
 /**

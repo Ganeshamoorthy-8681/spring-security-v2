@@ -40,7 +40,8 @@ public class AccountController {
    */
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ACCOUNT:READ')")
-  public ResponseEntity<AccountResponseDto> getAccountDetails(@PathVariable Long id) throws ServiceLayerException {
+  public ResponseEntity<AccountResponseDto> getAccountDetails(@PathVariable Long id)
+      throws ServiceLayerException {
     return new ResponseEntity<>(accountService.findById(id), HttpStatus.OK);
   }
 

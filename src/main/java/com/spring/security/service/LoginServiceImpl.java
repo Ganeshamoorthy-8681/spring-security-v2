@@ -6,12 +6,11 @@ import com.spring.security.config.tokens.RootUserAuthToken;
 import com.spring.security.controller.dto.request.LoginRequestDto;
 import com.spring.security.controller.dto.request.RootLoginRequestDto;
 import com.spring.security.domain.entity.CustomUserDetails;
+import com.spring.security.exceptions.AuthenticationException;
+import com.spring.security.exceptions.JwtTokenGenerationFailedException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.spring.security.exceptions.AuthenticationException;
-import com.spring.security.exceptions.JwtTokenGenerationFailedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
@@ -52,7 +51,7 @@ public class LoginServiceImpl implements LoginService {
 
     try {
       RootUserAuthToken authenticationToken =
-              new RootUserAuthToken(requestDto.getEmail(), requestDto.getPassword());
+          new RootUserAuthToken(requestDto.getEmail(), requestDto.getPassword());
       return generateToken(authenticationToken);
     } catch (Exception e) {
       log.error("Authentication failed for user: {}", requestDto.getEmail(), e);
@@ -71,11 +70,11 @@ public class LoginServiceImpl implements LoginService {
 
     try {
       AccountUserAuthToken authenticationToken =
-              new AccountUserAuthToken(
-                      requestDto.getAccountId(), requestDto.getEmail(), requestDto.getPassword());
+          new AccountUserAuthToken(
+              requestDto.getAccountId(), requestDto.getEmail(), requestDto.getPassword());
       return generateToken(authenticationToken);
     } catch (Exception e) {
-      throw new AuthenticationException("Failed to Authenticate",e);
+      throw new AuthenticationException("Failed to Authenticate", e);
     }
   }
 
@@ -85,7 +84,8 @@ public class LoginServiceImpl implements LoginService {
    * @param authenticationToken the authentication object containing user details
    * @return a string representing the generated JWT token
    */
-  private String generateToken(Authentication authenticationToken) throws JwtTokenGenerationFailedException {
+  private String generateToken(Authentication authenticationToken)
+      throws JwtTokenGenerationFailedException {
 
     Authentication authentication = authenticationManager.authenticate(authenticationToken);
     CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();

@@ -8,9 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-/**
- * UserDetails implementation that represents a custom user in the application.
- */
+/** UserDetails implementation that represents a custom user in the application. */
 @Getter
 @Setter
 public class CustomUserDetails implements UserDetails {

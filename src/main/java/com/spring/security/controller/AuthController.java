@@ -40,7 +40,8 @@ public class AuthController {
    */
   @PostMapping("/login")
   public ResponseEntity<Void> login(
-      @RequestBody LoginRequestDto requestDto, HttpServletResponse response) throws AuthenticationException {
+      @RequestBody LoginRequestDto requestDto, HttpServletResponse response)
+      throws AuthenticationException {
 
     String token = loginService.authenticate(requestDto);
     response.setHeader("Authorization", "Bearer " + token);
@@ -56,7 +57,8 @@ public class AuthController {
    */
   @PostMapping("/root-login")
   public ResponseEntity<Void> rootLogin(
-      @RequestBody RootLoginRequestDto requestDto, HttpServletResponse response) throws AuthenticationException {
+      @RequestBody RootLoginRequestDto requestDto, HttpServletResponse response)
+      throws AuthenticationException {
 
     String token = loginService.authenticate(requestDto);
     if (token == null) {

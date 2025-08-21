@@ -2,18 +2,17 @@ package com.spring.security.service;
 
 import com.spring.security.dao.OtpDao;
 import com.spring.security.domain.entity.OtpCode;
-import java.time.LocalDateTime;
-import java.util.Map;
-
 import com.spring.security.exceptions.DaoLayerException;
 import com.spring.security.exceptions.ResourceNotFoundException;
 import com.spring.security.exceptions.ServiceLayerException;
+import java.time.LocalDateTime;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Service implementation for handling OTP (One-Time Password) operations.
- * This service provides methods to create, find, update, delete, and validate OTPs.
+ * Service implementation for handling OTP (One-Time Password) operations. This service provides
+ * methods to create, find, update, delete, and validate OTPs.
  */
 @Service
 @Slf4j
@@ -21,9 +20,7 @@ public class OtpServiceImpl implements OtpService {
 
   private final OtpDao otpDao;
 
-  /**
-   * Default constructor for OtpServiceImpl.
-   */
+  /** Default constructor for OtpServiceImpl. */
   public OtpServiceImpl(OtpDao otpDao) {
     this.otpDao = otpDao;
   }
@@ -78,14 +75,13 @@ public class OtpServiceImpl implements OtpService {
   public void update(String email, String otp) throws ServiceLayerException {
     try {
       Map<String, Object> updates =
-              Map.of("otp", otp, "expires_at", LocalDateTime.now().plusMinutes(3));
+          Map.of("otp", otp, "expires_at", LocalDateTime.now().plusMinutes(3));
       Map<String, Object> conditions = Map.of("email", email);
       otpDao.update(updates, conditions);
     } catch (DaoLayerException e) {
       log.error("Error updating OTP for email {}: {}", email, e.getMessage());
       throw new ServiceLayerException("Failed to update OTP", e);
     }
-
   }
 
   /**
@@ -95,11 +91,10 @@ public class OtpServiceImpl implements OtpService {
    */
   @Override
   public void delete(String email) throws ServiceLayerException {
-      try {
-          otpDao.deleteByEmail(email);
-      } catch (DaoLayerException e) {
-          throw new ServiceLayerException("Failed to delete OTP for email", e);
-      }
+    try {
+      otpDao.deleteByEmail(email);
+    } catch (DaoLayerException e) {
+      throw new ServiceLayerException("Failed to delete OTP for email", e);
+    }
   }
-
 }

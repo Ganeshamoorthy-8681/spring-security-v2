@@ -4,12 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * DTO for requesting a resend of the OTP (One Time Password).
- * This class contains the email address to which the OTP should be resent.
+ * DTO for requesting a resend of the OTP (One Time Password). This class contains the email address
+ * to which the OTP should be resent.
  */
 @Getter
 @Setter
 public class OtpResendRequestDto {
 
-    private String email;
+  private String email;
 }

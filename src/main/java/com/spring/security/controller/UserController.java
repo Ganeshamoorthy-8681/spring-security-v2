@@ -44,7 +44,8 @@ public class UserController {
   @PostMapping("/create")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:CREATE')")
   public ResponseEntity<UserCreateResponseDto> createUser(
-      @PathVariable Long accountId, @RequestBody UserCreateRequestDto requestDto) throws ServiceLayerException {
+      @PathVariable Long accountId, @RequestBody UserCreateRequestDto requestDto)
+      throws ServiceLayerException {
     return new ResponseEntity<>(userService.createUser(requestDto, accountId), HttpStatus.CREATED);
   }
 
@@ -56,7 +57,8 @@ public class UserController {
    */
   @PostMapping("/root/create")
   public ResponseEntity<UserResponseDto> createRootUser(
-      @PathVariable Long accountId, @RequestBody RootUserCreateRequestDto requestDto) throws ServiceLayerException {
+      @PathVariable Long accountId, @RequestBody RootUserCreateRequestDto requestDto)
+      throws ServiceLayerException {
     return new ResponseEntity<>(
         userService.createRootUser(requestDto, accountId), HttpStatus.CREATED);
   }
@@ -84,11 +86,12 @@ public class UserController {
   @PostMapping("/email")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:READ')")
   public ResponseEntity<UserResponseDto> getUserByEmail(
-      @PathVariable Long accountId, @RequestBody GetUserByEmailRequestDto requestDto) throws ServiceLayerException {
-    UserResponseDto userResponseDto = userService.findByAccountIdAndEmail(accountId, requestDto.getEmail());
+      @PathVariable Long accountId, @RequestBody GetUserByEmailRequestDto requestDto)
+      throws ServiceLayerException {
+    UserResponseDto userResponseDto =
+        userService.findByAccountIdAndEmail(accountId, requestDto.getEmail());
     return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
   }
-
 
   /**
    * Sets a new password for a user.
@@ -99,16 +102,17 @@ public class UserController {
    */
   @PostMapping("/set-password")
   public ResponseEntity<Void> setPassword(
-      @PathVariable Long accountId, @RequestBody SetUserPasswordRequestDto requestDto) throws ServiceLayerException {
-    //Need to validate the user state and existence before setting the password
+      @PathVariable Long accountId, @RequestBody SetUserPasswordRequestDto requestDto)
+      throws ServiceLayerException {
+    // Need to validate the user state and existence before setting the password
     userService.updateUserPassword(accountId, requestDto.getEmail(), requestDto.getPassword());
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 
   @PostMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(
-        @PathVariable Long accountId, @RequestBody ForgotPasswordRequestDto requestDto) {
-        userService.forgotPassword(accountId, requestDto.getEmail());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+  public ResponseEntity<Void> forgotPassword(
+      @PathVariable Long accountId, @RequestBody ForgotPasswordRequestDto requestDto) {
+    userService.forgotPassword(accountId, requestDto.getEmail());
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 }

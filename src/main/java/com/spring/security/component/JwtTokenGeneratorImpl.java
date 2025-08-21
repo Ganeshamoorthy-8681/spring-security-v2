@@ -30,12 +30,12 @@ public class JwtTokenGeneratorImpl implements JwtTokenGenerator {
   public String generate(Map<String, Object> claims) throws JwtTokenGenerationFailedException {
 
     try {
-        return Jwts.builder()
-                .setClaims(claims) // custom claim
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // expires in 1 hour
-                .signWith(getSecretKey()) // sign the token
-                .compact();
+      return Jwts.builder()
+          .setClaims(claims) // custom claim
+          .setIssuedAt(new Date())
+          .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // expires in 1 hour
+          .signWith(getSecretKey()) // sign the token
+          .compact();
     } catch (Exception e) {
       log.error("Error generating JWT token: {}", e.getMessage());
       throw new JwtTokenGenerationFailedException("Failed to generate JWT token", e);
@@ -49,9 +49,10 @@ public class JwtTokenGeneratorImpl implements JwtTokenGenerator {
    * @return Claims object containing the claims from the token
    */
   @Override
-  public Claims getClaims(String token) throws JwtTokenParseException, PreconditionViolationException {
+  public Claims getClaims(String token)
+      throws JwtTokenParseException, PreconditionViolationException {
 
-    //Need to Implement a common validation utility to check for null or empty strings.
+    // Need to Implement a common validation utility to check for null or empty strings.
     if (token == null || token.isEmpty()) {
       log.error("JWT token is null or empty");
       throw new PreconditionViolationException("JWT token cannot be null or empty");
@@ -59,15 +60,14 @@ public class JwtTokenGeneratorImpl implements JwtTokenGenerator {
 
     try {
       return Jwts.parserBuilder()
-              .setSigningKey(getSecretKey())
-              .build()
-              .parseClaimsJws(token)
-              .getBody();
+          .setSigningKey(getSecretKey())
+          .build()
+          .parseClaimsJws(token)
+          .getBody();
     } catch (Exception e) {
       log.error("Error parsing JWT token: {}", e.getMessage());
       throw new JwtTokenParseException("Unable to get the claims from the token", e);
     }
-
   }
 
   private Key getSecretKey() {

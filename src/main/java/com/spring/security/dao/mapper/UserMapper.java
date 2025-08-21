@@ -18,9 +18,7 @@ import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.UpdateProvider;
 
-/**
- * UserMapper interface for MyBatis to map User entity operations.
- */
+/** UserMapper interface for MyBatis to map User entity operations. */
 @Mapper
 public interface UserMapper {
 
@@ -56,7 +54,7 @@ public interface UserMapper {
         @Result(property = "type", column = "type", javaType = UserType.class),
         @Result(property = "accountId", column = "account_id", javaType = Long.class),
         @Result(property = "status", column = "status", javaType = UserStatus.class),
-              @Result(property = "password",column = "password",javaType =String.class),
+        @Result(property = "password", column = "password", javaType = String.class),
         @Result(property = "roles", column = "id", many = @Many(select = "getRolesByUserId"))
       })
   User findByAccountIdAndEmail(Long accountId, String email);
@@ -85,8 +83,8 @@ public interface UserMapper {
   @ResultMap(value = "userMap")
   User findByAccountIdAndUserId(Long accountId, Long id);
 
-
-  @Select("SELECT id, password, first_name, last_name, middle_name, email, type, account_id, status FROM users WHERE email = #{email}")
+  @Select(
+      "SELECT id, password, first_name, last_name, middle_name, email, type, account_id, status FROM users WHERE email = #{email}")
   @ResultMap(value = "userMap")
   User findByEmail(String email);
 
