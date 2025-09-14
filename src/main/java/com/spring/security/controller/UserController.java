@@ -4,8 +4,6 @@ import com.spring.security.controller.dto.request.ForgotPasswordRequestDto;
 import com.spring.security.controller.dto.request.GetUserByEmailRequestDto;
 import com.spring.security.controller.dto.request.SetUserPasswordRequestDto;
 import com.spring.security.controller.dto.request.UserCreateRequestDto;
-import com.spring.security.controller.dto.request.UserProfileUpdateRequestDto;
-import com.spring.security.controller.dto.request.UserRoleUpdateRequestDto;
 import com.spring.security.controller.dto.request.UserUpdateRequestDto;
 import com.spring.security.controller.dto.response.UserCreateResponseDto;
 import com.spring.security.controller.dto.response.UserResponseDto;
@@ -14,6 +12,7 @@ import com.spring.security.domain.mapper.UserMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import com.spring.security.service.UserService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,8 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /** User controller for handling user-related operations. */
 @RestController
@@ -99,9 +96,8 @@ public class UserController {
   public ResponseEntity<List<UserResponseDto>> listUsers(@PathVariable Long accountId)
       throws ServiceLayerException {
     List<User> users = userService.listUsersByAccountId(accountId);
-    List<UserResponseDto> userResponseDtos = users.stream()
-        .map(UserMapper.USER_MAPPER::convertUserToUserResponseDto)
-        .toList();
+    List<UserResponseDto> userResponseDtos =
+        users.stream().map(UserMapper.USER_MAPPER::convertUserToUserResponseDto).toList();
     return new ResponseEntity<>(userResponseDtos, HttpStatus.OK);
   }
 
@@ -129,48 +125,9 @@ public class UserController {
   }
 
   /**
-   * Updates the profile information for a user.
-   * Note: Email updates are not allowed for security reasons.
-   *
-   * @param accountId the ID of the account to which the user belongs
-   * @param userId the ID of the user whose profile is to be updated
-   * @param requestDto the DTO containing updated profile information
-   * @return a ResponseEntity indicating the result of the operation
-   */
-  @PatchMapping("/{userId}/profile")
-  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:UPDATE')")
-  public ResponseEntity<Void> updateUserProfile(
-      @PathVariable Long accountId,
-      @PathVariable Long userId,
-      @Valid @RequestBody UserProfileUpdateRequestDto requestDto)
-      throws ServiceLayerException {
-    userService.updateUserProfile(accountId, userId, requestDto);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
-
-  /**
-   * Updates the roles assigned to a user.
-   *
-   * @param accountId the ID of the account to which the user belongs
-   * @param userId the ID of the user whose roles are to be updated
-   * @param requestDto the DTO containing the new role assignments
-   * @return a ResponseEntity indicating the result of the operation
-   */
-  @PatchMapping("/{userId}/roles")
-  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:UPDATE')")
-  public ResponseEntity<Void> updateUserRoles(
-      @PathVariable Long accountId,
-      @PathVariable Long userId,
-      @Valid @RequestBody UserRoleUpdateRequestDto requestDto)
-      throws ServiceLayerException {
-    userService.updateUserRoles(accountId, userId, requestDto);
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
-
-  /**
-   * Updates both profile information and roles for a user in a single operation.
-   * Note: Email updates are not allowed for security reasons.
-   * Roles are optional - if not provided, only profile will be updated.
+   * Updates both profile information and roles for a user in a single operation. Note: Email
+   * updates are not allowed for security reasons. Roles are optional - if not provided, only
+   * profile will be updated.
    *
    * @param accountId the ID of the account to which the user belongs
    * @param userId the ID of the user to be updated

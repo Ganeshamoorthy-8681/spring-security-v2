@@ -39,14 +39,8 @@ public interface AccountMapper {
             column = "additional_attributes",
             javaType = Map.class,
             typeHandler = JsonTypeHandler.class),
-        @Result(
-            property = "createdAt",
-            column = "created_at",
-            javaType = java.time.Instant.class),
-        @Result(
-            property = "updatedAt",
-            column = "updated_at",
-            javaType = java.time.Instant.class),
+        @Result(property = "createdAt", column = "created_at", javaType = java.time.Instant.class),
+        @Result(property = "updatedAt", column = "updated_at", javaType = java.time.Instant.class),
         @Result(property = "createdBy", column = "created_by", javaType = String.class),
         @Result(property = "updatedBy", column = "updated_by", javaType = String.class)
       })

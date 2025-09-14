@@ -2,14 +2,11 @@ package com.spring.security.controller.dto.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
-/**
- * Request DTO for updating user roles.
- */
+/** Request DTO for updating user roles. */
 @Getter
 @Setter
 public class UserRoleUpdateRequestDto {

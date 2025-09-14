@@ -56,11 +56,8 @@ public class UpdateQueryBuilder {
     return updateSet.toString();
   }
 
-  /**
-   * Checks if a string value is likely a column reference rather than a literal value.
-   */
+  /** Checks if a string value is likely a column reference rather than a literal value. */
   private boolean isColumnReference(String value) {
-      return value.startsWith("$col:"); // must start lowercase
+    return value.startsWith("$col:"); // must start lowercase
   }
-
 }

@@ -2,9 +2,7 @@ package com.spring.security.domain.entity;
 
 import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;

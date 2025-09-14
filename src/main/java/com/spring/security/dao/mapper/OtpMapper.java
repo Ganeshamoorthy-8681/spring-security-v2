@@ -2,9 +2,7 @@ package com.spring.security.dao.mapper;
 
 import com.spring.security.dao.UpdateQueryBuilder;
 import com.spring.security.domain.entity.OtpCode;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Map;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;

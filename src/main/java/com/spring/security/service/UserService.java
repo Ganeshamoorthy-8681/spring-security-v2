@@ -2,8 +2,6 @@ package com.spring.security.service;
 
 import com.spring.security.controller.dto.request.RootUserCreateRequestDto;
 import com.spring.security.controller.dto.request.UserCreateRequestDto;
-import com.spring.security.controller.dto.request.UserProfileUpdateRequestDto;
-import com.spring.security.controller.dto.request.UserRoleUpdateRequestDto;
 import com.spring.security.controller.dto.request.UserUpdateRequestDto;
 import com.spring.security.controller.dto.response.UserCreateResponseDto;
 import com.spring.security.domain.entity.User;
@@ -77,8 +75,8 @@ public interface UserService {
   void forgotPassword(Long accountId, String email);
 
   /**
-   * Updates the last login time for a user. Moves current login to last login
-   * and sets current login to the current timestamp.
+   * Updates the last login time for a user. Moves current login to last login and sets current
+   * login to the current timestamp.
    *
    * @param accountId the ID of the account to which the user belongs (null for root users)
    * @param email the email of the user
@@ -94,29 +92,8 @@ public interface UserService {
   List<User> listUsersByAccountId(Long accountId) throws ServiceLayerException;
 
   /**
-   * Updates the profile information for a user identified by their account ID and user ID.
-   * Note: Email updates are not allowed for security reasons.
-   *
-   * @param accountId the ID of the account to which the user belongs
-   * @param userId the ID of the user whose profile is to be updated
-   * @param requestDto the DTO containing updated profile information
-   */
-  void updateUserProfile(Long accountId, Long userId, UserProfileUpdateRequestDto requestDto)
-      throws ServiceLayerException;
-
-  /**
-   * Updates the roles assigned to a user identified by their account ID and user ID.
-   *
-   * @param accountId the ID of the account to which the user belongs
-   * @param userId the ID of the user whose roles are to be updated
-   * @param requestDto the DTO containing the new role assignments
-   */
-  void updateUserRoles(Long accountId, Long userId, UserRoleUpdateRequestDto requestDto)
-      throws ServiceLayerException;
-
-  /**
-   * Updates both profile information and roles for a user in a single operation.
-   * Note: Email updates are not allowed for security reasons.
+   * Updates both profile information and roles for a user in a single operation. Note: Email
+   * updates are not allowed for security reasons.
    *
    * @param accountId the ID of the account to which the user belongs
    * @param userId the ID of the user to be updated

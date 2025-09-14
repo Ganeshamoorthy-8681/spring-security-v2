@@ -40,14 +40,8 @@ public interface RoleMapper {
             property = "permissions",
             column = "id",
             many = @Many(select = "getPermissionsByRoleId")),
-        @Result(
-            property = "createdAt",
-            column = "created_at",
-            javaType = java.time.Instant.class),
-        @Result(
-            property = "updatedAt",
-            column = "updated_at",
-            javaType = java.time.Instant.class),
+        @Result(property = "createdAt", column = "created_at", javaType = java.time.Instant.class),
+        @Result(property = "updatedAt", column = "updated_at", javaType = java.time.Instant.class),
         @Result(property = "createdBy", column = "created_by", javaType = String.class),
         @Result(property = "updatedBy", column = "updated_by", javaType = String.class),
         @Result(property = "deletedBy", column = "deleted_by", javaType = String.class)

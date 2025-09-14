@@ -95,6 +95,7 @@ public class LoginServiceImpl implements LoginService {
 
   /**
    * Generates a JWT token for the authenticated user.
+   *
    * @param authenticationToken the authentication object containing user details
    * @return a string representing the generated JWT token
    */

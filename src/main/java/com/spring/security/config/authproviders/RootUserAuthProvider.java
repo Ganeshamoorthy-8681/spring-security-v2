@@ -65,7 +65,11 @@ public class RootUserAuthProvider implements AuthenticationProvider {
     validatePassword(user, password);
 
     UserDetails userDetails =
-        new CustomUserDetails(user.getAccountId(), user.getEmail(), user.getPassword(), getAuthorities(user.getRoles()));
+        new CustomUserDetails(
+            user.getAccountId(),
+            user.getEmail(),
+            user.getPassword(),
+            getAuthorities(user.getRoles()));
 
     return new RootUserAuthToken(userDetails, user.getPassword(), userDetails.getAuthorities());
   }

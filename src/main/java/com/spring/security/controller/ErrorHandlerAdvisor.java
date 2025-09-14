@@ -3,28 +3,27 @@ package com.spring.security.controller;
 import com.spring.security.controller.dto.response.ErrorResponseDto;
 import com.spring.security.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 /**
- * Global exception handler for authentication and general exceptions.
- * Provides structured error responses with proper HTTP status codes and nested exception handling.
+ * Global exception handler for authentication and general exceptions. Provides structured error
+ * responses with proper HTTP status codes and nested exception handling.
  */
 @RestControllerAdvice
 @Slf4j
@@ -35,8 +34,12 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleResourceNotFoundException(
       ResourceNotFoundException e, HttpServletRequest request) {
     log.warn("Resource not found: {}", e.getMessage());
-    ErrorResponseDto errorResponse = createErrorResponse(
-        e.getMessage(), HttpStatus.NOT_FOUND.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            e.getMessage(),
+            HttpStatus.NOT_FOUND.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
   }
 
@@ -44,8 +47,9 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleResourceAlreadyExistException(
       ResourceAlreadyExistException e, HttpServletRequest request) {
     log.warn("Resource already exists: {}", e.getMessage());
-    ErrorResponseDto errorResponse = createErrorResponse(
-        e.getMessage(), HttpStatus.CONFLICT.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            e.getMessage(), HttpStatus.CONFLICT.value(), extractCauses(e), request.getRequestURI());
     return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
   }
 
@@ -53,8 +57,12 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handlePreconditionViolationException(
       PreconditionViolationException e, HttpServletRequest request) {
     log.warn("Precondition violation: {}", e.getMessage());
-    ErrorResponseDto errorResponse = createErrorResponse(
-        e.getMessage(), HttpStatus.PRECONDITION_FAILED.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            e.getMessage(),
+            HttpStatus.PRECONDITION_FAILED.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.PRECONDITION_FAILED).body(errorResponse);
   }
 
@@ -62,8 +70,12 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleServiceLayerException(
       ServiceLayerException e, HttpServletRequest request) {
     log.error("Service layer error: {}", e.getMessage(), e);
-    ErrorResponseDto errorResponse = createErrorResponse(
-        e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            e.getMessage(),
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
   }
 
@@ -71,8 +83,12 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleDaoLayerException(
       DaoLayerException e, HttpServletRequest request) {
     log.error("Data access error: {}", e.getMessage(), e);
-    ErrorResponseDto errorResponse = createErrorResponse(
-        "Data access error occurred", HttpStatus.INTERNAL_SERVER_ERROR.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            "Data access error occurred",
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
   }
 
@@ -80,9 +96,12 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleOtpGenerationFailedException(
       OtpGenerationFailedException e, HttpServletRequest request) {
     log.error("OTP generation failed: {}", e.getMessage(), e);
-    ErrorResponseDto errorResponse = createErrorResponse(
-        "Failed to generate OTP. Please try again.", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            "Failed to generate OTP. Please try again.",
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
   }
 
@@ -90,9 +109,12 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleEmailServiceException(
       EmailServiceException e, HttpServletRequest request) {
     log.error("Email service error: {}", e.getMessage(), e);
-    ErrorResponseDto errorResponse = createErrorResponse(
-        "Failed to send email. Please try again later.", HttpStatus.SERVICE_UNAVAILABLE.value(),
-        extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            "Failed to send email. Please try again later.",
+            HttpStatus.SERVICE_UNAVAILABLE.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorResponse);
   }
 
@@ -100,9 +122,12 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleJwtTokenGenerationFailedException(
       JwtTokenGenerationFailedException e, HttpServletRequest request) {
     log.error("JWT token generation failed: {}", e.getMessage(), e);
-    ErrorResponseDto errorResponse = createErrorResponse(
-        "Authentication token generation failed", HttpStatus.INTERNAL_SERVER_ERROR.value(),
-        extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            "Authentication token generation failed",
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
   }
 
@@ -110,9 +135,12 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleJwtTokenParseException(
       JwtTokenParseException e, HttpServletRequest request) {
     log.warn("JWT token parse error: {}", e.getMessage());
-    ErrorResponseDto errorResponse = createErrorResponse(
-        "Invalid authentication token", HttpStatus.UNAUTHORIZED.value(),
-        extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            "Invalid authentication token",
+            HttpStatus.UNAUTHORIZED.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
   }
 
@@ -122,9 +150,12 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleAuthenticationException(
       AuthenticationException e, HttpServletRequest request) {
     log.warn("Authentication failed: {}", e.getMessage());
-    ErrorResponseDto errorResponse = createErrorResponse(
-        "Authentication failed: " + e.getMessage(), HttpStatus.UNAUTHORIZED.value(),
-        extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            "Authentication failed: " + e.getMessage(),
+            HttpStatus.UNAUTHORIZED.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
   }
 
@@ -136,14 +167,16 @@ public class ErrorHandlerAdvisor {
     if (userMessage.isEmpty() || userMessage.toLowerCase().contains("access denied")) {
       userMessage = "You don't have permission to access this resource";
     }
-    ErrorResponseDto errorResponse = createErrorResponse(
-        userMessage, HttpStatus.FORBIDDEN.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            userMessage, HttpStatus.FORBIDDEN.value(), extractCauses(e), request.getRequestURI());
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
   }
 
   @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
   public ResponseEntity<ErrorResponseDto> handleAuthorizationDeniedException(
-      org.springframework.security.authorization.AuthorizationDeniedException e, HttpServletRequest request) {
+      org.springframework.security.authorization.AuthorizationDeniedException e,
+      HttpServletRequest request) {
     log.warn("Authorization denied: {}", e.getMessage());
 
     String userMessage = "You are not authorized to perform this action";
@@ -156,8 +189,9 @@ public class ErrorHandlerAdvisor {
       }
     }
 
-    ErrorResponseDto errorResponse = createErrorResponse(
-        userMessage, HttpStatus.FORBIDDEN.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            userMessage, HttpStatus.FORBIDDEN.value(), extractCauses(e), request.getRequestURI());
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
   }
 
@@ -168,14 +202,17 @@ public class ErrorHandlerAdvisor {
       MethodArgumentNotValidException e, HttpServletRequest request) {
     log.warn("Validation failed: {}", e.getMessage());
 
-    List<String> validationErrors = e.getBindingResult().getFieldErrors()
-        .stream()
-        .map(error -> error.getField() + ": " + error.getDefaultMessage())
-        .collect(Collectors.toList());
+    List<String> validationErrors =
+        e.getBindingResult().getFieldErrors().stream()
+            .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .collect(Collectors.toList());
 
-    ErrorResponseDto errorResponse = createErrorResponse(
-        "Validation failed", HttpStatus.BAD_REQUEST.value(),
-        validationErrors, request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            "Validation failed",
+            HttpStatus.BAD_REQUEST.value(),
+            validationErrors,
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
 
@@ -184,14 +221,17 @@ public class ErrorHandlerAdvisor {
       BindException e, HttpServletRequest request) {
     log.warn("Binding validation failed: {}", e.getMessage());
 
-    List<String> bindingErrors = e.getBindingResult().getFieldErrors()
-        .stream()
-        .map(error -> error.getField() + ": " + error.getDefaultMessage())
-        .collect(Collectors.toList());
+    List<String> bindingErrors =
+        e.getBindingResult().getFieldErrors().stream()
+            .map(error -> error.getField() + ": " + error.getDefaultMessage())
+            .collect(Collectors.toList());
 
-    ErrorResponseDto errorResponse = createErrorResponse(
-        "Request binding failed", HttpStatus.BAD_REQUEST.value(),
-        bindingErrors, request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            "Request binding failed",
+            HttpStatus.BAD_REQUEST.value(),
+            bindingErrors,
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
 
@@ -201,9 +241,11 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleNoHandlerFoundException(
       NoHandlerFoundException e, HttpServletRequest request) {
     log.warn("No handler found for {} {}", e.getHttpMethod(), e.getRequestURL());
-    String message = String.format("Endpoint not found: %s %s", e.getHttpMethod(), e.getRequestURL());
-    ErrorResponseDto errorResponse = createErrorResponse(
-        message, HttpStatus.NOT_FOUND.value(), extractCauses(e), request.getRequestURI());
+    String message =
+        String.format("Endpoint not found: %s %s", e.getHttpMethod(), e.getRequestURL());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            message, HttpStatus.NOT_FOUND.value(), extractCauses(e), request.getRequestURI());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
   }
 
@@ -212,14 +254,22 @@ public class ErrorHandlerAdvisor {
       HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
     log.warn("Method not supported: {} for {}", e.getMethod(), request.getRequestURI());
 
-    String supportedMethods = e.getSupportedHttpMethods() != null ?
-        e.getSupportedHttpMethods().toString() : "GET, POST, PUT, DELETE";
+    String supportedMethods =
+        e.getSupportedHttpMethods() != null
+            ? e.getSupportedHttpMethods().toString()
+            : "GET, POST, PUT, DELETE";
 
-    String message = String.format("HTTP method '%s' is not supported for this endpoint. Supported methods: %s",
-        e.getMethod(), supportedMethods);
+    String message =
+        String.format(
+            "HTTP method '%s' is not supported for this endpoint. Supported methods: %s",
+            e.getMethod(), supportedMethods);
 
-    ErrorResponseDto errorResponse = createErrorResponse(
-        message, HttpStatus.METHOD_NOT_ALLOWED.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            message,
+            HttpStatus.METHOD_NOT_ALLOWED.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(errorResponse);
   }
 
@@ -228,42 +278,61 @@ public class ErrorHandlerAdvisor {
       HttpMediaTypeNotSupportedException e, HttpServletRequest request) {
     log.warn("Media type not supported: {}", e.getContentType());
 
-    String supportedTypes = e.getSupportedMediaTypes().isEmpty() ?
-        "application/json" : e.getSupportedMediaTypes().toString();
+    String supportedTypes =
+        e.getSupportedMediaTypes().isEmpty()
+            ? "application/json"
+            : e.getSupportedMediaTypes().toString();
 
-    String message = String.format("Media type '%s' is not supported. Supported types: %s",
-        e.getContentType(), supportedTypes);
+    String message =
+        String.format(
+            "Media type '%s' is not supported. Supported types: %s",
+            e.getContentType(), supportedTypes);
 
-    ErrorResponseDto errorResponse = createErrorResponse(
-        message, HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            message,
+            HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE).body(errorResponse);
   }
 
   @ExceptionHandler(MissingServletRequestParameterException.class)
   public ResponseEntity<ErrorResponseDto> handleMissingServletRequestParameterException(
       MissingServletRequestParameterException e, HttpServletRequest request) {
-    log.warn("Missing required parameter: {} of type {}", e.getParameterName(), e.getParameterType());
+    log.warn(
+        "Missing required parameter: {} of type {}", e.getParameterName(), e.getParameterType());
 
-    String message = String.format("Required parameter '%s' of type '%s' is missing",
-        e.getParameterName(), e.getParameterType());
+    String message =
+        String.format(
+            "Required parameter '%s' of type '%s' is missing",
+            e.getParameterName(), e.getParameterType());
 
-    ErrorResponseDto errorResponse = createErrorResponse(
-        message, HttpStatus.BAD_REQUEST.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            message, HttpStatus.BAD_REQUEST.value(), extractCauses(e), request.getRequestURI());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ErrorResponseDto> handleMethodArgumentTypeMismatchException(
       MethodArgumentTypeMismatchException e, HttpServletRequest request) {
-    log.warn("Method argument type mismatch: parameter '{}' with value '{}' could not be converted to type '{}'",
-        e.getName(), e.getValue(), e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "unknown");
-
-    String message = String.format("Invalid value '%s' for parameter '%s'. Expected type: %s",
-        e.getValue(), e.getName(),
+    log.warn(
+        "Method argument type mismatch: parameter '{}' with value '{}' could not be converted to type '{}'",
+        e.getName(),
+        e.getValue(),
         e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "unknown");
 
-    ErrorResponseDto errorResponse = createErrorResponse(
-        message, HttpStatus.BAD_REQUEST.value(), extractCauses(e), request.getRequestURI());
+    String message =
+        String.format(
+            "Invalid value '%s' for parameter '%s'. Expected type: %s",
+            e.getValue(),
+            e.getName(),
+            e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "unknown");
+
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            message, HttpStatus.BAD_REQUEST.value(), extractCauses(e), request.getRequestURI());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
 
@@ -273,12 +342,14 @@ public class ErrorHandlerAdvisor {
     log.error("Method not found: {}", e.getMessage(), e);
 
     String cleanMessage = getCleanExceptionMessage(e);
-    String message = cleanMessage.isEmpty() ?
-        "Requested method is not available" :
-        "Method not found: " + cleanMessage;
+    String message =
+        cleanMessage.isEmpty()
+            ? "Requested method is not available"
+            : "Method not found: " + cleanMessage;
 
-    ErrorResponseDto errorResponse = createErrorResponse(
-        message, HttpStatus.NOT_FOUND.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            message, HttpStatus.NOT_FOUND.value(), extractCauses(e), request.getRequestURI());
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
   }
 
@@ -288,18 +359,20 @@ public class ErrorHandlerAdvisor {
   public ResponseEntity<ErrorResponseDto> handleGeneralException(
       Exception e, HttpServletRequest request) {
     log.error("Unexpected error occurred: {}", e.getMessage(), e);
-    ErrorResponseDto errorResponse = createErrorResponse(
-        "An unexpected error occurred. Please contact support if the problem persists.",
-        HttpStatus.INTERNAL_SERVER_ERROR.value(), extractCauses(e), request.getRequestURI());
+    ErrorResponseDto errorResponse =
+        createErrorResponse(
+            "An unexpected error occurred. Please contact support if the problem persists.",
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            extractCauses(e),
+            request.getRequestURI());
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
   }
 
   // Helper Methods
 
-  /**
-   * Creates a standardized error response with the given parameters.
-   */
-  private ErrorResponseDto createErrorResponse(String message, int code, List<String> causes, String path) {
+  /** Creates a standardized error response with the given parameters. */
+  private ErrorResponseDto createErrorResponse(
+      String message, int code, List<String> causes, String path) {
     ErrorResponseDto errorResponse = new ErrorResponseDto(message, code, causes);
     errorResponse.setPath(path);
     errorResponse.setTimestamp(Instant.now());
@@ -313,18 +386,18 @@ public class ErrorHandlerAdvisor {
     List<String> causes = new ArrayList<>();
     Throwable[] suppressed = throwable.getSuppressed();
 
-    for (Throwable exception: suppressed){
-        String message = getCleanExceptionMessage(exception);
-        if (message != null && !message.trim().isEmpty() && !causes.contains(message)) {
-            causes.add(message);
-        }
+    for (Throwable exception : suppressed) {
+      String message = getCleanExceptionMessage(exception);
+      if (message != null && !message.trim().isEmpty() && !causes.contains(message)) {
+        causes.add(message);
+      }
     }
     return causes;
   }
 
   /**
-   * Extracts a clean, user-friendly message from an exception.
-   * Returns the exception message if available, otherwise a default message based on exception type.
+   * Extracts a clean, user-friendly message from an exception. Returns the exception message if
+   * available, otherwise a default message based on exception type.
    */
   private String getCleanExceptionMessage(Throwable throwable) {
     String message = throwable.getMessage();
@@ -340,9 +413,7 @@ public class ErrorHandlerAdvisor {
     return getDefaultMessageForExceptionType(throwable);
   }
 
-  /**
-   * Removes internal implementation details from exception messages.
-   */
+  /** Removes internal implementation details from exception messages. */
   private String cleanupInternalDetails(String message) {
     // Remove SQL error codes and technical details
     message = message.replaceAll("\\b(SQL|sql)\\s*[Ee]rror\\s*\\d+", "Database error");
@@ -362,9 +433,7 @@ public class ErrorHandlerAdvisor {
     return message;
   }
 
-  /**
-   * Provides user-friendly default messages for specific exception types.
-   */
+  /** Provides user-friendly default messages for specific exception types. */
   private String getDefaultMessageForExceptionType(Throwable throwable) {
     String className = throwable.getClass().getSimpleName();
 
@@ -391,9 +460,7 @@ public class ErrorHandlerAdvisor {
     };
   }
 
-  /**
-   * Gets the best available message from an exception, with fallback to default.
-   */
+  /** Gets the best available message from an exception, with fallback to default. */
   private String getExceptionMessage(Throwable throwable, String defaultMessage) {
     String message = throwable.getMessage();
 

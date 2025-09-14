@@ -65,7 +65,8 @@ public class RoleController {
   public ResponseEntity<RoleResponseDto> find(
       @PathVariable Long accountId, @PathVariable Long roleId) throws ServiceLayerException {
     Role role = roleService.findById(roleId, accountId);
-    return new ResponseEntity<>(RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role), HttpStatus.OK);
+    return new ResponseEntity<>(
+        RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role), HttpStatus.OK);
   }
 
   /**
@@ -128,9 +129,7 @@ public class RoleController {
    */
   @DeleteMapping("/{roleId}")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ROLE:DELETE')")
-  public ResponseEntity<Void> deleteRole(
-      @PathVariable Long accountId,
-      @PathVariable Long roleId)
+  public ResponseEntity<Void> deleteRole(@PathVariable Long accountId, @PathVariable Long roleId)
       throws ServiceLayerException {
     roleService.delete(roleId, accountId);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);

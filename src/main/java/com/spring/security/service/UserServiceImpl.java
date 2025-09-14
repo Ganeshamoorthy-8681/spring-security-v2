@@ -6,8 +6,6 @@ import com.spring.security.annotation.LogActivity;
 import com.spring.security.controller.dto.request.RoleCreateRequestDto;
 import com.spring.security.controller.dto.request.RootUserCreateRequestDto;
 import com.spring.security.controller.dto.request.UserCreateRequestDto;
-import com.spring.security.controller.dto.request.UserProfileUpdateRequestDto;
-import com.spring.security.controller.dto.request.UserRoleUpdateRequestDto;
 import com.spring.security.controller.dto.request.UserUpdateRequestDto;
 import com.spring.security.controller.dto.response.UserCreateResponseDto;
 import com.spring.security.dao.UserDao;
@@ -15,12 +13,10 @@ import com.spring.security.domain.entity.Role;
 import com.spring.security.domain.entity.User;
 import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
-import com.spring.security.domain.mapper.UserMapper;
 import com.spring.security.exceptions.DaoLayerException;
 import com.spring.security.exceptions.ResourceAlreadyExistException;
 import com.spring.security.exceptions.ResourceNotFoundException;
 import com.spring.security.exceptions.ServiceLayerException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -224,7 +220,7 @@ public class UserServiceImpl implements UserService {
     try {
       Map<String, Object> updateMap = Map.of("password", passwordEncoder.encode(password));
       Map<String, Object> conditionMap = Map.of("email", email, "account_id", accountId);
-      userDao.update("users",updateMap, conditionMap);
+      userDao.update("users", updateMap, conditionMap);
 
     } catch (DaoLayerException e) {
       log.error("Failed to update user password for email {}: {}", email, e.getMessage());
@@ -264,8 +260,8 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
-   * Updates the last login time for a user. Moves current login to last login
-   * and sets current login to the current timestamp.
+   * Updates the last login time for a user. Moves current login to last login and sets current
+   * login to the current timestamp.
    *
    * @param accountId the ID of the account to which the user belongs (null for root users)
    * @param email the email of the user
@@ -275,22 +271,29 @@ public class UserServiceImpl implements UserService {
   public void updateLastLoginTime(Long accountId, String email) throws ServiceLayerException {
     try {
       // Create update map with login time fields
-      Map<String, Object> updateMap = Map.of(
-          "last_login", "$col:current_login",  // Move current_login to last_login $col: for direct column reference
-          "current_login", "CURRENT_TIMESTAMP"  // Set current_login to now
-      );
+      Map<String, Object> updateMap =
+          Map.of(
+              "last_login",
+                  "$col:current_login", // Move current_login to last_login $col: for direct column
+              // reference
+              "current_login", "CURRENT_TIMESTAMP" // Set current_login to now
+              );
 
       Map<String, Object> conditionMap = new HashMap<>();
       conditionMap.put("email", email);
 
       if (accountId != null) {
-        conditionMap.put("account_id",accountId);
+        conditionMap.put("account_id", accountId);
       }
 
-      userDao.update("users",updateMap, conditionMap);
+      userDao.update("users", updateMap, conditionMap);
       log.debug("Successfully updated login time for user: {} on account: {}", email, accountId);
     } catch (DaoLayerException e) {
-      log.error("Failed to update login time for user {} on account {}: {}", email, accountId, e.getMessage());
+      log.error(
+          "Failed to update login time for user {} on account {}: {}",
+          email,
+          accountId,
+          e.getMessage());
       throw new ServiceLayerException("Failed to update user login time", e);
     }
   }
@@ -314,82 +317,8 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
-   * Updates the profile information for a user identified by their account ID and user ID.
-   * Note: Email updates are not allowed for security reasons.
-   *
-   * @param accountId the ID of the account to which the user belongs
-   * @param userId the ID of the user whose profile is to be updated
-   * @param requestDto the DTO containing updated profile information
-   */
-  @Override
-  @LogActivity(action = "UPDATE", entityType = "USER", description = "User profile updated")
-  public void updateUserProfile(Long accountId, Long userId, UserProfileUpdateRequestDto requestDto)
-      throws ServiceLayerException {
-    try {
-      // First verify the user exists
-      findByAccountIdAndUserId(accountId, userId);
-
-      Map<String, Object> updateMap = new HashMap<>();
-      updateMap.put("first_name", requestDto.getFirstName());
-      updateMap.put("last_name", requestDto.getLastName());
-
-      if (requestDto.getMiddleName() != null) {
-        updateMap.put("middle_name", requestDto.getMiddleName());
-      }
-
-      Map<String, Object> conditionMap = Map.of("id", userId, "account_id", accountId);
-      userDao.update("users",updateMap, conditionMap);
-
-      log.info("Successfully updated profile for user ID: {} in account: {}", userId, accountId);
-    } catch (DaoLayerException e) {
-      log.error("Failed to update user profile for user ID {}: {}", userId, e.getMessage());
-      throw new ServiceLayerException("Failed to update user profile", e);
-    }
-  }
-
-  /**
-   * Updates the roles assigned to a user identified by their account ID and user ID.
-   *
-   * @param accountId the ID of the account to which the user belongs
-   * @param userId the ID of the user whose roles are to be updated
-   * @param requestDto the DTO containing the new role assignments
-   */
-  @Override
-  @Transactional(rollbackFor = ServiceLayerException.class)
-  @LogActivity(action = "UPDATE", entityType = "USER", description = "User roles updated")
-  public void updateUserRoles(Long accountId, Long userId, UserRoleUpdateRequestDto requestDto)
-      throws ServiceLayerException {
-    try {
-      // First verify the user exists
-      findByAccountIdAndUserId(accountId, userId);
-
-      // Validate that all role IDs exist and belong to the same account
-      List<Role> validRoles = new ArrayList<>();
-      for (Long roleId : requestDto.getRoleIds()) {
-        Role role = roleService.findById(roleId, accountId);
-        if (role == null) {
-          throw new ResourceNotFoundException("Role with ID " + roleId + " not found");
-        }
-        validRoles.add(role);
-      }
-
-      // Delete existing role associations first
-      userDao.deleteUserRoles(userId, accountId);
-
-      // Assign new roles
-      List<Long> roleIds = requestDto.getRoleIds();
-      userDao.assignUserRoles(userId, roleIds, accountId);
-
-      log.info("Successfully updated roles for user ID: {} in account: {}", userId, accountId);
-    } catch (DaoLayerException e) {
-      log.error("Failed to update user roles for user ID {}: {}", userId, e.getMessage());
-      throw new ServiceLayerException("Failed to update user roles", e);
-    }
-  }
-
-  /**
-   * Updates both profile information and roles for a user in a single operation.
-   * Note: Email updates are not allowed for security reasons.
+   * Updates both profile information and roles for a user in a single operation. Note: Email
+   * updates are not allowed for security reasons.
    *
    * @param accountId the ID of the account to which the user belongs
    * @param userId the ID of the user to be updated
@@ -397,7 +326,10 @@ public class UserServiceImpl implements UserService {
    */
   @Override
   @Transactional(rollbackFor = ServiceLayerException.class)
-  @LogActivity(action = "UPDATE", entityType = "USER", description = "User profile and roles updated")
+  @LogActivity(
+      action = "UPDATE",
+      entityType = "USER",
+      description = "User profile and roles updated")
   public void updateUser(Long accountId, Long userId, UserUpdateRequestDto requestDto)
       throws ServiceLayerException {
     try {
@@ -439,13 +371,13 @@ public class UserServiceImpl implements UserService {
         userDao.assignUserRoles(userId, requestDto.getRoleIds(), accountId);
       }
 
-      log.info("Successfully updated user profile and roles for user ID: {} in account: {}", userId, accountId);
+      log.info(
+          "Successfully updated user profile and roles for user ID: {} in account: {}",
+          userId,
+          accountId);
     } catch (DaoLayerException e) {
       log.error("Failed to update user for user ID {}: {}", userId, e.getMessage());
       throw new ServiceLayerException("Failed to update user", e);
     }
   }
-
-
-
 }

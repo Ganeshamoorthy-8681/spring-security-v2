@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Request DTO for updating user profile information.
- * Note: Email updates are not allowed for security reasons.
+ * Request DTO for updating user profile information. Note: Email updates are not allowed for
+ * security reasons.
  */
 @Getter
 @Setter

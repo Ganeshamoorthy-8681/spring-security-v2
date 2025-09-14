@@ -170,25 +170,25 @@ public class OtpServiceImpl implements OtpService {
     return response;
   }
 
-    /**
-     * Marks the OTP as used by deleting it from the database.
-     *
-     * @param otpCode the OTP code to mark as used
-     */
-    private void markOtpAsUsed(OtpCode otpCode) throws ServiceLayerException {
-        try {
-            Map<String, Object> conditionsMap = new HashMap <>();
-            conditionsMap.put("email", otpCode.getEmail());
-            conditionsMap.put("otp", otpCode.getOtp());
-            Map<String, Object> updateMap = new HashMap <>();
-            updateMap.put("used", "true");
-            otpDao.update(updateMap, conditionsMap);
-            log.info("OTP marked as used for email {}", otpCode.getEmail());
-        } catch (DaoLayerException e) {
-            log.error("Error marking OTP as used for email {}: {}", otpCode.getEmail(), e.getMessage());
-            throw new ServiceLayerException("Failed to mark OTP as used", e);
-        }
+  /**
+   * Marks the OTP as used by deleting it from the database.
+   *
+   * @param otpCode the OTP code to mark as used
+   */
+  private void markOtpAsUsed(OtpCode otpCode) throws ServiceLayerException {
+    try {
+      Map<String, Object> conditionsMap = new HashMap<>();
+      conditionsMap.put("email", otpCode.getEmail());
+      conditionsMap.put("otp", otpCode.getOtp());
+      Map<String, Object> updateMap = new HashMap<>();
+      updateMap.put("used", "true");
+      otpDao.update(updateMap, conditionsMap);
+      log.info("OTP marked as used for email {}", otpCode.getEmail());
+    } catch (DaoLayerException e) {
+      log.error("Error marking OTP as used for email {}: {}", otpCode.getEmail(), e.getMessage());
+      throw new ServiceLayerException("Failed to mark OTP as used", e);
     }
+  }
 
   /**
    * Resends the OTP (One-Time Password) to the specified email.

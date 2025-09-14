@@ -155,7 +155,8 @@ public class UserDaoImpl implements UserDao {
    * @param conditionMap a map containing conditions to identify which user(s) to update
    */
   @Override
-  public void update(String tableName, Map<String, Object> updateMap, Map<String, Object> conditionMap)
+  public void update(
+      String tableName, Map<String, Object> updateMap, Map<String, Object> conditionMap)
       throws DaoLayerException {
 
     try {
@@ -171,7 +172,6 @@ public class UserDaoImpl implements UserDao {
       throw new DaoLayerException("Failed to update user", e);
     }
   }
-
 
   /**
    * Retrieves a list of all users associated with a specific account ID.
@@ -200,9 +200,14 @@ public class UserDaoImpl implements UserDao {
   public void deleteUserRoles(Long userId, Long accountId) throws DaoLayerException {
     try {
       int deletedRows = userMapper.deleteUserRoles(userId, accountId);
-      log.debug("Deleted {} role associations for user {} in account {}", deletedRows, userId, accountId);
+      log.debug(
+          "Deleted {} role associations for user {} in account {}", deletedRows, userId, accountId);
     } catch (Exception e) {
-      log.error("Error deleting role associations for user {} in account {}: {}", userId, accountId, e.getMessage());
+      log.error(
+          "Error deleting role associations for user {} in account {}: {}",
+          userId,
+          accountId,
+          e.getMessage());
       throw new DaoLayerException("Failed to delete user role associations", e);
     }
   }
@@ -216,7 +221,8 @@ public class UserDaoImpl implements UserDao {
    */
   @Override
   @Transactional(rollbackFor = DaoLayerException.class)
-  public void assignUserRoles(Long userId, List<Long> roleIds, Long accountId) throws DaoLayerException {
+  public void assignUserRoles(Long userId, List<Long> roleIds, Long accountId)
+      throws DaoLayerException {
     if (roleIds == null || roleIds.isEmpty()) {
       log.debug("No roles to assign for user {} in account {}", userId, accountId);
       return;
@@ -228,7 +234,12 @@ public class UserDaoImpl implements UserDao {
       }
       log.debug("Assigned {} roles to user {} in account {}", roleIds.size(), userId, accountId);
     } catch (Exception e) {
-      log.error("Error assigning roles {} to user {} in account {}: {}", roleIds, userId, accountId, e.getMessage());
+      log.error(
+          "Error assigning roles {} to user {} in account {}: {}",
+          roleIds,
+          userId,
+          accountId,
+          e.getMessage());
       throw new DaoLayerException("Failed to assign user roles", e);
     }
   }

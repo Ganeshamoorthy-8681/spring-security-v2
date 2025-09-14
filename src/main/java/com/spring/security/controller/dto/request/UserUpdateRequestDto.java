@@ -2,14 +2,13 @@ package com.spring.security.controller.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 /**
- * Request DTO for updating user profile and roles in a single operation.
- * Note: Email updates are not allowed for security reasons.
+ * Request DTO for updating user profile and roles in a single operation. Note: Email updates are
+ * not allowed for security reasons.
  */
 @Getter
 @Setter

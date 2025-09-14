@@ -3,12 +3,12 @@ package com.spring.security.util;
 import com.spring.security.config.tokens.AccountUserAuthToken;
 import com.spring.security.config.tokens.RootUserAuthToken;
 import com.spring.security.domain.entity.CustomUserDetails;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import jakarta.servlet.http.HttpServletRequest;
 
 /** Utility class for extracting authentication information from the security context. */
 @Slf4j
@@ -25,17 +25,17 @@ public class SecurityContextUtil {
     }
 
     // Try to get from CustomUserDetails if available
-    if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
-        return userDetails.getAccountId();
+    if (authentication != null
+        && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
+      return userDetails.getAccountId();
     }
 
     return null;
   }
 
   /**
-   * Intelligently gets the account ID from multiple sources:
-   * 1. First tries to get from security context (authenticated user)
-   * 2. Falls back to path parameter {accountId} from current request
+   * Intelligently gets the account ID from multiple sources: 1. First tries to get from security
+   * context (authenticated user) 2. Falls back to path parameter {accountId} from current request
    * 3. Returns null if neither is available
    */
   public static Long getAccountIdFromContextOrPath() {
@@ -58,12 +58,13 @@ public class SecurityContextUtil {
   }
 
   /**
-   * Extracts account ID from the current request path parameters.
-   * Looks for {accountId} path variable in the current request.
+   * Extracts account ID from the current request path parameters. Looks for {accountId} path
+   * variable in the current request.
    */
   public static Long getAccountIdFromPathVariable() {
     try {
-      ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+      ServletRequestAttributes attrs =
+          (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
       if (attrs != null) {
         HttpServletRequest request = attrs.getRequest();
         String requestURI = request.getRequestURI();
@@ -89,8 +90,8 @@ public class SecurityContextUtil {
   }
 
   /**
-   * Gets the current user ID from security context or path parameters.
-   * First tries security context, then falls back to {userId} path parameter.
+   * Gets the current user ID from security context or path parameters. First tries security
+   * context, then falls back to {userId} path parameter.
    */
   public static Long getUserIdFromContextOrPath() {
     // First try security context
@@ -104,12 +105,13 @@ public class SecurityContextUtil {
   }
 
   /**
-   * Extracts user ID from the current request path parameters.
-   * Looks for {userId} path variable in the current request.
+   * Extracts user ID from the current request path parameters. Looks for {userId} path variable in
+   * the current request.
    */
   public static Long getUserIdFromPathVariable() {
     try {
-      ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+      ServletRequestAttributes attrs =
+          (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
       if (attrs != null) {
         HttpServletRequest request = attrs.getRequest();
         String requestURI = request.getRequestURI();
@@ -120,10 +122,13 @@ public class SecurityContextUtil {
           if ("users".equals(pathSegments[i]) && i + 1 < pathSegments.length) {
             String userIdStr = pathSegments[i + 1];
             // Skip if it's a known endpoint suffix (not a user ID)
-            if (!"profile".equals(userIdStr) && !"roles".equals(userIdStr) &&
-                !"list".equals(userIdStr) && !"create".equals(userIdStr) &&
-                !"email".equals(userIdStr) && !"set-password".equals(userIdStr) &&
-                !"forgot-password".equals(userIdStr)) {
+            if (!"profile".equals(userIdStr)
+                && !"roles".equals(userIdStr)
+                && !"list".equals(userIdStr)
+                && !"create".equals(userIdStr)
+                && !"email".equals(userIdStr)
+                && !"set-password".equals(userIdStr)
+                && !"forgot-password".equals(userIdStr)) {
               try {
                 return Long.parseLong(userIdStr);
               } catch (NumberFormatException e) {
@@ -141,12 +146,13 @@ public class SecurityContextUtil {
   }
 
   /**
-   * Gets the current role ID from path parameters.
-   * Looks for {roleId} path variable in the current request.
+   * Gets the current role ID from path parameters. Looks for {roleId} path variable in the current
+   * request.
    */
   public static Long getRoleIdFromPathVariable() {
     try {
-      ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+      ServletRequestAttributes attrs =
+          (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
       if (attrs != null) {
         HttpServletRequest request = attrs.getRequest();
         String requestURI = request.getRequestURI();
@@ -181,9 +187,9 @@ public class SecurityContextUtil {
   public static String getCurrentUserEmail() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null) {
-        if (authentication.getPrincipal() instanceof String) {
-            return authentication.getPrincipal().toString();
-        }
+      if (authentication.getPrincipal() instanceof String) {
+        return authentication.getPrincipal().toString();
+      }
       var userDetails = (CustomUserDetails) authentication.getPrincipal();
       return userDetails.getEmail();
     }

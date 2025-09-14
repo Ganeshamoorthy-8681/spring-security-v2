@@ -24,10 +24,7 @@ public interface ActivityLogMapper {
         @Result(property = "description", column = "description", javaType = String.class),
         @Result(property = "ipAddress", column = "ip_address", javaType = String.class),
         @Result(property = "userAgent", column = "user_agent", javaType = String.class),
-        @Result(
-            property = "createdAt",
-            column = "created_at",
-            javaType = java.time.Instant.class)
+        @Result(property = "createdAt", column = "created_at", javaType = java.time.Instant.class)
       })
   @Select(
       "SELECT id, user_id, account_id, action, entity_type, entity_id, description, ip_address, user_agent, created_at FROM activity_logs WHERE id = #{id}")

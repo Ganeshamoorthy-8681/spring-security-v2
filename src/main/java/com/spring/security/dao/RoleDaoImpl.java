@@ -215,7 +215,7 @@ public class RoleDaoImpl implements RoleDao {
 
       // Then delete all user-role associations (if any exist)
       // This prevents orphaned foreign key references
-     // roleMapper.deleteUserRoleAssociations(roleId,accountId);
+      // roleMapper.deleteUserRoleAssociations(roleId,accountId);
 
       // Finally delete the role itself
       int deletedRows = roleMapper.deleteRole(roleId, accountId);
@@ -228,7 +228,8 @@ public class RoleDaoImpl implements RoleDao {
       log.info("Successfully deleted role with ID: {} from account: {}", roleId, accountId);
 
     } catch (Exception e) {
-      log.error("Error deleting role with ID {} for account {}: {}", roleId, accountId, e.getMessage());
+      log.error(
+          "Error deleting role with ID {} for account {}: {}", roleId, accountId, e.getMessage());
       throw new DaoLayerException("Failed to delete role", e);
     }
   }
