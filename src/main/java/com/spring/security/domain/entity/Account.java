@@ -2,6 +2,7 @@ package com.spring.security.domain.entity;
 
 import com.spring.security.domain.entity.enums.AccountStatus;
 import com.spring.security.domain.entity.enums.AccountType;
+import java.time.Instant;
 import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,4 +43,16 @@ public class Account {
 
   /** Additional attributes associated with the account. */
   private Map<String, Object> additionalAttributes;
+
+  /** The timestamp when the account was created. */
+  private Instant createdAt;
+
+  /** The timestamp when the account was last updated. */
+  private Instant updatedAt;
+
+  /** The user who created the account. */
+  private String createdBy;
+
+  /** The user who last updated the account. */
+  private String updatedBy;
 }

@@ -2,6 +2,12 @@ package com.spring.security.service;
 
 import com.spring.security.exceptions.EmailServiceException;
 
+/**
+ * Service interface for sending emails.
+ *
+ * <p>This interface defines the contract for email-related operations, such as sending emails to
+ * users.
+ */
 public interface EmailService {
 
   /**

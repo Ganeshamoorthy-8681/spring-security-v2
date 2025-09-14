@@ -1,7 +1,7 @@
 package com.spring.security.service;
 
 import com.spring.security.controller.dto.request.AccountCreateRequestDto;
-import com.spring.security.controller.dto.response.AccountResponseDto;
+import com.spring.security.domain.entity.Account;
 import com.spring.security.domain.entity.enums.AccountStatus;
 import com.spring.security.exceptions.ServiceLayerException;
 
@@ -12,8 +12,7 @@ public interface AccountService {
    *
    * @param accountCreateRequestDto the data transfer object containing account creation details
    */
-  AccountResponseDto create(AccountCreateRequestDto accountCreateRequestDto)
-      throws ServiceLayerException;
+  Account create(AccountCreateRequestDto accountCreateRequestDto) throws ServiceLayerException;
 
   /**
    * Retrieves an account by its ID.
@@ -21,7 +20,7 @@ public interface AccountService {
    * @param id the unique identifier of the account
    * @return the account associated with the given ID
    */
-  AccountResponseDto findById(Long id) throws ServiceLayerException;
+  Account findById(Long id) throws ServiceLayerException;
 
   /**
    * Retrieves an account by its name.
@@ -29,7 +28,7 @@ public interface AccountService {
    * @param accountName the name of the account to retrieve
    * @return the account associated with the given name
    */
-  AccountResponseDto findByAccountName(String accountName) throws ServiceLayerException;
+  Account findByAccountName(String accountName) throws ServiceLayerException;
 
   /**
    * Updates the status of an account.

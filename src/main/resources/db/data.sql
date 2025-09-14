@@ -1,27 +1,27 @@
-INSERT INTO permissions (name, description) VALUES
-    ('IAM:USER:CREATE',            'Can create users'),
-    ('IAM:USER:READ',              'Can read user details'),
-    ('IAM:USER:UPDATE',            'Can update user details'),
-    ('IAM:USER:DELETE',            'Can delete users'),
-    ('IAM:USER:LIST',              'Can list users'),
+INSERT INTO permissions (name, description, action) VALUES
+    ('IAM:USER:CREATE',            'Can create users', 'CREATE'),
+    ('IAM:USER:READ',              'Can read user details', 'READ'),
+    ('IAM:USER:UPDATE',            'Can update user details', 'UPDATE'),
+    ('IAM:USER:DELETE',            'Can delete users', 'DELETE'),
+    ('IAM:USER:LIST',              'Can list users', 'READ'),
 
-    ('IAM:ROLE:CREATE',            'Can create roles'),
-    ('IAM:ROLE:READ',              'Can read role details'),
-    ('IAM:ROLE:UPDATE',            'Can update role details'),
-    ('IAM:ROLE:DELETE',            'Can delete roles'),
-    ('IAM:ROLE:LIST',              'Can list roles'),
+    ('IAM:ROLE:CREATE',            'Can create roles', 'CREATE'),
+    ('IAM:ROLE:READ',              'Can read role details', 'READ'),
+    ('IAM:ROLE:UPDATE',            'Can update role details', 'UPDATE'),
+    ('IAM:ROLE:DELETE',            'Can delete roles', 'DELETE'),
+    ('IAM:ROLE:LIST',              'Can list roles', 'READ'),
 
-    ('IAM:PERMISSION:LIST',        'Can list permissions'),
+    ('IAM:PERMISSION:LIST',        'Can list permissions', 'READ'),
 
-    ('IAM:GROUP:CREATE',           'Can create groups'),
-    ('IAM:GROUP:READ',             'Can read group details'),
-    ('IAM:GROUP:UPDATE',           'Can update group details'),
-    ('IAM:GROUP:DELETE',           'Can delete groups'),
-    ('IAM:GROUP:LIST',             'Can list groups'),
+    ('IAM:GROUP:CREATE',           'Can create groups', 'CREATE'),
+    ('IAM:GROUP:READ',             'Can read group details', 'READ'),
+    ('IAM:GROUP:UPDATE',           'Can update group details', 'UPDATE'),
+    ('IAM:GROUP:DELETE',           'Can delete groups', 'DELETE'),
+    ('IAM:GROUP:LIST',             'Can list groups', 'READ'),
 
-    ('IAM:ACCOUNT:CREATE',         'Can create accounts'),
-    ('IAM:ACCOUNT:READ',           'Can read account details'),
-    ('IAM:ACCOUNT:UPDATE',         'Can update account details'),
-    ('IAM:ACCOUNT:DELETE',         'Can delete accounts'),
-    ('IAM:ACCOUNT:LIST',           'Can list accounts')
+    ('IAM:ACCOUNT:CREATE',         'Can create accounts', 'CREATE'),
+    ('IAM:ACCOUNT:READ',           'Can read account details', 'READ'),
+    ('IAM:ACCOUNT:UPDATE',         'Can update account details', 'UPDATE'),
+    ('IAM:ACCOUNT:DELETE',         'Can delete accounts', 'DELETE'),
+    ('IAM:ACCOUNT:LIST',           'Can list accounts', 'READ')
 ON CONFLICT (name) DO NOTHING;

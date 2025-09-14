@@ -1,5 +1,6 @@
 package com.spring.security.domain.entity;
 
+import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,4 +26,7 @@ public class Permission {
    * The specific action allowed by this permission. Examples: "READ", "WRITE", "DELETE", "EXECUTE"
    */
   private String action;
+
+  /** The timestamp when the permission was created. */
+  private Instant createdAt;
 }

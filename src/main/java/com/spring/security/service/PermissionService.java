@@ -1,6 +1,6 @@
 package com.spring.security.service;
 
-import com.spring.security.controller.dto.response.PermissionResponseDto;
+import com.spring.security.domain.entity.Permission;
 import com.spring.security.exceptions.ServiceLayerException;
 import java.util.List;
 
@@ -14,5 +14,5 @@ public interface PermissionService {
    *
    * @return a list of all permissions
    */
-  List<PermissionResponseDto> list() throws ServiceLayerException;
+  List<Permission> list() throws ServiceLayerException;
 }

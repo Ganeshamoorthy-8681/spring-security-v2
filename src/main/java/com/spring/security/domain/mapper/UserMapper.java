@@ -1,5 +1,6 @@
 package com.spring.security.domain.mapper;
 
+import com.spring.security.controller.dto.request.AccountCreateRequestDto;
 import com.spring.security.controller.dto.request.RootUserCreateRequestDto;
 import com.spring.security.controller.dto.request.UserCreateRequestDto;
 import com.spring.security.controller.dto.response.UserCreateResponseDto;
@@ -10,6 +11,7 @@ import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
 import java.util.List;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -64,4 +66,14 @@ public interface UserMapper {
    * @return a UserCreateResponseDto containing the details of the User entity
    */
   UserCreateResponseDto convertUserToUserCreateResponseDto(User user);
+
+  /**
+   * convert a accountCreateRequestDto to rootUserCreateRequestDto
+   *
+   * @param accountCreateRequestDto the AccountCreateRequestDto containing account creation details
+   * @return UserCreateRequestDto
+   */
+  @Mapping(source = "userDescription", target = "description")
+  RootUserCreateRequestDto convertAccountCreateRequestToRootUserCreateRequest(
+      AccountCreateRequestDto accountCreateRequestDto);
 }

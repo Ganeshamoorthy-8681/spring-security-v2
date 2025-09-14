@@ -69,9 +69,7 @@ public class RoleDaoImpl implements RoleDao {
       List<Long> permissionIds =
           createdRole.getPermissions().stream().map(Permission::getId).toList();
 
-      int rowCount =
-          roleMapper.insertRolePermissions(
-              createdRole.getId(), permissionIds, createdRole.getAccountId());
+      int rowCount = roleMapper.insertRolePermissions(createdRole.getId(), permissionIds);
 
       if (rowCount < 1) {
         throw new DaoLayerException(
@@ -134,6 +132,104 @@ public class RoleDaoImpl implements RoleDao {
       log.error(
           "Error retrieving role with name {} for account {}: {}", name, accountId, e.getMessage());
       throw new DaoLayerException("Failed to retrieve role by name", e);
+    }
+  }
+
+  /**
+   * Updates an existing role with new name, description, and permissions.
+   *
+   * @param roleId the unique identifier of the role to be updated
+   * @param accountId the unique identifier of the account associated with the role
+   * @param name the new name for the role
+   * @param description the new description for the role
+   * @param permissions the new list of permissions for the role
+   * @return the updated role
+   * @throws DaoLayerException if an error occurs during the operation
+   */
+  @Override
+  @Transactional
+  public Role update(
+      Long roleId, Long accountId, String name, String description, List<Permission> permissions)
+      throws DaoLayerException {
+    try {
+      // Update role basic information
+      int updatedRows = roleMapper.updateRole(roleId, accountId, name, description);
+      if (updatedRows == 0) {
+        log.error("Failed to update role with ID: {} for account: {}", roleId, accountId);
+        throw new DaoLayerException("Failed to update role - role not found or no changes made");
+      }
+
+      // Update permissions by deleting old ones and inserting new ones
+      updateRolePermissions(roleId, permissions);
+
+      // Return the updated role
+      return findById(roleId, accountId);
+
+    } catch (Exception e) {
+      log.error(
+          "Error updating role with ID {} for account {}: {}", roleId, accountId, e.getMessage());
+      throw new DaoLayerException("Failed to update role", e);
+    }
+  }
+
+  /**
+   * Updates permissions for a role by deleting existing ones and inserting new ones.
+   *
+   * @param roleId the unique identifier of the role
+   * @param permissions the new list of permissions for the role
+   */
+  private void updateRolePermissions(Long roleId, List<Permission> permissions)
+      throws DaoLayerException {
+    try {
+      // Delete existing permissions
+      roleMapper.deleteRolePermissions(roleId);
+
+      // Insert new permissions if any
+      if (!CollectionUtils.isEmpty(permissions)) {
+        List<Long> permissionIds = permissions.stream().map(Permission::getId).toList();
+        int insertedRows = roleMapper.insertRolePermissions(roleId, permissionIds);
+
+        if (insertedRows < permissions.size()) {
+          throw new DaoLayerException("Failed to insert all permissions for role");
+        }
+      }
+    } catch (Exception e) {
+      log.error("Error updating permissions for role {}: {}", roleId, e.getMessage());
+      throw new DaoLayerException("Failed to update role permissions", e);
+    }
+  }
+
+  /**
+   * Deletes a role by its unique identifier and account ID.
+   *
+   * @param roleId the unique identifier of the role to be deleted
+   * @param accountId the unique identifier of the account associated with the role
+   * @throws DaoLayerException if an error occurs during the operation
+   */
+  @Override
+  @Transactional(rollbackFor = DaoLayerException.class)
+  public void delete(Long roleId, Long accountId) throws DaoLayerException {
+    try {
+      // First delete all role-permission associations
+      roleMapper.deleteRolePermissions(roleId);
+
+      // Then delete all user-role associations (if any exist)
+      // This prevents orphaned foreign key references
+     // roleMapper.deleteUserRoleAssociations(roleId,accountId);
+
+      // Finally delete the role itself
+      int deletedRows = roleMapper.deleteRole(roleId, accountId);
+
+      if (deletedRows == 0) {
+        log.error("Failed to delete role with ID: {} for account: {}", roleId, accountId);
+        throw new DaoLayerException("Failed to delete role - role not found");
+      }
+
+      log.info("Successfully deleted role with ID: {} from account: {}", roleId, accountId);
+
+    } catch (Exception e) {
+      log.error("Error deleting role with ID {} for account {}: {}", roleId, accountId, e.getMessage());
+      throw new DaoLayerException("Failed to delete role", e);
     }
   }
 }

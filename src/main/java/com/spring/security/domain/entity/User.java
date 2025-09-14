@@ -2,6 +2,9 @@ package com.spring.security.domain.entity;
 
 import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
@@ -61,4 +64,34 @@ public class User {
 
   /** The additional attributes associated with the user. */
   private Map<String, Object> additionalAttributes;
+
+  /** The timestamp when the user was created. */
+  private Instant createdAt;
+
+  /** The timestamp when the user was last updated. */
+  private Instant updatedAt;
+
+  /** The timestamp when the user was deleted. */
+  private Instant deletedAt;
+
+  /** The timestamp of the user's current login. */
+  private Instant currentLogin;
+
+  /** The timestamp of the user's last login. */
+  private Instant lastLogin;
+
+  /** The number of failed login attempts. */
+  private Integer failedLoginAttempts;
+
+  /** The timestamp of the user's last failed login. */
+  private Instant lastFailedLogin;
+
+  /** The identifier of the user who created this record. */
+  private String createdBy;
+
+  /** The identifier of the user who last updated this record. */
+  private String updatedBy;
+
+  /** The identifier of the user who deleted this record. */
+  private String deletedBy;
 }

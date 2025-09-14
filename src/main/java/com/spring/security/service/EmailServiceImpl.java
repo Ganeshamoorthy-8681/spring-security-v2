@@ -37,6 +37,7 @@ public class EmailServiceImpl implements EmailService {
   @Async("mailTaskExecutor")
   public void sendEmail(String to, String subject, String content) throws EmailServiceException {
     try {
+      log.info("Sending email to: {}", to);
       SimpleMailMessage message = createEmail(to, subject, content);
       javaMailSender.send(message);
     } catch (Exception e) {

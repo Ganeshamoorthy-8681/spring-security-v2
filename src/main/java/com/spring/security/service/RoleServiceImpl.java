@@ -1,7 +1,8 @@
 package com.spring.security.service;
 
+import com.spring.security.annotation.LogActivity;
 import com.spring.security.controller.dto.request.RoleCreateRequestDto;
-import com.spring.security.controller.dto.response.RoleResponseDto;
+import com.spring.security.controller.dto.request.RoleUpdateRequestDto;
 import com.spring.security.dao.RoleDao;
 import com.spring.security.domain.entity.Role;
 import com.spring.security.domain.mapper.PermissionMapper;
@@ -30,7 +31,8 @@ public class RoleServiceImpl implements RoleService {
    * @param roleCreateRequestDto the data transfer object containing role creation details
    */
   @Override
-  public RoleResponseDto create(RoleCreateRequestDto roleCreateRequestDto, Long accountId)
+  @LogActivity(action = "CREATE", entityType = "ROLE", description = "Role created")
+  public Role create(RoleCreateRequestDto roleCreateRequestDto, Long accountId)
       throws ServiceLayerException {
 
     try {
@@ -44,13 +46,12 @@ public class RoleServiceImpl implements RoleService {
       }
 
       Role convertedRole =
-          RoleMapper.ROLE_MAPPER.convertCreteRequestToRole(
+          RoleMapper.ROLE_MAPPER.convertCreateRequestToRole(
               roleCreateRequestDto,
               accountId,
               PermissionMapper.PERMISSION_MAPPER.convertPermissionDtoToPermission(
                   roleCreateRequestDto.getPermissions()));
-      Role role = roleDao.create(convertedRole);
-      return RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role);
+      return roleDao.create(convertedRole);
     } catch (DaoLayerException e) {
       log.error("Failed to create role for account ID: {}", accountId, e);
       throw new ServiceLayerException("Failed to create role", e);
@@ -80,9 +81,9 @@ public class RoleServiceImpl implements RoleService {
    * @return a list of roles associated with the given account ID
    */
   @Override
-  public List<RoleResponseDto> list(Long accountId) throws ServiceLayerException {
+  public List<Role> list(Long accountId) throws ServiceLayerException {
     try {
-      return RoleMapper.ROLE_MAPPER.convertRoleListToResponseDtoList(roleDao.list(accountId));
+      return roleDao.list(accountId);
     } catch (DaoLayerException e) {
       log.error("Failed to retrieve roles for account ID: {}", accountId, e);
       throw new ServiceLayerException("Failed to retrieve roles", e);
@@ -97,7 +98,7 @@ public class RoleServiceImpl implements RoleService {
    * @return RoleResponseDto containing the role details
    */
   @Override
-  public RoleResponseDto findById(Long roleId, Long accountId) throws ServiceLayerException {
+  public Role findById(Long roleId, Long accountId) throws ServiceLayerException {
 
     try {
       Role role = roleDao.findById(roleId, accountId);
@@ -106,7 +107,7 @@ public class RoleServiceImpl implements RoleService {
         log.warn("Role with ID: {} not found for account ID: {}", roleId, accountId);
         throw new ResourceNotFoundException("Role not found with ID: " + roleId);
       }
-      return RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role);
+      return role;
 
     } catch (DaoLayerException e) {
       log.error("Failed to find role with ID: {} for account ID: {}", roleId, accountId, e);
@@ -122,17 +123,73 @@ public class RoleServiceImpl implements RoleService {
    * @return the role response data transfer object if found, otherwise null
    */
   @Override
-  public RoleResponseDto findByName(String roleName, Long accountId) throws ServiceLayerException {
+  public Role findByName(String roleName, Long accountId) throws ServiceLayerException {
     try {
       Role role = roleDao.findByName(roleName, accountId);
       if (role == null) {
         log.warn("Role with name: {} not found for account ID: {}", roleName, accountId);
         throw new ResourceNotFoundException("Role not found with name: " + roleName);
       }
-      return RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role);
+      return role;
     } catch (DaoLayerException e) {
       log.error("Failed to find role with name: {} for account ID: {}", roleName, accountId, e);
       throw new ServiceLayerException("Failed to find role", e);
+    }
+  }
+
+  /**
+   * Updates an existing role with new name, description, and permissions.
+   *
+   * @param roleId the unique identifier of the role to be updated
+   * @param accountId the unique identifier of the account to which the role belongs
+   * @param roleUpdateRequestDto the data transfer object containing updated role details
+   * @return the updated role
+   */
+  @Override
+  @LogActivity(action = "UPDATE", entityType = "ROLE", description = "Role updated")
+  public Role update(Long roleId, Long accountId, RoleUpdateRequestDto roleUpdateRequestDto)
+      throws ServiceLayerException {
+    try {
+
+      // Convert permissions from DTO to entity
+      var permissions =
+          PermissionMapper.PERMISSION_MAPPER.convertPermissionDtoToPermission(
+              roleUpdateRequestDto.getPermissions());
+
+      // Update the role
+      return roleDao.update(
+          roleId,
+          accountId,
+          roleUpdateRequestDto.getName(),
+          roleUpdateRequestDto.getDescription(),
+          permissions);
+
+    } catch (DaoLayerException e) {
+      log.error("Failed to update role with ID: {} for account ID: {}", roleId, accountId, e);
+      throw new ServiceLayerException("Failed to update role", e);
+    }
+  }
+
+  /**
+   * Deletes a role by its unique identifier and account ID.
+   *
+   * @param roleId the unique identifier of the role to be deleted
+   * @param accountId the unique identifier of the account to which the role belongs
+   */
+  @Override
+  @LogActivity(action = "DELETE", entityType = "ROLE", description = "Role deleted")
+  public void delete(Long roleId, Long accountId) throws ServiceLayerException {
+    try {
+      // First verify the role exists
+      findById(roleId, accountId);
+
+      // Delete the role
+      roleDao.delete(roleId, accountId);
+
+      log.info("Successfully deleted role with ID: {} from account: {}", roleId, accountId);
+    } catch (DaoLayerException e) {
+      log.error("Failed to delete role with ID: {} for account ID: {}", roleId, accountId, e);
+      throw new ServiceLayerException("Failed to delete role", e);
     }
   }
 }

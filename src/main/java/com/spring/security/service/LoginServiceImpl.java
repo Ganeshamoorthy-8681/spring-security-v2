@@ -1,5 +1,6 @@
 package com.spring.security.service;
 
+import com.spring.security.annotation.LogActivity;
 import com.spring.security.component.JwtTokenGenerator;
 import com.spring.security.config.tokens.AccountUserAuthToken;
 import com.spring.security.config.tokens.RootUserAuthToken;
@@ -26,18 +27,23 @@ import org.springframework.stereotype.Service;
 public class LoginServiceImpl implements LoginService {
 
   private final JwtTokenGenerator jwtTokenGenerator;
-
   private final AuthenticationManager authenticationManager;
+  private final UserService userService;
 
   /**
    * Constructor for LoginServiceImpl.
    *
    * @param jwtTokenGenerator the JwtTokenGenerator used to generate JWT tokens
+   * @param authenticationManager the AuthenticationManager for user authentication
+   * @param userService the UserService for user operations
    */
   LoginServiceImpl(
-      JwtTokenGenerator jwtTokenGenerator, AuthenticationManager authenticationManager) {
+      JwtTokenGenerator jwtTokenGenerator,
+      AuthenticationManager authenticationManager,
+      UserService userService) {
     this.jwtTokenGenerator = jwtTokenGenerator;
     this.authenticationManager = authenticationManager;
+    this.userService = userService;
   }
 
   /**
@@ -47,12 +53,16 @@ public class LoginServiceImpl implements LoginService {
    * @return a string representing the authentication result, typically a JWT token
    */
   @Override
+  @LogActivity(action = "LOGIN", entityType = "USER", description = "Root user login attempt")
   public String authenticate(RootLoginRequestDto requestDto) throws AuthenticationException {
-
     try {
       RootUserAuthToken authenticationToken =
           new RootUserAuthToken(requestDto.getEmail(), requestDto.getPassword());
-      return generateToken(authenticationToken);
+      String token = generateToken(authenticationToken);
+
+      // Update login time for root user (accountId is null for root users)
+      userService.updateLastLoginTime(null, requestDto.getEmail());
+      return token;
     } catch (Exception e) {
       log.error("Authentication failed for user: {}", requestDto.getEmail(), e);
       throw new AuthenticationException("Failed to Authenticate", e);
@@ -66,21 +76,25 @@ public class LoginServiceImpl implements LoginService {
    * @return a string representing the authentication result, typically a JWT token
    */
   @Override
+  @LogActivity(action = "LOGIN", entityType = "USER", description = "Account user login attempt")
   public String authenticate(LoginRequestDto requestDto) throws AuthenticationException {
-
     try {
       AccountUserAuthToken authenticationToken =
           new AccountUserAuthToken(
               requestDto.getAccountId(), requestDto.getEmail(), requestDto.getPassword());
-      return generateToken(authenticationToken);
+      String token = generateToken(authenticationToken);
+
+      // Update login time for account user
+      userService.updateLastLoginTime(requestDto.getAccountId(), requestDto.getEmail());
+      return token;
     } catch (Exception e) {
+      log.error("Authentication failed for user: {}", requestDto.getEmail(), e);
       throw new AuthenticationException("Failed to Authenticate", e);
     }
   }
 
   /**
-   * Generates a JWT token based on the authentication object.
-   *
+   * Generates a JWT token for the authenticated user.
    * @param authenticationToken the authentication object containing user details
    * @return a string representing the generated JWT token
    */

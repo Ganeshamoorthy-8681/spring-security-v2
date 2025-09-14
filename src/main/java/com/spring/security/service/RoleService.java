@@ -1,7 +1,8 @@
 package com.spring.security.service;
 
 import com.spring.security.controller.dto.request.RoleCreateRequestDto;
-import com.spring.security.controller.dto.response.RoleResponseDto;
+import com.spring.security.controller.dto.request.RoleUpdateRequestDto;
+import com.spring.security.domain.entity.Role;
 import com.spring.security.exceptions.ServiceLayerException;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface RoleService {
    * @param roleCreateRequestDto the data transfer object containing role creation details
    * @param accountId the unique identifier of the account to which the role belongs
    */
-  RoleResponseDto create(RoleCreateRequestDto roleCreateRequestDto, Long accountId)
+  Role create(RoleCreateRequestDto roleCreateRequestDto, Long accountId)
       throws ServiceLayerException;
 
   /**
@@ -26,7 +27,7 @@ public interface RoleService {
    * @param accountId the unique identifier of the account
    * @return a list of roles associated with the given account ID
    */
-  List<RoleResponseDto> list(Long accountId) throws ServiceLayerException;
+  List<Role> list(Long accountId) throws ServiceLayerException;
 
   /**
    * Finds a role by its unique identifier and the account ID it belongs to.
@@ -35,7 +36,7 @@ public interface RoleService {
    * @param accountId the unique identifier of the account to which the role belongs
    * @return the role response data transfer object if found, otherwise null
    */
-  RoleResponseDto findById(Long roleId, Long accountId) throws ServiceLayerException;
+  Role findById(Long roleId, Long accountId) throws ServiceLayerException;
 
   /**
    * Finds a role by its name and the account ID it belongs to.
@@ -44,5 +45,24 @@ public interface RoleService {
    * @param accountId the unique identifier of the account to which the role belongs
    * @return the role response data transfer object if found, otherwise null
    */
-  RoleResponseDto findByName(String roleName, Long accountId) throws ServiceLayerException;
+  Role findByName(String roleName, Long accountId) throws ServiceLayerException;
+
+  /**
+   * Updates an existing role with new name, description, and permissions.
+   *
+   * @param roleId the unique identifier of the role to be updated
+   * @param accountId the unique identifier of the account to which the role belongs
+   * @param roleUpdateRequestDto the data transfer object containing updated role details
+   * @return the updated role
+   */
+  Role update(Long roleId, Long accountId, RoleUpdateRequestDto roleUpdateRequestDto)
+      throws ServiceLayerException;
+
+  /**
+   * Deletes a role by its unique identifier and account ID.
+   *
+   * @param roleId the unique identifier of the role to be deleted
+   * @param accountId the unique identifier of the account to which the role belongs
+   */
+  void delete(Long roleId, Long accountId) throws ServiceLayerException;
 }

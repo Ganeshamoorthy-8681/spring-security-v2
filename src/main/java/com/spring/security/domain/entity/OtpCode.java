@@ -1,6 +1,6 @@
 package com.spring.security.domain.entity;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,11 +8,15 @@ import lombok.Setter;
 @Setter
 public class OtpCode {
 
+  private Long id;
+
   private String otp;
+
+  private Boolean used;
 
   private String email;
 
-  private LocalDateTime createdAt;
+  private Instant createdAt;
 
-  private LocalDateTime expiresAt;
+  private Instant expiresAt;
 }

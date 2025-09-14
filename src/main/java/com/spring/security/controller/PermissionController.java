@@ -1,6 +1,7 @@
 package com.spring.security.controller;
 
 import com.spring.security.controller.dto.response.PermissionResponseDto;
+import com.spring.security.domain.mapper.PermissionMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import com.spring.security.service.PermissionService;
 import java.util.List;
@@ -33,6 +34,7 @@ public class PermissionController {
   @GetMapping("/list")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:PERMISSION:LIST')")
   public List<PermissionResponseDto> getPermissionList() throws ServiceLayerException {
-    return permissionService.list();
+    return PermissionMapper.PERMISSION_MAPPER.convertPermissionToPermissionResponseDto(
+        permissionService.list());
   }
 }

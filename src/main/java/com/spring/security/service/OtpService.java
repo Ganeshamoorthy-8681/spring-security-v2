@@ -1,5 +1,7 @@
 package com.spring.security.service;
 
+import com.spring.security.controller.dto.request.OtpValidateRequestDto;
+import com.spring.security.controller.dto.response.OtpValidateResponseDto;
 import com.spring.security.domain.entity.OtpCode;
 import com.spring.security.exceptions.ServiceLayerException;
 
@@ -34,4 +36,26 @@ public interface OtpService {
    * @param email the email address whose OTP should be deleted
    */
   void delete(String email) throws ServiceLayerException;
+
+  /**
+   * Validates the provided OTP (One-Time Password) for the given email.
+   *
+   * @param otpValidateRequestDto the DTO containing the email and OTP to validate
+   */
+  OtpValidateResponseDto validateOtp(OtpValidateRequestDto otpValidateRequestDto)
+      throws ServiceLayerException;
+
+  /**
+   * Resends the OTP (One-Time Password) to the specified email.
+   *
+   * @param email the email to which the OTP should be resent
+   */
+  void resendOtp(String email) throws ServiceLayerException;
+
+  /**
+   * Sends an OTP (One-Time Password) to the specified email.
+   *
+   * @param email the email to which the OTP should be sent
+   */
+  void sendOtp(String email) throws ServiceLayerException;
 }

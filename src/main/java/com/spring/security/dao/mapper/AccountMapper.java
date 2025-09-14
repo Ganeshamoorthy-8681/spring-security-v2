@@ -20,9 +20,9 @@ import org.apache.ibatis.annotations.UpdateProvider;
 public interface AccountMapper {
 
   @Insert(
-      "INSERT INTO accounts (name, status, description, type, additional_attributes) VALUES ("
+      "INSERT INTO accounts (name, status, description, type, additional_attributes, created_by) VALUES ("
           + "#{name}, #{status}, #{description}, #{type},"
-          + " #{additionalAttributes, typeHandler=com.spring.security.type.handlers.JsonTypeHandler})")
+          + " #{additionalAttributes, typeHandler=com.spring.security.type.handlers.JsonTypeHandler},#{createdBy})")
   @Options(useGeneratedKeys = true, keyProperty = "id")
   int create(Account account);
 
@@ -38,7 +38,17 @@ public interface AccountMapper {
             property = "additionalAttributes",
             column = "additional_attributes",
             javaType = Map.class,
-            typeHandler = JsonTypeHandler.class)
+            typeHandler = JsonTypeHandler.class),
+        @Result(
+            property = "createdAt",
+            column = "created_at",
+            javaType = java.time.Instant.class),
+        @Result(
+            property = "updatedAt",
+            column = "updated_at",
+            javaType = java.time.Instant.class),
+        @Result(property = "createdBy", column = "created_by", javaType = String.class),
+        @Result(property = "updatedBy", column = "updated_by", javaType = String.class)
       })
   @Select("SELECT * FROM accounts WHERE id = #{id}")
   Account findById(Long id);

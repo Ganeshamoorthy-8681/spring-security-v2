@@ -13,6 +13,7 @@ package com.spring.security.domain.entity.enums;
  * </ul>
  */
 public enum PermissionActionType {
+
   /** Represents the creation of a resource. */
   CREATE,
 

@@ -18,6 +18,7 @@ public interface PermissionMapper {
         @Result(property = "name", column = "name", javaType = String.class),
         @Result(property = "description", column = "description", javaType = String.class),
         @Result(property = "action", column = "action", javaType = String.class),
+        @Result(property = "createdAt", column = "created_at", javaType = java.time.Instant.class),
       })
   List<Permission> list();
 }

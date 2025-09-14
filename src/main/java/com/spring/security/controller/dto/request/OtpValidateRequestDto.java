@@ -8,9 +8,9 @@ import lombok.Setter;
 @Setter
 public class OtpValidateRequestDto {
 
+  private Long accountId;
+
   private String email;
 
   private int otp;
-
-  private Long accountId;
 }

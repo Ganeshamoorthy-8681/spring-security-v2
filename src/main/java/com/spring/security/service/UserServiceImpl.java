@@ -2,32 +2,27 @@ package com.spring.security.service;
 
 import static com.spring.security.domain.mapper.UserMapper.USER_MAPPER;
 
-import com.spring.security.component.OtpGenerator;
-import com.spring.security.controller.dto.request.OtpValidateRequestDto;
+import com.spring.security.annotation.LogActivity;
 import com.spring.security.controller.dto.request.RoleCreateRequestDto;
 import com.spring.security.controller.dto.request.RootUserCreateRequestDto;
 import com.spring.security.controller.dto.request.UserCreateRequestDto;
-import com.spring.security.controller.dto.response.OtpValidateResponseDto;
-import com.spring.security.controller.dto.response.OtpValidationStatus;
-import com.spring.security.controller.dto.response.RoleResponseDto;
+import com.spring.security.controller.dto.request.UserProfileUpdateRequestDto;
+import com.spring.security.controller.dto.request.UserRoleUpdateRequestDto;
+import com.spring.security.controller.dto.request.UserUpdateRequestDto;
 import com.spring.security.controller.dto.response.UserCreateResponseDto;
-import com.spring.security.controller.dto.response.UserResponseDto;
 import com.spring.security.dao.UserDao;
-import com.spring.security.domain.entity.OtpCode;
 import com.spring.security.domain.entity.Role;
 import com.spring.security.domain.entity.User;
-import com.spring.security.domain.entity.enums.AccountStatus;
 import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
-import com.spring.security.domain.mapper.RoleMapper;
 import com.spring.security.domain.mapper.UserMapper;
 import com.spring.security.exceptions.DaoLayerException;
-import com.spring.security.exceptions.EmailServiceException;
-import com.spring.security.exceptions.OtpGenerationFailedException;
 import com.spring.security.exceptions.ResourceAlreadyExistException;
 import com.spring.security.exceptions.ResourceNotFoundException;
 import com.spring.security.exceptions.ServiceLayerException;
-import java.time.LocalDateTime;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +30,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * Service implementation for managing users. This service provides methods to create, retrieve,
+ * update, and manage users.
+ */
 @Service
 @Slf4j
 public class UserServiceImpl implements UserService {
@@ -43,36 +42,24 @@ public class UserServiceImpl implements UserService {
 
   private final BCryptPasswordEncoder passwordEncoder;
 
-  private final OtpService otpService;
-
-  private final EmailService emailService;
-
   private final RoleService roleService;
 
-  private final OtpGenerator otpGenerator;
-
-  private final AccountService accountService;
+  private final OtpService otpService;
 
   /**
    * Constructor for UserServiceImpl.
    *
    * @param userDao the UserDao to be used for database operations
    */
-  UserServiceImpl(
+  public UserServiceImpl(
       UserDao userDao,
       BCryptPasswordEncoder passwordEncoder,
-      OtpService otpService,
-      EmailService emailService,
       RoleService roleService,
-      OtpGenerator otpGenerator,
-      AccountService accountService) {
+      OtpService otpService) {
     this.passwordEncoder = passwordEncoder;
     this.userDao = userDao;
-    this.otpService = otpService;
-    this.emailService = emailService;
     this.roleService = roleService;
-    this.otpGenerator = otpGenerator;
-    this.accountService = accountService;
+    this.otpService = otpService;
   }
 
   /**
@@ -81,80 +68,73 @@ public class UserServiceImpl implements UserService {
    * @param requestDto the request dto containing user details
    */
   @Override
+  @LogActivity(action = "CREATE", entityType = "USER", description = "New user created")
   public UserCreateResponseDto createUser(UserCreateRequestDto requestDto, Long accountId)
       throws ServiceLayerException {
-
     try {
-      User user =
-          USER_MAPPER.convertUserCreateRequestDtoToUser(
-              requestDto, UserType.PASSWORD, UserStatus.CREATED, accountId);
-
-      // Check if user already exists
-      if (isUserAlreadyExists(accountId, user.getEmail())) {
-        log.error("User with email {} already exists in account {}", user.getEmail(), accountId);
-        throw new ResourceAlreadyExistException("User already exists");
-      }
-
-      User createdUser = userDao.create(user);
-      // Sends an email for verification
-      sendOtpToEmail(createdUser.getEmail());
-
-      return UserMapper.USER_MAPPER.convertUserToUserCreateResponseDto(createdUser);
-    } catch (DaoLayerException e) {
-      log.error("Failed to create user: {}", e.getMessage());
-      throw new ServiceLayerException("Failed to create user");
+      validateUserDoesNotExist(accountId, requestDto.getEmail());
+      User user = buildUser(requestDto, accountId);
+      User createdUser = persistUser(user);
+      sendVerificationOtp(createdUser);
+      return USER_MAPPER.convertUserToUserCreateResponseDto(createdUser);
     } catch (Exception e) {
-      log.error("Unexpected error occurred while creating user: {}", e.getMessage());
-      throw new ServiceLayerException("Unexpected error occurred while creating user");
+      log.error("Error creating user: {}", e.getMessage(), e);
+      throw new ServiceLayerException("Failed to create user", e);
     }
   }
 
-  /**
-   * Creates a root user with the specified details.
-   *
-   * @param userCreateRequestDto the request dto containing root user creation details
-   * @param accountId the ID of the account to which the root user belongs
-   * @return the created root user response dto
-   */
   @Override
   @Transactional(rollbackFor = ServiceLayerException.class)
-  public UserResponseDto createRootUser(
-      RootUserCreateRequestDto userCreateRequestDto, Long accountId) throws ServiceLayerException {
-
+  @LogActivity(action = "CREATE", entityType = "USER", description = "Root user created")
+  public void createRootUser(RootUserCreateRequestDto requestDto, Long accountId)
+      throws ServiceLayerException {
     try {
+      validateUserDoesNotExist(accountId, requestDto.getEmail());
 
-      if (isUserAlreadyExists(accountId, userCreateRequestDto.getEmail())) {
-        log.error(
-            "Root user with email {} already exists in account {}",
-            userCreateRequestDto.getEmail(),
-            accountId);
-        throw new ResourceAlreadyExistException("Root user already exists");
-      }
-
-      RoleResponseDto roleResponseDto = createRootRole(accountId);
-
-      if (roleResponseDto == null) {
-        log.error("Failed to create root role for user creation");
-        throw new ServiceLayerException("Failed to create roles for root user");
-      }
-      List<Role> roles =
-          List.of(RoleMapper.ROLE_MAPPER.convertRoleResponseDtoToRole(roleResponseDto));
-      User user =
-          USER_MAPPER.convertRootUserCreateRequestDtoToUser(
-              userCreateRequestDto, UserType.PASSWORD, UserStatus.CREATED, accountId, roles);
-      User createdUser = userDao.create(user);
-      // Sends an email for verification
-      sendOtpToEmail(createdUser.getEmail());
-      return UserMapper.USER_MAPPER.convertUserToUserResponseDto(createdUser);
-
-    } catch (DaoLayerException | ServiceLayerException e) {
-      log.error("Failed to create root user: {}", e.getMessage());
-      throw new ServiceLayerException("Failed to create root user");
-
+      List<Role> roles = buildRootRoles(accountId);
+      User user = buildRootUser(requestDto, accountId, roles);
+      User createdUser = persistUser(user);
+      sendVerificationOtp(createdUser);
+    } catch (ResourceAlreadyExistException e) {
+      log.error("Root user already exists: {}", e.getMessage());
+      throw e;
     } catch (Exception e) {
-      log.error("Unexpected error occurred while creating Root  user: {}", e.getMessage());
-      throw new ServiceLayerException("Unexpected error occurred while creating user");
+      log.error("Error creating root user: {}", e.getMessage(), e);
+      throw new ServiceLayerException("Failed to create root user", e);
     }
+  }
+
+  private void validateUserDoesNotExist(Long accountId, String email)
+      throws ResourceAlreadyExistException {
+    if (isUserAlreadyExists(accountId, email)) {
+      throw new ResourceAlreadyExistException("User already exists");
+    }
+  }
+
+  private User buildUser(UserCreateRequestDto dto, Long accountId) {
+    return USER_MAPPER.convertUserCreateRequestDtoToUser(
+        dto, UserType.PASSWORD, UserStatus.CREATED, accountId);
+  }
+
+  private User buildRootUser(RootUserCreateRequestDto dto, Long accountId, List<Role> roles) {
+    return USER_MAPPER.convertRootUserCreateRequestDtoToUser(
+        dto, UserType.PASSWORD, UserStatus.CREATED, accountId, roles);
+  }
+
+  private List<Role> buildRootRoles(Long accountId) throws ServiceLayerException {
+    Role role = createRootRole(accountId);
+    if (role == null) {
+      throw new ServiceLayerException("Failed to create root role");
+    }
+    return List.of(role);
+  }
+
+  private User persistUser(User user) throws DaoLayerException {
+    return userDao.create(user);
+  }
+
+  private void sendVerificationOtp(User user) throws ServiceLayerException {
+    otpService.sendOtp(user.getEmail());
   }
 
   /**
@@ -179,7 +159,7 @@ public class UserServiceImpl implements UserService {
    * @param accountId the ID of the account to which the root role belongs
    * @return the created root role response dto
    */
-  private RoleResponseDto createRootRole(Long accountId) throws ServiceLayerException {
+  private Role createRootRole(Long accountId) throws ServiceLayerException {
     RoleCreateRequestDto roleCreateRequestDto = new RoleCreateRequestDto();
     roleCreateRequestDto.setName("ROOT");
     roleCreateRequestDto.setDescription("Root role with all permissions");
@@ -194,17 +174,14 @@ public class UserServiceImpl implements UserService {
    * @return the user with the specified ID, or null if not found
    */
   @Override
-  public UserResponseDto findByAccountIdAndUserId(Long accountId, Long id)
-      throws ServiceLayerException {
+  public User findByAccountIdAndUserId(Long accountId, Long id) throws ServiceLayerException {
     try {
-
       User user = userDao.findById(accountId, id);
-
       if (user == null) {
         log.warn("User with ID {} not found in account {}", id, accountId);
         throw new ResourceNotFoundException("User not found");
       }
-      return USER_MAPPER.convertUserToUserResponseDto(user);
+      return user;
     } catch (DaoLayerException e) {
       log.error("Failed to find user by ID {}: {}", id, e.getMessage());
       throw new ServiceLayerException("Failed to find user by ID");
@@ -218,130 +195,18 @@ public class UserServiceImpl implements UserService {
    * @return the user with the specified email, or null if not found
    */
   @Override
-  public UserResponseDto findByAccountIdAndEmail(Long accountId, String email)
-      throws ServiceLayerException {
+  public User findByAccountIdAndEmail(Long accountId, String email) throws ServiceLayerException {
     try {
       User user = userDao.findByAccountIdAndEmail(accountId, email);
       if (user == null) {
         log.warn("User with email {} not found in account {}", email, accountId);
         throw new ResourceNotFoundException("User not found");
       }
-      return USER_MAPPER.convertUserToUserResponseDto(user);
+      return user;
     } catch (DaoLayerException e) {
       log.error("Failed to find user by email {}: {}", email, e.getMessage());
       throw new ServiceLayerException("Failed to find user by email");
     }
-  }
-
-  /**
-   * Verifies the email address of an account.
-   *
-   * @param email the email address to verify
-   */
-  private void sendOtpToEmail(String email) throws ServiceLayerException {
-    try {
-      String otp = otpGenerator.generateOtp();
-      otpService.create(email, otp);
-      sendEmail(email, otp);
-    } catch (OtpGenerationFailedException | EmailServiceException e) {
-      log.error("Failed to generate OTP for email {}: {}", email, e.getMessage());
-      throw new ServiceLayerException("Failed to generate OTP", e);
-    }
-  }
-
-  /**
-   * Sends an email with the OTP code to the specified email address.
-   *
-   * @param email the email address to which the OTP should be sent
-   * @param otp the OTP code to send
-   */
-  private void sendEmail(String email, String otp) throws EmailServiceException {
-    emailService.sendEmail(email, "Email Verification", "Your OTP code is: " + otp);
-    log.info("Email sent to {} with OTP: {}", email, otp);
-  }
-
-  /**
-   * Verifies the OTP code for an account.
-   *
-   * @param otpRequestDto the request dto for verifying the OTP
-   */
-  @Override
-  @Transactional(rollbackFor = ServiceLayerException.class)
-  public OtpValidateResponseDto validateOtp(OtpValidateRequestDto otpRequestDto)
-      throws ServiceLayerException {
-
-    try {
-      OtpCode otpCode = otpService.find(otpRequestDto.getEmail());
-      return processOtpValidation(otpRequestDto, otpCode);
-
-    } catch (ServiceLayerException e) {
-      log.error("Failed to validate OTP: {}", e.getMessage());
-      throw new ServiceLayerException("Failed to validate OTP");
-    }
-  }
-
-  /**
-   * Processes the OTP validation request.
-   *
-   * @param request the OTP validation request containing email and OTP
-   * @param otpCode the OTP code associated with the email
-   * @return the response indicating the status of the OTP validation
-   */
-  private OtpValidateResponseDto processOtpValidation(
-      OtpValidateRequestDto request, OtpCode otpCode) throws ServiceLayerException {
-    OtpValidateResponseDto response = new OtpValidateResponseDto();
-
-    if (otpCode == null) {
-      log.warn("No OTP found for email");
-      response.setStatus(OtpValidationStatus.NOT_FOUND);
-      return response;
-    }
-
-    if (otpCode.getExpiresAt().isBefore(LocalDateTime.now())) {
-      log.warn("OTP has expired");
-      response.setStatus(OtpValidationStatus.EXPIRED);
-      return response;
-    }
-
-    if (!otpCode.getOtp().equals(String.valueOf(request.getOtp()))) {
-      response.setStatus(OtpValidationStatus.INVALID);
-      return response;
-    }
-
-    activateUserIfRequired(request);
-    response.setStatus(OtpValidationStatus.VALID);
-    return response;
-  }
-
-  /**
-   * Activates the user if they are a root user and updates their status to active.
-   *
-   * @param request the OTP validation request containing account ID and email
-   */
-  private void activateUserIfRequired(OtpValidateRequestDto request) throws ServiceLayerException {
-
-    try {
-      UserResponseDto user = findByAccountIdAndEmail(request.getAccountId(), request.getEmail());
-
-      if (isRootUser(user)) {
-        accountService.updateStatus(request.getAccountId(), AccountStatus.ACTIVE);
-      }
-
-      updateUserStatus(request.getAccountId(), user.getEmail(), UserStatus.ACTIVE);
-    } catch (ServiceLayerException e) {
-      log.error("Failed to activate user: {}", e.getMessage());
-      throw new ServiceLayerException("Failed to activate user");
-    }
-  }
-
-  /**
-   * Resends the OTP (One-Time Password) to the specified email.
-   *
-   * @param email the email to which the OTP should be resent
-   */
-  @Override
-  public void resendOtp(String email) throws ServiceLayerException {
-    sendOtpToEmail(email);
   }
 
   /**
@@ -352,13 +217,14 @@ public class UserServiceImpl implements UserService {
    * @param password the new password to set for the user
    */
   @Override
+  @LogActivity(action = "UPDATE", entityType = "USER", description = "User password updated")
   public void updateUserPassword(Long accountId, String email, String password)
       throws ServiceLayerException {
 
     try {
       Map<String, Object> updateMap = Map.of("password", passwordEncoder.encode(password));
       Map<String, Object> conditionMap = Map.of("email", email, "account_id", accountId);
-      userDao.update(updateMap, conditionMap);
+      userDao.update("users",updateMap, conditionMap);
 
     } catch (DaoLayerException e) {
       log.error("Failed to update user password for email {}: {}", email, e.getMessage());
@@ -373,13 +239,13 @@ public class UserServiceImpl implements UserService {
    * @param email the email of the user whose status is to be updated
    */
   @Override
+  @LogActivity(action = "UPDATE", entityType = "USER", description = "User status updated")
   public void updateUserStatus(Long accountId, String email, UserStatus status)
       throws ServiceLayerException {
-
     try {
       Map<String, Object> updateMap = Map.of("status", status);
       Map<String, Object> conditionMap = Map.of("email", email, "account_id", accountId);
-      userDao.update(updateMap, conditionMap);
+      userDao.update("users", updateMap, conditionMap);
     } catch (DaoLayerException e) {
       log.error("Failed to update user status for email {}: {}", email, e.getMessage());
       throw new ServiceLayerException("Failed to update user status");
@@ -398,12 +264,188 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
-   * Checks if the user is a root user.
+   * Updates the last login time for a user. Moves current login to last login
+   * and sets current login to the current timestamp.
    *
-   * @param user the user to check
-   * @return true if the user is a root user, false otherwise
+   * @param accountId the ID of the account to which the user belongs (null for root users)
+   * @param email the email of the user
    */
-  private boolean isRootUser(UserResponseDto user) {
-    return user.getRoles().stream().anyMatch(role -> role.getName().equalsIgnoreCase("ROOT"));
+  @Override
+  @LogActivity(action = "UPDATE", entityType = "USER", description = "User login time updated")
+  public void updateLastLoginTime(Long accountId, String email) throws ServiceLayerException {
+    try {
+      // Create update map with login time fields
+      Map<String, Object> updateMap = Map.of(
+          "last_login", "$col:current_login",  // Move current_login to last_login $col: for direct column reference
+          "current_login", "CURRENT_TIMESTAMP"  // Set current_login to now
+      );
+
+      Map<String, Object> conditionMap = new HashMap<>();
+      conditionMap.put("email", email);
+
+      if (accountId != null) {
+        conditionMap.put("account_id",accountId);
+      }
+
+      userDao.update("users",updateMap, conditionMap);
+      log.debug("Successfully updated login time for user: {} on account: {}", email, accountId);
+    } catch (DaoLayerException e) {
+      log.error("Failed to update login time for user {} on account {}: {}", email, accountId, e.getMessage());
+      throw new ServiceLayerException("Failed to update user login time", e);
+    }
   }
+
+  /**
+   * Retrieves a list of all users associated with a specific account ID.
+   *
+   * @param accountId the unique identifier of the account
+   * @return a list of users associated with the given account ID
+   */
+  @Override
+  public List<User> listUsersByAccountId(Long accountId) throws ServiceLayerException {
+    try {
+      List<User> users = userDao.listByAccountId(accountId);
+      log.debug("Retrieved {} users for account ID: {}", users.size(), accountId);
+      return users;
+    } catch (DaoLayerException e) {
+      log.error("Failed to retrieve users for account ID {}: {}", accountId, e.getMessage());
+      throw new ServiceLayerException("Failed to retrieve users", e);
+    }
+  }
+
+  /**
+   * Updates the profile information for a user identified by their account ID and user ID.
+   * Note: Email updates are not allowed for security reasons.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user whose profile is to be updated
+   * @param requestDto the DTO containing updated profile information
+   */
+  @Override
+  @LogActivity(action = "UPDATE", entityType = "USER", description = "User profile updated")
+  public void updateUserProfile(Long accountId, Long userId, UserProfileUpdateRequestDto requestDto)
+      throws ServiceLayerException {
+    try {
+      // First verify the user exists
+      findByAccountIdAndUserId(accountId, userId);
+
+      Map<String, Object> updateMap = new HashMap<>();
+      updateMap.put("first_name", requestDto.getFirstName());
+      updateMap.put("last_name", requestDto.getLastName());
+
+      if (requestDto.getMiddleName() != null) {
+        updateMap.put("middle_name", requestDto.getMiddleName());
+      }
+
+      Map<String, Object> conditionMap = Map.of("id", userId, "account_id", accountId);
+      userDao.update("users",updateMap, conditionMap);
+
+      log.info("Successfully updated profile for user ID: {} in account: {}", userId, accountId);
+    } catch (DaoLayerException e) {
+      log.error("Failed to update user profile for user ID {}: {}", userId, e.getMessage());
+      throw new ServiceLayerException("Failed to update user profile", e);
+    }
+  }
+
+  /**
+   * Updates the roles assigned to a user identified by their account ID and user ID.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user whose roles are to be updated
+   * @param requestDto the DTO containing the new role assignments
+   */
+  @Override
+  @Transactional(rollbackFor = ServiceLayerException.class)
+  @LogActivity(action = "UPDATE", entityType = "USER", description = "User roles updated")
+  public void updateUserRoles(Long accountId, Long userId, UserRoleUpdateRequestDto requestDto)
+      throws ServiceLayerException {
+    try {
+      // First verify the user exists
+      findByAccountIdAndUserId(accountId, userId);
+
+      // Validate that all role IDs exist and belong to the same account
+      List<Role> validRoles = new ArrayList<>();
+      for (Long roleId : requestDto.getRoleIds()) {
+        Role role = roleService.findById(roleId, accountId);
+        if (role == null) {
+          throw new ResourceNotFoundException("Role with ID " + roleId + " not found");
+        }
+        validRoles.add(role);
+      }
+
+      // Delete existing role associations first
+      userDao.deleteUserRoles(userId, accountId);
+
+      // Assign new roles
+      List<Long> roleIds = requestDto.getRoleIds();
+      userDao.assignUserRoles(userId, roleIds, accountId);
+
+      log.info("Successfully updated roles for user ID: {} in account: {}", userId, accountId);
+    } catch (DaoLayerException e) {
+      log.error("Failed to update user roles for user ID {}: {}", userId, e.getMessage());
+      throw new ServiceLayerException("Failed to update user roles", e);
+    }
+  }
+
+  /**
+   * Updates both profile information and roles for a user in a single operation.
+   * Note: Email updates are not allowed for security reasons.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user to be updated
+   * @param requestDto the DTO containing updated profile information and role assignments
+   */
+  @Override
+  @Transactional(rollbackFor = ServiceLayerException.class)
+  @LogActivity(action = "UPDATE", entityType = "USER", description = "User profile and roles updated")
+  public void updateUser(Long accountId, Long userId, UserUpdateRequestDto requestDto)
+      throws ServiceLayerException {
+    try {
+      // First verify the user exists
+      findByAccountIdAndUserId(accountId, userId);
+
+      // Prepare profile update
+      Map<String, Object> updateMap = new HashMap<>();
+      updateMap.put("first_name", requestDto.getFirstName());
+      updateMap.put("last_name", requestDto.getLastName());
+
+      if (requestDto.getMiddleName() != null) {
+        updateMap.put("middle_name", requestDto.getMiddleName());
+      }
+
+      updateMap.put("updated_at", "CURRENT_TIMESTAMP");
+
+      // Update profile information
+      Map<String, Object> conditionMap = Map.of("id", userId, "account_id", accountId);
+      userDao.update("users", updateMap, conditionMap);
+
+      // Update roles if provided
+      if (requestDto.getRoleIds() != null && !requestDto.getRoleIds().isEmpty()) {
+
+        // Validate that all role IDs exist and belong to the same account
+        List<Role> validRoles = new ArrayList<>();
+        for (Long roleId : requestDto.getRoleIds()) {
+          Role role = roleService.findById(roleId, accountId);
+          if (role == null) {
+            throw new ResourceNotFoundException("Role with ID " + roleId + " not found");
+          }
+          validRoles.add(role);
+        }
+
+        // Delete existing role associations first
+        userDao.deleteUserRoles(userId, accountId);
+
+        // Assign new roles
+        userDao.assignUserRoles(userId, requestDto.getRoleIds(), accountId);
+      }
+
+      log.info("Successfully updated user profile and roles for user ID: {} in account: {}", userId, accountId);
+    } catch (DaoLayerException e) {
+      log.error("Failed to update user for user ID {}: {}", userId, e.getMessage());
+      throw new ServiceLayerException("Failed to update user", e);
+    }
+  }
+
+
+
 }

@@ -1,8 +1,7 @@
 package com.spring.security.service;
 
-import com.spring.security.controller.dto.response.PermissionResponseDto;
 import com.spring.security.dao.PermissionDao;
-import com.spring.security.domain.mapper.PermissionMapper;
+import com.spring.security.domain.entity.Permission;
 import com.spring.security.exceptions.DaoLayerException;
 import com.spring.security.exceptions.ServiceLayerException;
 import java.util.List;
@@ -26,13 +25,12 @@ public class PermissionServiceImpl implements PermissionService {
    * @return a list of all permissions
    */
   @Override
-  public List<PermissionResponseDto> list() throws ServiceLayerException {
+  public List<Permission> list() throws ServiceLayerException {
 
     try {
-      return PermissionMapper.PERMISSION_MAPPER.convertPermissionToPermissionResponseDto(
-          permissionDao.list());
+      return permissionDao.list();
     } catch (DaoLayerException e) {
-      log.warn("Failed to list permissions", e);
+      log.error("Failed to list permissions", e);
       throw new ServiceLayerException("Failed to list permissions", e);
     }
   }

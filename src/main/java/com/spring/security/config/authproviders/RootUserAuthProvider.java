@@ -65,7 +65,7 @@ public class RootUserAuthProvider implements AuthenticationProvider {
     validatePassword(user, password);
 
     UserDetails userDetails =
-        new CustomUserDetails(user.getEmail(), user.getPassword(), getAuthorities(user.getRoles()));
+        new CustomUserDetails(user.getAccountId(), user.getEmail(), user.getPassword(), getAuthorities(user.getRoles()));
 
     return new RootUserAuthToken(userDetails, user.getPassword(), userDetails.getAuthorities());
   }
@@ -106,6 +106,8 @@ public class RootUserAuthProvider implements AuthenticationProvider {
    */
   private void validatePassword(User user, String rawPassword) {
     log.warn("Validating password for user: {}", user.getEmail());
+    // If rawPassword is null, it means no password was provided (e.g., OAuth2 login)
+    // In such cases, we skip password validation
     if (rawPassword != null && !passwordEncoder.matches(rawPassword, user.getPassword())) {
       throw new BadCredentialsException("Invalid credentials");
     }

@@ -1,8 +1,5 @@
 package com.spring.security.dao;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -39,14 +36,16 @@ public class UpdateQueryBuilder {
       Object value = updateColumnValueEntry.getValue();
 
       if (Objects.isNull(value)) {
+        updateSet.append(String.format("%s IS NULL", column));
+      } else if (value instanceof String && ((String) value).startsWith("CURRENT_")) {
+        // Handle SQL functions like CURRENT_TIMESTAMP without quotes
         updateSet.append(String.format("%s = %s", column, value));
-      } else if (value instanceof LocalDateTime) {
-        DateTimeFormatter formatter =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
-        updateSet.append(
-            String.format("%s = '%s'", column, ((LocalDateTime) value).format(formatter)));
+      } else if (value instanceof String && isColumnReference((String) value)) {
+        // Handle column references (like current_login) without quotes
+        updateSet.append(String.format("%s = %s", column, ((String) value).substring(5)));
       } else {
         updateSet.append(String.format("%s = '%s'", column, value));
+        System.out.println("Literal value detected: " + value);
       }
 
       if (index != updateColumnValueMap.size() - 1) {
@@ -56,4 +55,12 @@ public class UpdateQueryBuilder {
     }
     return updateSet.toString();
   }
+
+  /**
+   * Checks if a string value is likely a column reference rather than a literal value.
+   */
+  private boolean isColumnReference(String value) {
+      return value.startsWith("$col:"); // must start lowercase
+  }
+
 }

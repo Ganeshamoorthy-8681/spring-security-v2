@@ -2,6 +2,9 @@ package com.spring.security.controller.dto.response;
 
 import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,4 +39,34 @@ public class UserResponseDto {
 
   /** The list of roles assigned to the user. */
   private List<UserRoleResponseDto> roles;
+
+    /** The timestamp when the user was created. */
+    private Instant createdAt;
+
+    /** The timestamp when the user was last updated. */
+    private Instant updatedAt;
+
+    private Instant deletedAt;
+
+    /** The identifier of the user who created this user record. */
+    private String createdBy;
+
+    /** The identifier of the user who last updated this user record. */
+    private String updatedBy;
+
+    /** The identifier of the user who deleted this user record, if applicable. */
+    private String deletedBy;
+
+    /** The timestamp of the user's current login. */
+    private Instant currentLogin;
+
+    /** The timestamp of the user's last login. */
+    private Instant lastLogin;
+
+    /** The number of failed login attempts. */
+    private Integer failedLoginAttempts;
+
+    /** The timestamp of the user's last failed login. */
+    private Instant lastFailedLogin;
+
 }

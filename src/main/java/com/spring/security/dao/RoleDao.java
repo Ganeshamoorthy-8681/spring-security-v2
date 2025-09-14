@@ -1,5 +1,6 @@
 package com.spring.security.dao;
 
+import com.spring.security.domain.entity.Permission;
 import com.spring.security.domain.entity.Role;
 import com.spring.security.exceptions.DaoLayerException;
 import java.util.List;
@@ -42,4 +43,28 @@ public interface RoleDao {
    * @throws DaoLayerException if an error occurs during the operation
    */
   Role findByName(String name, Long accountId) throws DaoLayerException;
+
+  /**
+   * Updates an existing role with new name, description, and permissions.
+   *
+   * @param roleId the unique identifier of the role to be updated
+   * @param accountId the unique identifier of the account associated with the role
+   * @param name the new name for the role
+   * @param description the new description for the role
+   * @param permissions the new list of permissions for the role
+   * @return the updated role
+   * @throws DaoLayerException if an error occurs during the operation
+   */
+  Role update(
+      Long roleId, Long accountId, String name, String description, List<Permission> permissions)
+      throws DaoLayerException;
+
+  /**
+   * Deletes a role by its unique identifier and account ID.
+   *
+   * @param roleId the unique identifier of the role to be deleted
+   * @param accountId the unique identifier of the account associated with the role
+   * @throws DaoLayerException if an error occurs during the operation
+   */
+  void delete(Long roleId, Long accountId) throws DaoLayerException;
 }

@@ -1,6 +1,6 @@
 package com.spring.security.exceptions;
 
-public class OtpGenerationFailedException extends BaseException {
+public class OtpGenerationFailedException extends ServiceLayerException {
 
   public OtpGenerationFailedException(String message) {
     super(message);

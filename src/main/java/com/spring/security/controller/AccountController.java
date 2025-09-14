@@ -2,8 +2,11 @@ package com.spring.security.controller;
 
 import com.spring.security.controller.dto.request.AccountCreateRequestDto;
 import com.spring.security.controller.dto.response.AccountResponseDto;
+import com.spring.security.domain.entity.Account;
+import com.spring.security.domain.mapper.AccountMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import com.spring.security.service.AccountService;
+import com.spring.security.service.OrchestratorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,13 +26,16 @@ public class AccountController {
 
   private final AccountService accountService;
 
+  private final OrchestratorService orchestratorService;
+
   /**
    * Constructor for AccountController.
    *
    * @param accountService the service to handle account-related operations
    */
-  AccountController(AccountService accountService) {
+  AccountController(AccountService accountService, OrchestratorService orchestratorService) {
     this.accountService = accountService;
+    this.orchestratorService = orchestratorService;
   }
 
   /**
@@ -42,7 +48,11 @@ public class AccountController {
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ACCOUNT:READ')")
   public ResponseEntity<AccountResponseDto> getAccountDetails(@PathVariable Long id)
       throws ServiceLayerException {
-    return new ResponseEntity<>(accountService.findById(id), HttpStatus.OK);
+    Account account = accountService.findById(id);
+    return new ResponseEntity<>(
+        com.spring.security.domain.mapper.AccountMapper.ACCOUNT_MAPPER
+            .convertAccountToAccountResponseDto(account),
+        HttpStatus.OK);
   }
 
   /**
@@ -54,7 +64,10 @@ public class AccountController {
   @PostMapping("/create")
   public ResponseEntity<AccountResponseDto> createAccount(
       @RequestBody AccountCreateRequestDto accountCreateRequestDto) throws ServiceLayerException {
-    return new ResponseEntity<>(accountService.create(accountCreateRequestDto), HttpStatus.CREATED);
+    return new ResponseEntity<>(
+        AccountMapper.ACCOUNT_MAPPER.convertAccountToAccountResponseDto(
+            orchestratorService.createAccountWithRootUser(accountCreateRequestDto)),
+        HttpStatus.CREATED);
   }
 
   /**

@@ -2,22 +2,30 @@ package com.spring.security.controller;
 
 import com.spring.security.controller.dto.request.ForgotPasswordRequestDto;
 import com.spring.security.controller.dto.request.GetUserByEmailRequestDto;
-import com.spring.security.controller.dto.request.RootUserCreateRequestDto;
 import com.spring.security.controller.dto.request.SetUserPasswordRequestDto;
 import com.spring.security.controller.dto.request.UserCreateRequestDto;
+import com.spring.security.controller.dto.request.UserProfileUpdateRequestDto;
+import com.spring.security.controller.dto.request.UserRoleUpdateRequestDto;
+import com.spring.security.controller.dto.request.UserUpdateRequestDto;
 import com.spring.security.controller.dto.response.UserCreateResponseDto;
 import com.spring.security.controller.dto.response.UserResponseDto;
+import com.spring.security.domain.entity.User;
+import com.spring.security.domain.mapper.UserMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import com.spring.security.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /** User controller for handling user-related operations. */
 @RestController
@@ -50,20 +58,6 @@ public class UserController {
   }
 
   /**
-   * Creates a root user.
-   *
-   * @param requestDto the request data transfer object containing root user creation details
-   * @return a ResponseEntity indicating the result of the operation
-   */
-  @PostMapping("/root/create")
-  public ResponseEntity<UserResponseDto> createRootUser(
-      @PathVariable Long accountId, @RequestBody RootUserCreateRequestDto requestDto)
-      throws ServiceLayerException {
-    return new ResponseEntity<>(
-        userService.createRootUser(requestDto, accountId), HttpStatus.CREATED);
-  }
-
-  /**
    * Retrieves a user by their ID.
    *
    * @param userId the ID of the user to retrieve
@@ -73,8 +67,9 @@ public class UserController {
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:READ')")
   public ResponseEntity<UserResponseDto> getUserById(
       @PathVariable Long accountId, @PathVariable Long userId) throws ServiceLayerException {
-    UserResponseDto user = userService.findByAccountIdAndUserId(accountId, userId);
-    return new ResponseEntity<>(user, HttpStatus.OK);
+    User user = userService.findByAccountIdAndUserId(accountId, userId);
+    return new ResponseEntity<>(
+        UserMapper.USER_MAPPER.convertUserToUserResponseDto(user), HttpStatus.OK);
   }
 
   /**
@@ -88,9 +83,26 @@ public class UserController {
   public ResponseEntity<UserResponseDto> getUserByEmail(
       @PathVariable Long accountId, @RequestBody GetUserByEmailRequestDto requestDto)
       throws ServiceLayerException {
-    UserResponseDto userResponseDto =
-        userService.findByAccountIdAndEmail(accountId, requestDto.getEmail());
-    return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
+    User user = userService.findByAccountIdAndEmail(accountId, requestDto.getEmail());
+    return new ResponseEntity<>(
+        UserMapper.USER_MAPPER.convertUserToUserResponseDto(user), HttpStatus.OK);
+  }
+
+  /**
+   * Retrieves a list of all users in an account.
+   *
+   * @param accountId the ID of the account to retrieve users from
+   * @return a ResponseEntity containing the list of users
+   */
+  @GetMapping("/list")
+  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:LIST')")
+  public ResponseEntity<List<UserResponseDto>> listUsers(@PathVariable Long accountId)
+      throws ServiceLayerException {
+    List<User> users = userService.listUsersByAccountId(accountId);
+    List<UserResponseDto> userResponseDtos = users.stream()
+        .map(UserMapper.USER_MAPPER::convertUserToUserResponseDto)
+        .toList();
+    return new ResponseEntity<>(userResponseDtos, HttpStatus.OK);
   }
 
   /**
@@ -113,6 +125,66 @@ public class UserController {
   public ResponseEntity<Void> forgotPassword(
       @PathVariable Long accountId, @RequestBody ForgotPasswordRequestDto requestDto) {
     userService.forgotPassword(accountId, requestDto.getEmail());
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  /**
+   * Updates the profile information for a user.
+   * Note: Email updates are not allowed for security reasons.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user whose profile is to be updated
+   * @param requestDto the DTO containing updated profile information
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @PatchMapping("/{userId}/profile")
+  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:UPDATE')")
+  public ResponseEntity<Void> updateUserProfile(
+      @PathVariable Long accountId,
+      @PathVariable Long userId,
+      @Valid @RequestBody UserProfileUpdateRequestDto requestDto)
+      throws ServiceLayerException {
+    userService.updateUserProfile(accountId, userId, requestDto);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  /**
+   * Updates the roles assigned to a user.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user whose roles are to be updated
+   * @param requestDto the DTO containing the new role assignments
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @PatchMapping("/{userId}/roles")
+  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:UPDATE')")
+  public ResponseEntity<Void> updateUserRoles(
+      @PathVariable Long accountId,
+      @PathVariable Long userId,
+      @Valid @RequestBody UserRoleUpdateRequestDto requestDto)
+      throws ServiceLayerException {
+    userService.updateUserRoles(accountId, userId, requestDto);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  /**
+   * Updates both profile information and roles for a user in a single operation.
+   * Note: Email updates are not allowed for security reasons.
+   * Roles are optional - if not provided, only profile will be updated.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user to be updated
+   * @param requestDto the DTO containing updated profile information and optional role assignments
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @PatchMapping("/{userId}")
+  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:UPDATE')")
+  public ResponseEntity<Void> updateUser(
+      @PathVariable Long accountId,
+      @PathVariable Long userId,
+      @Valid @RequestBody UserUpdateRequestDto requestDto)
+      throws ServiceLayerException {
+    userService.updateUser(accountId, userId, requestDto);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

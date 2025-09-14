@@ -11,6 +11,10 @@ public class ServiceLayerException extends BaseException {
     super(message);
   }
 
+  public ServiceLayerException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
   public ServiceLayerException(String message, BaseException cause) {
     super(message, cause);
   }

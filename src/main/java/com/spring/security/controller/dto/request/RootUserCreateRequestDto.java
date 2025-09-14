@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class RootUserCreateRequestDto {
+
   /** The email address of the user. */
   private String email;
 

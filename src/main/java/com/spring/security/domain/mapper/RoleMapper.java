@@ -25,7 +25,7 @@ public interface RoleMapper {
    * @param accountId the ID of the account to which the role belongs
    * @return the converted Role entity
    */
-  Role convertCreteRequestToRole(
+  Role convertCreateRequestToRole(
       RoleCreateRequestDto roleCreateRequestDto, Long accountId, List<Permission> permissions);
 
   /**

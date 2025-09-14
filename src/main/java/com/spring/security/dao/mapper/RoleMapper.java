@@ -20,13 +20,13 @@ public interface RoleMapper {
   // Batch insert permissions for the role
   @Insert({
     "<script>",
-    "INSERT INTO role_permissions (role_id, permission_id, account_id) VALUES ",
+    "INSERT INTO role_permissions (role_id, permission_id) VALUES ",
     "<foreach collection='permissionIds' item='pid' separator=','>",
-    "(#{roleId}, #{pid}, #{accountId})",
+    "(#{roleId}, #{pid})",
     "</foreach>",
     "</script>"
   })
-  int insertRolePermissions(Long roleId, List<Long> permissionIds, Long accountId);
+  int insertRolePermissions(Long roleId, List<Long> permissionIds);
 
   @Select("SELECT * FROM roles WHERE id = #{id} AND account_id = #{accountId}")
   @Results(
@@ -39,7 +39,18 @@ public interface RoleMapper {
         @Result(
             property = "permissions",
             column = "id",
-            many = @Many(select = "getPermissionsByRoleId"))
+            many = @Many(select = "getPermissionsByRoleId")),
+        @Result(
+            property = "createdAt",
+            column = "created_at",
+            javaType = java.time.Instant.class),
+        @Result(
+            property = "updatedAt",
+            column = "updated_at",
+            javaType = java.time.Instant.class),
+        @Result(property = "createdBy", column = "created_by", javaType = String.class),
+        @Result(property = "updatedBy", column = "updated_by", javaType = String.class),
+        @Result(property = "deletedBy", column = "deleted_by", javaType = String.class)
       })
   Role findByAccountIdAndId(Long id, Long accountId);
 
@@ -57,4 +68,21 @@ public interface RoleMapper {
   @Select("SELECT * FROM roles WHERE name = #{name} AND account_id = #{accountId}")
   @ResultMap("roleResultMap")
   Role findByNameAndAccountId(String name, Long accountId);
+
+  // Update role name and description
+  @Update(
+      "UPDATE roles SET name = #{name}, description = #{description}, updated_at = CURRENT_TIMESTAMP WHERE id = #{id} AND account_id = #{accountId}")
+  int updateRole(
+      @Param("id") Long id,
+      @Param("accountId") Long accountId,
+      @Param("name") String name,
+      @Param("description") String description);
+
+  // Delete existing role permissions
+  @Delete("DELETE FROM role_permissions WHERE role_id = #{roleId}")
+  void deleteRolePermissions(Long roleId);
+
+  // Delete role itself
+  @Delete("DELETE FROM roles WHERE id = #{roleId} AND account_id = #{accountId}")
+  int deleteRole(@Param("roleId") Long roleId, @Param("accountId") Long accountId);
 }

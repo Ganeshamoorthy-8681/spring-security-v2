@@ -2,6 +2,8 @@ package com.spring.security.dao.mapper;
 
 import com.spring.security.dao.UpdateQueryBuilder;
 import com.spring.security.domain.entity.OtpCode;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Map;
 import org.apache.ibatis.annotations.Delete;
@@ -25,8 +27,8 @@ public interface OtpMapper {
       value = {
         @Result(property = "otp", column = "otp", javaType = String.class),
         @Result(property = "email", column = "email", javaType = String.class),
-        @Result(property = "createdAt", column = "created_at", javaType = LocalDateTime.class),
-        @Result(property = "expiresAt", column = "expires_at", javaType = LocalDateTime.class)
+        @Result(property = "createdAt", column = "created_at", javaType = Instant.class),
+        @Result(property = "expiresAt", column = "expires_at", javaType = Instant.class)
       })
   OtpCode find(String email);
 

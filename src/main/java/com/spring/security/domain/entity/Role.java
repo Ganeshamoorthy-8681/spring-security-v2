@@ -1,5 +1,6 @@
 package com.spring.security.domain.entity;
 
+import java.time.Instant;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,4 +36,16 @@ public class Role {
 
   /** A list of permissions associated with the role. */
   private List<Permission> permissions;
+
+  /** Creation timestamp of the role. */
+  private Instant createdAt;
+
+  /** Last update timestamp of the role. */
+  private Instant updatedAt;
+
+  /** Created by user identifier. */
+  private String createdBy;
+
+  /** Updated by user identifier. */
+  private String updatedBy;
 }

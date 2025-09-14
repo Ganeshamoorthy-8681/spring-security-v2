@@ -1,16 +1,22 @@
 package com.spring.security.controller;
 
 import com.spring.security.controller.dto.request.RoleCreateRequestDto;
+import com.spring.security.controller.dto.request.RoleUpdateRequestDto;
 import com.spring.security.controller.dto.response.RoleResponseDto;
+import com.spring.security.domain.entity.Role;
+import com.spring.security.domain.mapper.RoleMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import com.spring.security.service.RoleService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,8 +47,10 @@ public class RoleController {
   public ResponseEntity<RoleResponseDto> create(
       @PathVariable Long accountId, @RequestBody RoleCreateRequestDto roleCreateRequestDto)
       throws ServiceLayerException {
-    RoleResponseDto roleResponseDto = roleService.create(roleCreateRequestDto, accountId);
-    return new ResponseEntity<>(roleResponseDto, HttpStatus.CREATED);
+    Role role = roleService.create(roleCreateRequestDto, accountId);
+
+    return new ResponseEntity<>(
+        RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role), HttpStatus.CREATED);
   }
 
   /**
@@ -56,8 +64,8 @@ public class RoleController {
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ROLE:READ')")
   public ResponseEntity<RoleResponseDto> find(
       @PathVariable Long accountId, @PathVariable Long roleId) throws ServiceLayerException {
-    RoleResponseDto roleResponseDto = roleService.findById(roleId, accountId);
-    return new ResponseEntity<>(roleResponseDto, HttpStatus.OK);
+    Role role = roleService.findById(roleId, accountId);
+    return new ResponseEntity<>(RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role), HttpStatus.OK);
   }
 
   /**
@@ -70,8 +78,9 @@ public class RoleController {
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ROLE:LIST')")
   public ResponseEntity<List<RoleResponseDto>> list(@PathVariable Long accountId)
       throws ServiceLayerException {
-    List<RoleResponseDto> roleResponseDtos = roleService.list(accountId);
-    return new ResponseEntity<>(roleResponseDtos, HttpStatus.OK);
+    List<Role> roles = roleService.list(accountId);
+    return new ResponseEntity<>(
+        RoleMapper.ROLE_MAPPER.convertRoleListToResponseDtoList(roles), HttpStatus.OK);
   }
 
   /**
@@ -85,7 +94,45 @@ public class RoleController {
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ROLE:READ')")
   public ResponseEntity<RoleResponseDto> findByName(
       @PathVariable Long accountId, @RequestParam String name) throws ServiceLayerException {
-    RoleResponseDto roleResponseDto = roleService.findByName(name, accountId);
-    return new ResponseEntity<>(roleResponseDto, HttpStatus.OK);
+    Role role = roleService.findByName(name, accountId);
+    return new ResponseEntity<>(
+        RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(role), HttpStatus.OK);
+  }
+
+  /**
+   * Updates an existing role.
+   *
+   * @param accountId the unique identifier of the account
+   * @param roleId the unique identifier of the role to be updated
+   * @param roleUpdateRequestDto the DTO containing updated role information
+   * @return a ResponseEntity containing the updated RoleResponseDto and HTTP status
+   */
+  @PutMapping("/{roleId}")
+  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ROLE:UPDATE')")
+  public ResponseEntity<RoleResponseDto> updateRole(
+      @PathVariable Long accountId,
+      @PathVariable Long roleId,
+      @Valid @RequestBody RoleUpdateRequestDto roleUpdateRequestDto)
+      throws ServiceLayerException {
+    Role updatedRole = roleService.update(roleId, accountId, roleUpdateRequestDto);
+    return new ResponseEntity<>(
+        RoleMapper.ROLE_MAPPER.convertRoleToResponseDto(updatedRole), HttpStatus.OK);
+  }
+
+  /**
+   * Deletes an existing role.
+   *
+   * @param accountId the unique identifier of the account
+   * @param roleId the unique identifier of the role to be deleted
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @DeleteMapping("/{roleId}")
+  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ROLE:DELETE')")
+  public ResponseEntity<Void> deleteRole(
+      @PathVariable Long accountId,
+      @PathVariable Long roleId)
+      throws ServiceLayerException {
+    roleService.delete(roleId, accountId);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }

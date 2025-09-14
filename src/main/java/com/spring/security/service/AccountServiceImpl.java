@@ -1,7 +1,7 @@
 package com.spring.security.service;
 
+import com.spring.security.annotation.LogActivity;
 import com.spring.security.controller.dto.request.AccountCreateRequestDto;
-import com.spring.security.controller.dto.response.AccountResponseDto;
 import com.spring.security.dao.AccountDao;
 import com.spring.security.domain.entity.Account;
 import com.spring.security.domain.entity.enums.AccountStatus;
@@ -25,7 +25,7 @@ public class AccountServiceImpl implements AccountService {
    *
    * @param accountDao the data access object for account operations
    */
-  public AccountServiceImpl(AccountDao accountDao) {
+  public AccountServiceImpl(AccountDao accountDao, UserService userService) {
     this.accountDao = accountDao;
   }
 
@@ -35,7 +35,8 @@ public class AccountServiceImpl implements AccountService {
    * @param accountCreateRequestDto the data transfer object containing account creation details
    */
   @Override
-  public AccountResponseDto create(AccountCreateRequestDto accountCreateRequestDto)
+  @LogActivity(action = "CREATE", entityType = "ACCOUNT", description = "New account created")
+  public Account create(AccountCreateRequestDto accountCreateRequestDto)
       throws ServiceLayerException {
 
     try {
@@ -48,7 +49,7 @@ public class AccountServiceImpl implements AccountService {
         throw new ResourceAlreadyExistException("Account with this name already exists");
       }
       accountDao.create(account);
-      return AccountMapper.ACCOUNT_MAPPER.convertAccountToAccountResponseDto(account);
+      return account;
     } catch (DaoLayerException e) {
       log.error("Error creating account: {}", e.getMessage());
       throw new ServiceLayerException("Failed to create account", e);
@@ -63,7 +64,7 @@ public class AccountServiceImpl implements AccountService {
    * @throws ServiceLayerException if an error occurs while retrieving the account
    */
   @Override
-  public AccountResponseDto findByAccountName(String accountName) throws ServiceLayerException {
+  public Account findByAccountName(String accountName) throws ServiceLayerException {
     try {
       Account account = accountDao.findByName(accountName);
 
@@ -72,7 +73,7 @@ public class AccountServiceImpl implements AccountService {
         throw new ResourceNotFoundException("Account not found");
       }
 
-      return AccountMapper.ACCOUNT_MAPPER.convertAccountToAccountResponseDto(account);
+      return account;
     } catch (DaoLayerException e) {
       log.error("Error finding account by name: {}", e.getMessage());
       throw new ServiceLayerException("Failed to find account by name", e);
@@ -102,14 +103,14 @@ public class AccountServiceImpl implements AccountService {
    * @return the account associated with the given ID
    */
   @Override
-  public AccountResponseDto findById(Long id) throws ServiceLayerException {
+  public Account findById(Long id) throws ServiceLayerException {
     try {
       Account account = accountDao.findById(id);
       if (account == null) {
         log.warn("Account with ID '{}' not found", id);
         throw new ResourceNotFoundException("Account not found");
       }
-      return AccountMapper.ACCOUNT_MAPPER.convertAccountToAccountResponseDto(account);
+      return account;
     } catch (DaoLayerException e) {
       log.error("Error finding account by ID: {}", e.getMessage());
       throw new ServiceLayerException("Failed to find account by ID", e);
@@ -123,6 +124,7 @@ public class AccountServiceImpl implements AccountService {
    * @param status the new status to set for the account
    */
   @Override
+  @LogActivity(action = "UPDATE", entityType = "ACCOUNT", description = "Account status updated")
   public void updateStatus(Long accountId, AccountStatus status) throws ServiceLayerException {
     try {
       Map<String, Object> updateMap = Map.of("status", status.toString());
@@ -140,6 +142,7 @@ public class AccountServiceImpl implements AccountService {
    * @param id the unique identifier of the account to be deleted
    */
   @Override
+  @LogActivity(action = "DELETE", entityType = "ACCOUNT", description = "Account deleted")
   public void delete(Long id) throws ServiceLayerException {
     updateStatus(id, AccountStatus.DELETED);
   }

@@ -4,7 +4,8 @@ import com.spring.security.controller.dto.request.OtpResendRequestDto;
 import com.spring.security.controller.dto.request.OtpValidateRequestDto;
 import com.spring.security.controller.dto.response.OtpValidateResponseDto;
 import com.spring.security.exceptions.ServiceLayerException;
-import com.spring.security.service.UserService;
+import com.spring.security.service.OrchestratorService;
+import com.spring.security.service.OtpService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,15 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/otp")
 public class OtpController {
 
-  private final UserService userService;
+  private final OtpService otpService;
+
+  private final OrchestratorService orchestratorService;
 
   /**
    * Constructor for OtpController.
    *
-   * @param userService the UserService to be used by this controller
+   * @param otpService the UserService to be used by this controller
    */
-  OtpController(UserService userService) {
-    this.userService = userService;
+  public OtpController(OtpService otpService, OrchestratorService orchestratorService) {
+    this.otpService = otpService;
+    this.orchestratorService = orchestratorService;
   }
 
   /**
@@ -36,7 +40,13 @@ public class OtpController {
   @PostMapping("/validate")
   public ResponseEntity<OtpValidateResponseDto> validateOtp(
       @RequestBody OtpValidateRequestDto requestDto) throws ServiceLayerException {
-    return new ResponseEntity<>(userService.validateOtp(requestDto), HttpStatus.OK);
+
+    OtpValidateResponseDto response = otpService.validateOtp(requestDto);
+
+    orchestratorService.updateAccountAndUserStatusBasedOnOtpValidation(
+        requestDto.getAccountId(), requestDto.getEmail(), response.getStatus());
+
+    return new ResponseEntity<>(response, HttpStatus.OK);
   }
 
   /**
@@ -48,7 +58,7 @@ public class OtpController {
   @PostMapping("/resend")
   public ResponseEntity<Void> resendOtp(@RequestBody OtpResendRequestDto requestDto)
       throws ServiceLayerException {
-    userService.resendOtp(requestDto.getEmail());
+    otpService.resendOtp(requestDto.getEmail());
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }
