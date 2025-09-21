@@ -2,6 +2,7 @@ package com.spring.security.dao.mapper;
 
 import com.spring.security.dao.UpdateQueryBuilder;
 import com.spring.security.domain.entity.Account;
+import com.spring.security.domain.entity.AccountStats;
 import com.spring.security.domain.entity.enums.AccountStatus;
 import com.spring.security.domain.entity.enums.AccountType;
 import com.spring.security.type.handlers.JsonTypeHandler;
@@ -53,4 +54,23 @@ public interface AccountMapper {
 
   @UpdateProvider(type = UpdateQueryBuilder.class, method = "update")
   int update(String tableName, Map<String, Object> updates, Map<String, Object> conditions);
+
+  @Select("SELECT " +
+          "    COUNT(*) AS totalUsers, " +
+          "    SUM(CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END) AS activeUsers, " +
+          "    SUM(CASE WHEN status = 'INACTIVE' THEN 1 ELSE 0 END) AS inactiveUsers, " +
+          "    SUM(CASE WHEN failed_login_attempts > 0 THEN 1 ELSE 0 END) AS failedLoginAttempts, " +
+          "    SUM(CASE WHEN status = 'CREATED' THEN 1 ELSE 0 END) AS pendingInvitations " +
+          "   FROM users WHERE account_id = #{accountId}")
+  @Results(
+          id = "accountStatsMap",
+          value = {
+            @Result(property = "totalUsers", column = "totalUsers", javaType = Long.class),
+            @Result(property = "activeUsers", column = "activeUsers", javaType = Long.class),
+            @Result(property = "inactiveUsers", column = "inactiveUsers", javaType = Long.class),
+            @Result(property = "failedLoginAttempts", column = "failedLoginAttempts", javaType = Long.class),
+            @Result(property = "pendingInvitations", column = "pendingInvitations", javaType = Long.class)
+          }
+  )
+  AccountStats getAccountStats(Long accountId);
 }

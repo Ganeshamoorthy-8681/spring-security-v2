@@ -6,6 +6,8 @@ import com.spring.security.controller.dto.request.UserUpdateRequestDto;
 import com.spring.security.controller.dto.response.UserCreateResponseDto;
 import com.spring.security.domain.entity.User;
 import com.spring.security.domain.entity.enums.UserStatus;
+import com.spring.security.exceptions.JwtTokenParseException;
+import com.spring.security.exceptions.PreconditionViolationException;
 import com.spring.security.exceptions.ServiceLayerException;
 import java.util.List;
 
@@ -48,6 +50,14 @@ public interface UserService {
   User findByAccountIdAndEmail(Long accountId, String email) throws ServiceLayerException;
 
   /**
+   * Retrieves a user by their email, for root users (accountId is null).
+   *
+   * @param email the email of the root users to retrieve
+   * @return the user with the specified email, or null if not found
+   */
+  User findByEmail(String email) throws ServiceLayerException;
+
+  /**
    * Updates the password for a user identified by their account ID and email.
    *
    * @param accountId the ID of the account to which the user belongs
@@ -64,6 +74,16 @@ public interface UserService {
    * @param email the email of the user whose status is to be updated
    */
   void updateUserStatus(Long accountId, String email, UserStatus status)
+      throws ServiceLayerException;
+
+  /**
+   * Updates the status of a user identified by their account ID and user ID.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user whose status is to be updated
+   * @param status the new status to set for the user
+   */
+  void updateUserStatusById(Long accountId, Long userId, UserStatus status)
       throws ServiceLayerException;
 
   /**
@@ -101,4 +121,23 @@ public interface UserService {
    */
   void updateUser(Long accountId, Long userId, UserUpdateRequestDto requestDto)
       throws ServiceLayerException;
+
+  /**
+   * Retrieves the user information based on the provided JWT token.
+   *
+   * @param jwtToken the JWT token used for authentication
+   * @return the user associated with the provided JWT token
+   * @throws ServiceLayerException if there is an error during the retrieval process
+   */
+  User whoami(String jwtToken)
+      throws ServiceLayerException, JwtTokenParseException, PreconditionViolationException;
+
+
+  /**
+   * Retrieves a root user by their account ID.
+   *
+   * @param accountId the account ID of the root user to retrieve
+   * @return the root user associated with the specified account ID, or null if not found
+   */
+  User findRootUserByAccountId(Long accountId);
 }

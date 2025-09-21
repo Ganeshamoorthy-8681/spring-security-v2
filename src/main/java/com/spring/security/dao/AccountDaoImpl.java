@@ -2,6 +2,7 @@ package com.spring.security.dao;
 
 import com.spring.security.dao.mapper.AccountMapper;
 import com.spring.security.domain.entity.Account;
+import com.spring.security.domain.entity.AccountStats;
 import com.spring.security.exceptions.DaoLayerException;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -96,6 +97,22 @@ public class AccountDaoImpl implements AccountDao {
     } catch (Exception e) {
       log.error("Error updating account: {}", e.getMessage());
       throw new DaoLayerException("Failed to update account", e);
+    }
+  }
+
+  /**
+   * Retrieves account statistics for the specified account.
+   *
+   * @param accountId the ID of the account to get statistics for
+   * @return AccountStats containing various metrics for the account
+   */
+  @Override
+  public AccountStats getAccountStats(Long accountId) throws DaoLayerException {
+    try {
+        return accountMapper.getAccountStats(accountId);
+    } catch (Exception e) {
+      log.error("Error retrieving account statistics for account ID {}: {}", accountId, e.getMessage());
+      throw new DaoLayerException("Failed to retrieve account statistics", e);
     }
   }
 }

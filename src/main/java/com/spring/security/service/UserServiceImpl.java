@@ -3,6 +3,7 @@ package com.spring.security.service;
 import static com.spring.security.domain.mapper.UserMapper.USER_MAPPER;
 
 import com.spring.security.annotation.LogActivity;
+import com.spring.security.component.JwtTokenGenerator;
 import com.spring.security.controller.dto.request.RoleCreateRequestDto;
 import com.spring.security.controller.dto.request.RootUserCreateRequestDto;
 import com.spring.security.controller.dto.request.UserCreateRequestDto;
@@ -14,13 +15,17 @@ import com.spring.security.domain.entity.User;
 import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
 import com.spring.security.exceptions.DaoLayerException;
+import com.spring.security.exceptions.JwtTokenParseException;
+import com.spring.security.exceptions.PreconditionViolationException;
 import com.spring.security.exceptions.ResourceAlreadyExistException;
 import com.spring.security.exceptions.ResourceNotFoundException;
 import com.spring.security.exceptions.ServiceLayerException;
+import io.jsonwebtoken.Claims;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -42,6 +47,8 @@ public class UserServiceImpl implements UserService {
 
   private final OtpService otpService;
 
+  private final JwtTokenGenerator jwtTokenGenerator;
+
   /**
    * Constructor for UserServiceImpl.
    *
@@ -51,11 +58,13 @@ public class UserServiceImpl implements UserService {
       UserDao userDao,
       BCryptPasswordEncoder passwordEncoder,
       RoleService roleService,
-      OtpService otpService) {
+      OtpService otpService,
+      JwtTokenGenerator jwtTokenGenerator) {
     this.passwordEncoder = passwordEncoder;
     this.userDao = userDao;
     this.roleService = roleService;
     this.otpService = otpService;
+    this.jwtTokenGenerator = jwtTokenGenerator;
   }
 
   /**
@@ -114,7 +123,7 @@ public class UserServiceImpl implements UserService {
 
   private User buildRootUser(RootUserCreateRequestDto dto, Long accountId, List<Role> roles) {
     return USER_MAPPER.convertRootUserCreateRequestDtoToUser(
-        dto, UserType.PASSWORD, UserStatus.CREATED, accountId, roles);
+        dto, UserType.PASSWORD, UserStatus.CREATED, accountId, roles,true);
   }
 
   private List<Role> buildRootRoles(Long accountId) throws ServiceLayerException {
@@ -206,6 +215,27 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
+   * Retrieves a user by their email, for root users (accountId is null).
+   *
+   * @param email the email of the root users to retrieve
+   * @return the user with the specified email, or null if not found
+   */
+  @Override
+  public User findByEmail(String email) throws ServiceLayerException {
+    try {
+      User user = userDao.findByEmail(email);
+      if (user == null || !isRootUser(user)) {
+        log.warn("Root user with email {} not found", email);
+        throw new ResourceNotFoundException("Root User not found");
+      }
+      return user;
+    } catch (DaoLayerException e) {
+      log.error("Failed to find root user by email {}: {}", email, e.getMessage());
+      throw new ServiceLayerException("Failed to find root user by email");
+    }
+  }
+
+  /**
    * Updates the password for a user identified by their account ID and email.
    *
    * @param accountId the ID of the account to which the user belongs
@@ -248,7 +278,28 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  /**
+    /**
+     * Updates the status of a user identified by their account ID and user ID.
+     *
+     * @param accountId the ID of the account to which the user belongs
+     * @param userId    the ID of the user whose status is to be updated
+     * @param status   the new status to set for the user
+     */
+    @Override
+    @LogActivity(action = "UPDATE", entityType = "USER", description = "User status updated")
+    public void updateUserStatusById(Long accountId, Long userId, UserStatus status) throws ServiceLayerException {
+        try {
+            Map<String, Object> updateMap = Map.of("status", status);
+            Map<String, Object> conditionMap = Map.of("id", userId, "account_id", accountId);
+            userDao.update("users", updateMap, conditionMap);
+        } catch (DaoLayerException e) {
+            log.error("Failed to update user status for user ID {}: {}", userId, e.getMessage());
+            throw new ServiceLayerException("Failed to update user status");
+        }
+    }
+
+
+    /**
    * Sends a forgot password request for the user identified by their account ID and email.
    *
    * @param accountId the ID of the account to which the user belongs
@@ -332,11 +383,23 @@ public class UserServiceImpl implements UserService {
       description = "User profile and roles updated")
   public void updateUser(Long accountId, Long userId, UserUpdateRequestDto requestDto)
       throws ServiceLayerException {
-    try {
-      // First verify the user exists
-      findByAccountIdAndUserId(accountId, userId);
 
-      // Prepare profile update
+      // First, update profile information
+      updateProfileInformation(accountId, userId, requestDto);
+
+      // Update roles if provided
+      if (requestDto.getRoleIds() != null && !requestDto.getRoleIds().isEmpty()) {
+          updateUserRoles(accountId, userId, requestDto.getRoleIds());
+      }
+      log.info(
+              "Successfully updated user profile and roles for user ID: {} in account: {}",
+              userId,
+              accountId);
+  }
+
+  private void updateProfileInformation(Long userId, Long accountId, UserUpdateRequestDto requestDto)
+      throws ServiceLayerException {
+    try {
       Map<String, Object> updateMap = new HashMap<>();
       updateMap.put("first_name", requestDto.getFirstName());
       updateMap.put("last_name", requestDto.getLastName());
@@ -345,39 +408,82 @@ public class UserServiceImpl implements UserService {
         updateMap.put("middle_name", requestDto.getMiddleName());
       }
 
-      updateMap.put("updated_at", "CURRENT_TIMESTAMP");
-
-      // Update profile information
       Map<String, Object> conditionMap = Map.of("id", userId, "account_id", accountId);
       userDao.update("users", updateMap, conditionMap);
+    } catch (DaoLayerException e) {
+      log.error(
+          "Failed to update profile information for user ID {}: {}", userId, e.getMessage());
+      throw new ServiceLayerException("Failed to update user profile information", e);
+    }
+  }
 
-      // Update roles if provided
-      if (requestDto.getRoleIds() != null && !requestDto.getRoleIds().isEmpty()) {
+  private void updateUserRoles(Long accountId, Long userId,List<Long> roleIds)
+      throws ServiceLayerException {
+    try {
 
         // Validate that all role IDs exist and belong to the same account
-        List<Role> validRoles = new ArrayList<>();
-        for (Long roleId : requestDto.getRoleIds()) {
-          Role role = roleService.findById(roleId, accountId);
-          if (role == null) {
-            throw new ResourceNotFoundException("Role with ID " + roleId + " not found");
-          }
-          validRoles.add(role);
+        for (Long roleId : roleIds) {
+            Role role = roleService.findById(roleId, accountId);
+            if (role == null) {
+                throw new ResourceNotFoundException("Role with ID " + roleId + " not found");
+            }
         }
+      // Delete existing roles
+      userDao.deleteUserRoles(userId, accountId);
 
-        // Delete existing role associations first
-        userDao.deleteUserRoles(userId, accountId);
-
-        // Assign new roles
-        userDao.assignUserRoles(userId, requestDto.getRoleIds(), accountId);
-      }
-
-      log.info(
-          "Successfully updated user profile and roles for user ID: {} in account: {}",
-          userId,
-          accountId);
+      // Assign new roles
+      userDao.assignUserRoles(userId, roleIds, accountId);
     } catch (DaoLayerException e) {
-      log.error("Failed to update user for user ID {}: {}", userId, e.getMessage());
-      throw new ServiceLayerException("Failed to update user", e);
+      log.error("Failed to update roles for user ID {}: {}", userId, e.getMessage());
+      throw new ServiceLayerException("Failed to update user roles", e);
     }
+  }
+
+  /**
+   * Retrieves the user information based on the provided JWT token.
+   *
+   * @param jwtToken the JWT token used for authentication
+   * @return the user associated with the provided JWT token
+   * @throws ServiceLayerException if there is an error during the retrieval process
+   */
+  @Override
+  public User whoami(String jwtToken)
+      throws ServiceLayerException, JwtTokenParseException, PreconditionViolationException {
+    Claims claims = jwtTokenGenerator.getClaims(jwtToken);
+    String email = (String) claims.get("email");
+    boolean isRoot = (boolean) claims.get("isRoot");
+
+    Long accountId =
+        Optional.ofNullable(claims.get("accountId"))
+            .filter(Number.class::isInstance)
+            .map(Number.class::cast)
+            .map(Number::longValue)
+            .orElse(null);
+    return isRoot ? findByEmail(email) : findByAccountIdAndEmail(accountId, email);
+  }
+
+    /**
+     * Retrieves a root user by their account ID.
+     * @param accountId the account ID of the root user to retrieve
+     * @return the root user associated with the specified account ID, or null if not found
+     */
+    @Override
+    public User findRootUserByAccountId(Long accountId) {
+        try {
+            return userDao.findRootUserByAccountId(accountId);
+        } catch (DaoLayerException e) {
+            log.error("Failed to find root user for account ID {}: {}", accountId, e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+   * Checks if the user is a root user.
+   *
+   * @param user the user to check
+   * @return true if the user is a root user, false otherwise
+   */
+  private boolean isRootUser(User user) {
+    return user.getRoles().stream().anyMatch(role -> role.getName().equalsIgnoreCase("ROOT"));
   }
 }

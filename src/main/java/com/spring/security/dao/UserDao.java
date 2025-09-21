@@ -72,4 +72,12 @@ public interface UserDao {
    * @param accountId the ID of the account to which the user belongs
    */
   void assignUserRoles(Long userId, List<Long> roleIds, Long accountId) throws DaoLayerException;
+
+  /**
+   * Retrieves a root user by their account ID.
+   *
+   * @param accountId the account ID of the root user to retrieve
+   * @return the root user with the specified account ID, or null if not found
+   */
+  User findRootUserByAccountId(Long accountId) throws DaoLayerException;
 }

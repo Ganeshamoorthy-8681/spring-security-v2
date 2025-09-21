@@ -67,7 +67,8 @@ public class SecurityConfig {
                         "/api/v1/accounts/*/users/set-password",
                         "/api/v1/accounts/*/users/forgot-password",
                         "/api/v1/accounts/create",
-                        "/api/v1/otp/**")
+                        "/api/v1/otp/**"
+                        )
                     .permitAll()
                     .anyRequest()
                     .authenticated())

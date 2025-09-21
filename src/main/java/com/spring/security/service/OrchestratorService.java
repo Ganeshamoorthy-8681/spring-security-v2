@@ -1,11 +1,13 @@
 package com.spring.security.service;
 
 import com.spring.security.controller.dto.request.AccountCreateRequestDto;
+import com.spring.security.controller.dto.response.AccountGetResponseDto;
 import com.spring.security.controller.dto.response.OtpValidationStatus;
 import com.spring.security.domain.entity.Account;
 import com.spring.security.domain.entity.User;
 import com.spring.security.domain.entity.enums.AccountStatus;
 import com.spring.security.domain.entity.enums.UserStatus;
+import com.spring.security.domain.mapper.AccountMapper;
 import com.spring.security.domain.mapper.UserMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import lombok.extern.slf4j.Slf4j;
@@ -89,6 +91,18 @@ public class OrchestratorService {
     } catch (ServiceLayerException e) {
       throw new ServiceLayerException(
           "Failed to update account and user status based on OTP validation", e);
+    }
+  }
+
+
+  public AccountGetResponseDto getAccountAndRootUserByAccountId(Long accountId) throws ServiceLayerException {
+    try {
+      Account account = accountService.findById(accountId);
+      User user = userService.findRootUserByAccountId(accountId);
+        return AccountMapper.ACCOUNT_MAPPER.convertAccountAndUserToAccountGetResponseDto(account,user);
+    } catch (ServiceLayerException e) {
+      throw new ServiceLayerException(
+          "Failed to get account and root user by account id", e);
     }
   }
 

@@ -10,11 +10,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /** This filter used to authenticate JWT tokens in the request. */
@@ -24,6 +26,25 @@ public class JwtFilter extends OncePerRequestFilter {
   private final JwtTokenGenerator jwtTokenGenerator;
 
   private final AuthenticationManager authenticationManager;
+
+    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    private static final List<String> EXCLUDED_PATHS = List.of(
+            "/api/v1/auth/**",
+            "/api/v1/accounts/*/users/root/create",
+            "/api/v1/accounts/*/users/set-password",
+            "/api/v1/accounts/*/users/forgot-password",
+            "/api/v1/accounts/create",
+            "/api/v1/otp/**"
+    );
+
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return EXCLUDED_PATHS.stream()
+                .anyMatch(pattern -> pathMatcher.match(pattern, path));
+    }
 
   public JwtFilter(
       JwtTokenGenerator jwtTokenGenerator, AuthenticationManager authenticationManager) {

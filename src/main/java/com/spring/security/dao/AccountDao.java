@@ -1,6 +1,7 @@
 package com.spring.security.dao;
 
 import com.spring.security.domain.entity.Account;
+import com.spring.security.domain.entity.AccountStats;
 import com.spring.security.exceptions.DaoLayerException;
 import java.util.Map;
 
@@ -40,4 +41,12 @@ public interface AccountDao {
    * @param conditions a map containing the conditions for the update operation
    */
   void update(Map<String, Object> updates, Map<String, Object> conditions) throws DaoLayerException;
+
+  /**
+   * Retrieves account statistics for the specified account.
+   *
+   * @param accountId the ID of the account to get statistics for
+   * @return AccountStats containing various metrics for the account
+   */
+  AccountStats getAccountStats(Long accountId) throws DaoLayerException;
 }

@@ -113,7 +113,7 @@ public class RoleController {
   public ResponseEntity<RoleResponseDto> updateRole(
       @PathVariable Long accountId,
       @PathVariable Long roleId,
-      @Valid @RequestBody RoleUpdateRequestDto roleUpdateRequestDto)
+      @RequestBody RoleUpdateRequestDto roleUpdateRequestDto)
       throws ServiceLayerException {
     Role updatedRole = roleService.update(roleId, accountId, roleUpdateRequestDto);
     return new ResponseEntity<>(

@@ -4,6 +4,7 @@ import com.spring.security.annotation.LogActivity;
 import com.spring.security.controller.dto.request.AccountCreateRequestDto;
 import com.spring.security.dao.AccountDao;
 import com.spring.security.domain.entity.Account;
+import com.spring.security.domain.entity.AccountStats;
 import com.spring.security.domain.entity.enums.AccountStatus;
 import com.spring.security.domain.mapper.AccountMapper;
 import com.spring.security.exceptions.DaoLayerException;
@@ -40,7 +41,6 @@ public class AccountServiceImpl implements AccountService {
       throws ServiceLayerException {
 
     try {
-
       Account account =
           AccountMapper.ACCOUNT_MAPPER.convertAccountCreateRequestToAccount(
               accountCreateRequestDto, AccountStatus.CREATED);
@@ -60,11 +60,10 @@ public class AccountServiceImpl implements AccountService {
    * Retrieves an account by its name.
    *
    * @param accountName the name of the account to retrieve
-   * @return the account associated with the given name
    * @throws ServiceLayerException if an error occurs while retrieving the account
    */
   @Override
-  public Account findByAccountName(String accountName) throws ServiceLayerException {
+  public void findByAccountName(String accountName) throws ServiceLayerException {
     try {
       Account account = accountDao.findByName(accountName);
 
@@ -73,7 +72,6 @@ public class AccountServiceImpl implements AccountService {
         throw new ResourceNotFoundException("Account not found");
       }
 
-      return account;
     } catch (DaoLayerException e) {
       log.error("Error finding account by name: {}", e.getMessage());
       throw new ServiceLayerException("Failed to find account by name", e);
@@ -145,5 +143,31 @@ public class AccountServiceImpl implements AccountService {
   @LogActivity(action = "DELETE", entityType = "ACCOUNT", description = "Account deleted")
   public void delete(Long id) throws ServiceLayerException {
     updateStatus(id, AccountStatus.DELETED);
+  }
+
+  /**
+   * Gathers and processes statistics for the account with the given ID.
+   *
+   * @param id the unique identifier of the account
+   * @return AccountStats containing various metrics for the account
+   */
+  @Override
+  @LogActivity(action = "READ", entityType = "ACCOUNT", description = "Account statistics retrieved")
+  public AccountStats getAccountStats(Long id) throws ServiceLayerException {
+    try {
+
+      // First verify that the account exists
+      Account account = findById(id);
+
+      // Get the statistics from the DAO layer
+      AccountStats stats = accountDao.getAccountStats(id);
+
+      log.info("Successfully retrieved statistics for account ID: {}", id);
+      return stats;
+
+    } catch (DaoLayerException e) {
+      log.error("Error retrieving account statistics for account ID {}: {}", id, e.getMessage());
+      throw new ServiceLayerException("Failed to retrieve account statistics", e);
+    }
   }
 }

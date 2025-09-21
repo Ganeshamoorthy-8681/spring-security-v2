@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS users (
     created_by TEXT,
     updated_by TEXT,
     deleted_by TEXT,
+    is_root boolean,
     UNIQUE(email, account_id)
 );
 

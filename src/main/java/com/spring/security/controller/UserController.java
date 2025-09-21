@@ -8,6 +8,7 @@ import com.spring.security.controller.dto.request.UserUpdateRequestDto;
 import com.spring.security.controller.dto.response.UserCreateResponseDto;
 import com.spring.security.controller.dto.response.UserResponseDto;
 import com.spring.security.domain.entity.User;
+import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.mapper.UserMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import com.spring.security.service.UserService;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** User controller for handling user-related operations. */
@@ -144,4 +146,36 @@ public class UserController {
     userService.updateUser(accountId, userId, requestDto);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
+
+  /**
+   * Enables a user by updating their status to ACTIVE.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user to be enabled
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @PatchMapping("/{userId}/enable")
+  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:UPDATE')")
+  public ResponseEntity<Void> updateUserStatus(
+          @PathVariable Long accountId,
+          @PathVariable Long userId) throws ServiceLayerException {
+    userService.updateUserStatusById(accountId, userId, UserStatus.ACTIVE);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
+
+  /**
+   * Disables a user by updating their status to INACTIVE.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user to be disabled
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @PatchMapping("/{userId}/disable")
+  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:UPDATE')")
+  public ResponseEntity<Void> disableUser(
+          @PathVariable Long accountId,
+          @PathVariable Long userId) throws ServiceLayerException {
+    userService.updateUserStatusById(accountId, userId, UserStatus.INACTIVE);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

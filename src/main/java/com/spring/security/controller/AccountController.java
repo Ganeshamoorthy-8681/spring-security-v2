@@ -1,8 +1,10 @@
 package com.spring.security.controller;
 
 import com.spring.security.controller.dto.request.AccountCreateRequestDto;
+import com.spring.security.controller.dto.response.AccountGetResponseDto;
 import com.spring.security.controller.dto.response.AccountResponseDto;
-import com.spring.security.domain.entity.Account;
+import com.spring.security.controller.dto.response.AccountStatsDto;
+import com.spring.security.domain.entity.AccountStats;
 import com.spring.security.domain.mapper.AccountMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import com.spring.security.service.AccountService;
@@ -46,13 +48,10 @@ public class AccountController {
    */
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ACCOUNT:READ')")
-  public ResponseEntity<AccountResponseDto> getAccountDetails(@PathVariable Long id)
+  public ResponseEntity<AccountGetResponseDto> getAccountDetails(@PathVariable Long id)
       throws ServiceLayerException {
-    Account account = accountService.findById(id);
-    return new ResponseEntity<>(
-        com.spring.security.domain.mapper.AccountMapper.ACCOUNT_MAPPER
-            .convertAccountToAccountResponseDto(account),
-        HttpStatus.OK);
+
+    return new ResponseEntity<>(orchestratorService.getAccountAndRootUserByAccountId(id), HttpStatus.OK);
   }
 
   /**
@@ -81,4 +80,19 @@ public class AccountController {
   public void deleteAccount(@PathVariable Long id) throws ServiceLayerException {
     accountService.delete(id);
   }
+
+  /**
+   * Retrieves account statistics by ID.
+   *
+   * @param id the ID of the account to get statistics for
+   * @return ResponseEntity containing the account statistics
+   */
+  @GetMapping("/{id}/stats")
+  @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:ACCOUNT:READ')")
+  public ResponseEntity<AccountStatsDto> getAccountStats(@PathVariable Long id)
+      throws ServiceLayerException {
+    AccountStats stats = accountService.getAccountStats(id);
+    return new ResponseEntity<>(AccountMapper.ACCOUNT_MAPPER.convertAccountStatsToAccountStatsDto(stats), HttpStatus.OK);
+  }
+
 }

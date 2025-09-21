@@ -243,4 +243,20 @@ public class UserDaoImpl implements UserDao {
       throw new DaoLayerException("Failed to assign user roles", e);
     }
   }
+
+    /**
+     * Retrieves a root user by their account ID.
+     *
+     * @param accountId the account ID of the root user to retrieve
+     * @return the root user with the specified account ID, or null if not found
+     */
+    @Override
+    public User findRootUserByAccountId(Long accountId) throws DaoLayerException {
+        try {
+            return userMapper.findRootUserByAccountId(accountId);
+        } catch (Exception e) {
+            log.error("Error retrieving root user for account {}: {}", accountId, e.getMessage());
+            throw new DaoLayerException("Failed to retrieve root user by account ID", e);
+        }
+    }
 }
