@@ -5,21 +5,21 @@ FROM openjdk:23-jdk-slim
 WORKDIR /app
 
 # Copy Gradle wrapper files
-#COPY gradlew .
-#COPY gradle/ gradle/
+COPY gradlew .
+COPY gradle/ gradle/
 
 # Make gradlew executable
-#RUN chmod +x ./gradlew
+RUN chmod +x ./gradlew
 
 # Copy build files
-#COPY build.gradle .
-#COPY settings.gradle .
+COPY build.gradle .
+COPY settings.gradle .
 
 # Copy source code
-#COPY src/ src/
+COPY src/ src/
 
 # Build the application
-#RUN ./gradlew build -x test --no-daemon
+RUN ./gradlew build -x test -x spotlessCheck --no-daemon
 
 
 # Expose the port the app runs on (default Spring Boot port)
