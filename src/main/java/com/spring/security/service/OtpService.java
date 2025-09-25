@@ -46,16 +46,11 @@ public interface OtpService {
       throws ServiceLayerException;
 
   /**
-   * Resends the OTP (One-Time Password) to the specified email.
+   * Generates and stores a new OTP for the specified email address.
    *
-   * @param email the email to which the OTP should be resent
+   * @param email the email address to generate OTP for
+   * @return the generated OTP string
+   * @throws ServiceLayerException if OTP generation or storage fails
    */
-  void resendOtp(String email) throws ServiceLayerException;
-
-  /**
-   * Sends an OTP (One-Time Password) to the specified email.
-   *
-   * @param email the email to which the OTP should be sent
-   */
-  void sendOtp(String email) throws ServiceLayerException;
+  String generateAndStoreOtp(String email) throws ServiceLayerException;
 }

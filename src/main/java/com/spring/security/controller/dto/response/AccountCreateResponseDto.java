@@ -2,15 +2,18 @@ package com.spring.security.controller.dto.response;
 
 import com.spring.security.domain.entity.enums.AccountStatus;
 import com.spring.security.domain.entity.enums.AccountType;
-import com.spring.security.domain.entity.enums.UserStatus;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
-
+/**
+ * Data Transfer Object (DTO) for account creation response.
+ *
+ * <p>This DTO encapsulates the details of an account that has been created, including its unique
+ * identifier, name, description, type, status, associated user ID, and email.
+ */
 @Getter
 @Setter
-public class AccountGetResponseDto {
+public class AccountCreateResponseDto {
 
     /** The unique identifier of the account. */
     private Long id;
@@ -30,14 +33,4 @@ public class AccountGetResponseDto {
     private Long userId;
 
     private String email;
-
-    private String  firstName;
-
-    private String lastName;
-
-    private Instant currentLogin;
-
-    private Instant lastLogin;
-
-    private UserStatus userStatus;
 }

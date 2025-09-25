@@ -50,7 +50,7 @@ public interface UserMapper {
       UserStatus status,
       Long accountId,
       List<Role> roles,
-      boolean isRoot);
+      Boolean isRoot);
 
   /**
    * Converts a User entity to a UserResponseDto.

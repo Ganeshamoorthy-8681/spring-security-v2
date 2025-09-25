@@ -1,6 +1,7 @@
 package com.spring.security.service;
 
 import com.spring.security.controller.dto.request.AccountCreateRequestDto;
+import com.spring.security.controller.dto.response.AccountCreateResponseDto;
 import com.spring.security.controller.dto.response.AccountGetResponseDto;
 import com.spring.security.controller.dto.response.OtpValidationStatus;
 import com.spring.security.domain.entity.Account;
@@ -22,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Slf4j
 @Service
-public class OrchestratorService {
+public class OrchestratorServiceImpl {
 
   private final AccountService accountService;
 
@@ -34,7 +35,7 @@ public class OrchestratorService {
    * @param accountService the account service
    * @param userService the user service
    */
-  public OrchestratorService(AccountService accountService, UserService userService) {
+  public OrchestratorServiceImpl(AccountService accountService, UserService userService) {
     this.accountService = accountService;
     this.userService = userService;
   }
@@ -47,19 +48,13 @@ public class OrchestratorService {
    * @throws ServiceLayerException if there is an error during account or user creation
    */
   @Transactional(rollbackFor = ServiceLayerException.class)
-  public Account createAccountWithRootUser(AccountCreateRequestDto accountCreateRequestDto)
+  public AccountCreateResponseDto createAccountWithRootUser(AccountCreateRequestDto accountCreateRequestDto)
       throws ServiceLayerException {
-    try {
       Account account = accountService.create(accountCreateRequestDto);
-      userService.createRootUser(
+      User user = userService.createRootUser(
           UserMapper.USER_MAPPER.convertAccountCreateRequestToRootUserCreateRequest(
-              accountCreateRequestDto),
-          account.getId());
-      return account;
-
-    } catch (ServiceLayerException e) {
-      throw new ServiceLayerException("Failed to create account with root user", e);
-    }
+              accountCreateRequestDto), account.getId());
+      return AccountMapper.ACCOUNT_MAPPER.convertAccountAndUserToAccountCreateResponseDto(account, user.getEmail(),user.getId());
   }
 
   /**

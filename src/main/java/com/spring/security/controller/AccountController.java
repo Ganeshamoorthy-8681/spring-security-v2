@@ -1,14 +1,14 @@
 package com.spring.security.controller;
 
 import com.spring.security.controller.dto.request.AccountCreateRequestDto;
+import com.spring.security.controller.dto.response.AccountCreateResponseDto;
 import com.spring.security.controller.dto.response.AccountGetResponseDto;
-import com.spring.security.controller.dto.response.AccountResponseDto;
 import com.spring.security.controller.dto.response.AccountStatsDto;
 import com.spring.security.domain.entity.AccountStats;
 import com.spring.security.domain.mapper.AccountMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import com.spring.security.service.AccountService;
-import com.spring.security.service.OrchestratorService;
+import com.spring.security.service.OrchestratorServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,16 +28,16 @@ public class AccountController {
 
   private final AccountService accountService;
 
-  private final OrchestratorService orchestratorService;
+  private final OrchestratorServiceImpl orchestratorServiceImpl;
 
   /**
    * Constructor for AccountController.
    *
    * @param accountService the service to handle account-related operations
    */
-  AccountController(AccountService accountService, OrchestratorService orchestratorService) {
+  AccountController(AccountService accountService, OrchestratorServiceImpl orchestratorServiceImpl) {
     this.accountService = accountService;
-    this.orchestratorService = orchestratorService;
+    this.orchestratorServiceImpl = orchestratorServiceImpl;
   }
 
   /**
@@ -51,7 +51,7 @@ public class AccountController {
   public ResponseEntity<AccountGetResponseDto> getAccountDetails(@PathVariable Long id)
       throws ServiceLayerException {
 
-    return new ResponseEntity<>(orchestratorService.getAccountAndRootUserByAccountId(id), HttpStatus.OK);
+    return new ResponseEntity<>(orchestratorServiceImpl.getAccountAndRootUserByAccountId(id), HttpStatus.OK);
   }
 
   /**
@@ -61,12 +61,9 @@ public class AccountController {
    * @return ResponseEntity with status CREATED
    */
   @PostMapping("/create")
-  public ResponseEntity<AccountResponseDto> createAccount(
+  public ResponseEntity<AccountCreateResponseDto> createAccount(
       @RequestBody AccountCreateRequestDto accountCreateRequestDto) throws ServiceLayerException {
-    return new ResponseEntity<>(
-        AccountMapper.ACCOUNT_MAPPER.convertAccountToAccountResponseDto(
-            orchestratorService.createAccountWithRootUser(accountCreateRequestDto)),
-        HttpStatus.CREATED);
+    return new ResponseEntity<>(orchestratorServiceImpl.createAccountWithRootUser(accountCreateRequestDto), HttpStatus.CREATED);
   }
 
   /**

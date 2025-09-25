@@ -12,6 +12,7 @@ import com.spring.security.controller.dto.response.UserCreateResponseDto;
 import com.spring.security.dao.UserDao;
 import com.spring.security.domain.entity.Role;
 import com.spring.security.domain.entity.User;
+import com.spring.security.domain.entity.OtpCode;
 import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
 import com.spring.security.exceptions.DaoLayerException;
@@ -47,6 +48,8 @@ public class UserServiceImpl implements UserService {
 
   private final OtpService otpService;
 
+  private final NotificationService notificationService;
+
   private final JwtTokenGenerator jwtTokenGenerator;
 
   /**
@@ -59,11 +62,13 @@ public class UserServiceImpl implements UserService {
       BCryptPasswordEncoder passwordEncoder,
       RoleService roleService,
       OtpService otpService,
+      NotificationService notificationService,
       JwtTokenGenerator jwtTokenGenerator) {
     this.passwordEncoder = passwordEncoder;
     this.userDao = userDao;
     this.roleService = roleService;
     this.otpService = otpService;
+    this.notificationService = notificationService;
     this.jwtTokenGenerator = jwtTokenGenerator;
   }
 
@@ -80,7 +85,17 @@ public class UserServiceImpl implements UserService {
       validateUserDoesNotExist(accountId, requestDto.getEmail());
       User user = buildUser(requestDto, accountId);
       User createdUser = persistUser(user);
-      sendVerificationOtp(createdUser);
+
+      // Generate OTP and send user creation email with verification link
+      String otp = generateAndStoreOtp(createdUser.getEmail());
+      notificationService.sendUserCreationEmail(
+          createdUser.getFirstName(),
+          createdUser.getEmail(),
+          otp,
+          accountId,
+          false
+      );
+
       return USER_MAPPER.convertUserToUserCreateResponseDto(createdUser);
     } catch (Exception e) {
       log.error("Error creating user: {}", e.getMessage(), e);
@@ -90,8 +105,8 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional(rollbackFor = ServiceLayerException.class)
-  @LogActivity(action = "CREATE", entityType = "USER", description = "Root user created")
-  public void createRootUser(RootUserCreateRequestDto requestDto, Long accountId)
+  @LogActivity(action = "CREATE", entityType = "ROOT_USER", description = "Root user created")
+  public User createRootUser(RootUserCreateRequestDto requestDto, Long accountId)
       throws ServiceLayerException {
     try {
       validateUserDoesNotExist(accountId, requestDto.getEmail());
@@ -99,7 +114,17 @@ public class UserServiceImpl implements UserService {
       List<Role> roles = buildRootRoles(accountId);
       User user = buildRootUser(requestDto, accountId, roles);
       User createdUser = persistUser(user);
-      sendVerificationOtp(createdUser);
+
+      // Generate OTP and send root user creation email with OTP displayed directly (no verification link)
+      String otp = generateAndStoreOtp(createdUser.getEmail());
+      notificationService.sendUserCreationEmailWithOtp(
+          createdUser.getFirstName(),
+          createdUser.getEmail(),
+          otp,
+          true
+      );
+
+      return createdUser;
     } catch (ResourceAlreadyExistException e) {
       log.error("Root user already exists: {}", e.getMessage());
       throw e;
@@ -138,8 +163,101 @@ public class UserServiceImpl implements UserService {
     return userDao.create(user);
   }
 
-  private void sendVerificationOtp(User user) throws ServiceLayerException {
-    otpService.sendOtp(user.getEmail());
+  /**
+   * Generates a new OTP and stores it in the database for the given email.
+   *
+   * @param email the email address to generate OTP for
+   * @return the generated OTP string
+   * @throws ServiceLayerException if OTP generation or storage fails
+   */
+  private String generateAndStoreOtp(String email) throws ServiceLayerException {
+    try {
+      // Use OtpService's new generateAndStoreOtp method instead of manual generation
+      return otpService.generateAndStoreOtp(email);
+    } catch (Exception e) {
+      log.error("Failed to generate and store OTP for email {}: {}", email, e.getMessage());
+      throw new ServiceLayerException("Failed to generate OTP", e);
+    }
+  }
+
+  /**
+   * Sends an OTP (One-Time Password) to the specified email.
+   *
+   * @param email the email to which the OTP should be sent
+   * @throws ServiceLayerException if there is an error during the process
+   */
+  @Override
+  public void sendOtp(String email) throws ServiceLayerException {
+    try {
+      // Generate and store OTP
+      String otp = otpService.generateAndStoreOtp(email);
+
+      // Try to find user details for professional email template
+      User user = findUserByEmailSafely(email);
+
+      if (user != null) {
+        boolean isRoot = isRootUser(user);
+
+        if (isRoot) {
+          // For root users, send OTP directly in email (no verification link)
+          notificationService.sendResendOtpEmailWithOtp(
+              user.getFirstName(),
+              email,
+              otp,
+              true
+          );
+          log.info("Root user OTP email (direct OTP) sent to {}", email);
+        } else {
+          // For regular users, send professional resend OTP email with verification link
+          notificationService.sendResendOtpEmail(
+              user.getFirstName(),
+              email,
+              otp,
+              user.getAccountId(),
+              false
+          );
+          log.info("Regular user OTP email (with link) sent to {} for account: {}", email, user.getAccountId());
+        }
+      } else {
+        // Fallback to basic OTP email if user not found
+        notificationService.sendOtp(otp, email);
+        log.info("Basic OTP email sent to {} (user details not found)", email);
+      }
+    } catch (Exception e) {
+      log.error("Failed to send OTP to email {}: {}", email, e.getMessage());
+      throw new ServiceLayerException("Failed to send OTP", e);
+    }
+  }
+
+  /**
+   * Resends the OTP (One-Time Password) to the specified email.
+   *
+   * @param email the email to which the OTP should be resent
+   * @throws ServiceLayerException if there is an error during the process
+   */
+  @Override
+  public void resendOtp(String email) throws ServiceLayerException {
+    // Delegate to sendOtp method since the logic is the same
+    sendOtp(email);
+  }
+
+  /**
+   * Safely finds a user by email address, checking both regular users and root users.
+   * Returns null if user is not found instead of throwing exception.
+   *
+   * @param email the email address to search for
+   * @return the User if found, null otherwise
+   */
+  private User findUserByEmailSafely(String email) {
+    try {
+      // First try to find as a root user (no account ID)
+      return findByEmail(email);
+    } catch (ServiceLayerException e) {
+      // If not found as root user, we can't easily search all accounts
+      // since we don't have the account ID. This is a design limitation.
+      log.debug("User not found as root user for email: {}", email);
+      return null;
+    }
   }
 
   /**
@@ -162,7 +280,7 @@ public class UserServiceImpl implements UserService {
    * Creates a root role for the root user.
    *
    * @param accountId the ID of the account to which the root role belongs
-   * @return the created root role response dto
+   * @return the created root role
    */
   private Role createRootRole(Long accountId) throws ServiceLayerException {
     RoleCreateRequestDto roleCreateRequestDto = new RoleCreateRequestDto();
@@ -449,7 +567,8 @@ public class UserServiceImpl implements UserService {
   @Override
   public User whoami(String jwtToken)
       throws ServiceLayerException, JwtTokenParseException, PreconditionViolationException {
-    Claims claims = jwtTokenGenerator.getClaims(jwtToken);
+    String token = jwtToken.replace("Bearer", "").trim(); // remove "Bearer "
+    Claims claims = jwtTokenGenerator.getClaims(token);
     String email = (String) claims.get("email");
     boolean isRoot = (boolean) claims.get("isRoot");
 

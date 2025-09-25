@@ -18,4 +18,13 @@ public interface EmailService {
    * @param content the content of the email
    */
   void sendEmail(String to, String subject, String content) throws EmailServiceException;
+
+  /**
+   * Sends an HTML email with the specified subject and HTML content to the given recipient.
+   *
+   * @param to the recipient's email address
+   * @param subject the subject of the email
+   * @param htmlContent the HTML content of the email
+   */
+  void sendHtmlEmail(String to, String subject, String htmlContent) throws EmailServiceException;
 }

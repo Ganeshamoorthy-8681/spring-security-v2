@@ -31,7 +31,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final List<String> EXCLUDED_PATHS = List.of(
             "/api/v1/auth/**",
-            "/api/v1/accounts/*/users/root/create",
             "/api/v1/accounts/*/users/set-password",
             "/api/v1/accounts/*/users/forgot-password",
             "/api/v1/accounts/create",

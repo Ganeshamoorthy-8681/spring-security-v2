@@ -30,7 +30,7 @@ public interface UserService {
    *
    * @param userCreateRequestDto the DTO containing root user creation details
    */
-  void createRootUser(RootUserCreateRequestDto userCreateRequestDto, Long accountId)
+  User createRootUser(RootUserCreateRequestDto userCreateRequestDto, Long accountId)
       throws ServiceLayerException;
 
   /**
@@ -140,4 +140,20 @@ public interface UserService {
    * @return the root user associated with the specified account ID, or null if not found
    */
   User findRootUserByAccountId(Long accountId);
+
+  /**
+   * Sends an OTP (One-Time Password) to the specified email.
+   *
+   * @param email the email to which the OTP should be sent
+   * @throws ServiceLayerException if there is an error during the process
+   */
+  void sendOtp(String email) throws ServiceLayerException;
+
+  /**
+   * Resends the OTP (One-Time Password) to the specified email.
+   *
+   * @param email the email to which the OTP should be resent
+   * @throws ServiceLayerException if there is an error during the process
+   */
+  void resendOtp(String email) throws ServiceLayerException;
 }

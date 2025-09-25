@@ -7,7 +7,6 @@ import com.spring.security.controller.dto.response.OtpValidationStatus;
 import com.spring.security.dao.OtpDao;
 import com.spring.security.domain.entity.OtpCode;
 import com.spring.security.exceptions.DaoLayerException;
-import com.spring.security.exceptions.EmailServiceException;
 import com.spring.security.exceptions.OtpGenerationFailedException;
 import com.spring.security.exceptions.ResourceNotFoundException;
 import com.spring.security.exceptions.ServiceLayerException;
@@ -32,17 +31,12 @@ public class OtpServiceImpl implements OtpService {
 
   private final OtpGenerator otpGenerator;
 
-  private final NotificationService notificationService;
-
-  /** Default constructor for OtpServiceImpl. */
+  /** Constructor for OtpServiceImpl. */
   public OtpServiceImpl(
       OtpDao otpDao,
-      EmailService emailService,
-      OtpGenerator otpGenerator,
-      NotificationService notificationService) {
+      OtpGenerator otpGenerator) {
     this.otpDao = otpDao;
     this.otpGenerator = otpGenerator;
-    this.notificationService = notificationService;
   }
 
   /**
@@ -190,54 +184,38 @@ public class OtpServiceImpl implements OtpService {
     }
   }
 
-  /**
-   * Resends the OTP (One-Time Password) to the specified email.
-   *
-   * @param email the email to which the OTP should be resent
-   */
-  @Override
-  public void resendOtp(String email) throws ServiceLayerException {
-    sendOtpToEmail(email);
-  }
 
   /**
-   * Sends an OTP (One-Time Password) to the specified email.
+   * Generates and stores a new OTP for the specified email address.
    *
-   * @param email the email to which the OTP should be sent
+   * @param email the email address to generate OTP for
+   * @return the generated OTP string
+   * @throws ServiceLayerException if OTP generation or storage fails
    */
   @Override
-  public void sendOtp(String email) throws ServiceLayerException {
-    sendOtpToEmail(email);
-  }
-
-  /**
-   * Verifies the email address of an account.
-   *
-   * @param email the email address to verify
-   */
-  private void sendOtpToEmail(String email) throws ServiceLayerException {
+  public String generateAndStoreOtp(String email) throws ServiceLayerException {
     try {
       String otp = otpGenerator.generateOtp();
       if (otp == null || otp.isBlank()) {
         throw new OtpGenerationFailedException("Failed to generate OTP");
       }
-      create(email, otp);
-      sendEmail(email, otp);
-    } catch (OtpGenerationFailedException | EmailServiceException e) {
-      log.error("Failed to generate OTP for email {}: {}", email, e.getMessage());
+
+      // Check if OTP already exists for this email
+      try {
+        OtpCode existingOtp = find(email);
+        if (existingOtp != null) {
+          // Update existing OTP
+          update(email, otp);
+        }
+      } catch (ResourceNotFoundException e) {
+        // Create new OTP if none exists
+        create(email, otp);
+      }
+
+      return otp;
+    } catch (Exception e) {
+      log.error("Failed to generate and store OTP for email {}: {}", email, e.getMessage());
       throw new ServiceLayerException("Failed to generate OTP", e);
     }
-  }
-
-  /**
-   * Sends an email with the OTP code to the specified email address.
-   *
-   * @param email the email address to which the OTP should be sent
-   * @param otp the OTP code to send
-   */
-  private void sendEmail(String email, String otp)
-      throws EmailServiceException, ServiceLayerException {
-    notificationService.sendOtp(otp, email);
-    log.info("Email sent to {} with OTP: {}", email, otp);
   }
 }

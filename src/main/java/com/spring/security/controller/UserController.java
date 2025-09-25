@@ -56,6 +56,30 @@ public class UserController {
     return new ResponseEntity<>(userService.createUser(requestDto, accountId), HttpStatus.CREATED);
   }
 
+
+    /**
+     * Sets a new password for a user.
+     *
+     * @param accountId the ID of the account to which the user belongs
+     * @param requestDto the request data transfer object containing the email and new password
+     * @return a ResponseEntity indicating the result of the operation
+     */
+    @PatchMapping("/set-password")
+    public ResponseEntity<Void> setPassword(
+            @PathVariable Long accountId, @RequestBody SetUserPasswordRequestDto requestDto)
+            throws ServiceLayerException {
+        // Need to validate the user state and existence before setting the password
+        userService.updateUserPassword(accountId, requestDto.getEmail(), requestDto.getPassword());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(
+            @PathVariable Long accountId, @RequestBody ForgotPasswordRequestDto requestDto) {
+        userService.forgotPassword(accountId, requestDto.getEmail());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
   /**
    * Retrieves a user by their ID.
    *
@@ -103,28 +127,6 @@ public class UserController {
     return new ResponseEntity<>(userResponseDtos, HttpStatus.OK);
   }
 
-  /**
-   * Sets a new password for a user.
-   *
-   * @param accountId the ID of the account to which the user belongs
-   * @param requestDto the request data transfer object containing the email and new password
-   * @return a ResponseEntity indicating the result of the operation
-   */
-  @PostMapping("/set-password")
-  public ResponseEntity<Void> setPassword(
-      @PathVariable Long accountId, @RequestBody SetUserPasswordRequestDto requestDto)
-      throws ServiceLayerException {
-    // Need to validate the user state and existence before setting the password
-    userService.updateUserPassword(accountId, requestDto.getEmail(), requestDto.getPassword());
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
-
-  @PostMapping("/forgot-password")
-  public ResponseEntity<Void> forgotPassword(
-      @PathVariable Long accountId, @RequestBody ForgotPasswordRequestDto requestDto) {
-    userService.forgotPassword(accountId, requestDto.getEmail());
-    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-  }
 
   /**
    * Updates both profile information and roles for a user in a single operation. Note: Email

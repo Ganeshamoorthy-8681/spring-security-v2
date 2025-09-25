@@ -147,7 +147,7 @@ public interface UserMapper {
       """)
   void insertUserRole(Long userId, Long roleId, Long accountId);
 
-    @Select("SELECT * FROM users WHERE account_id #{accountId} AND is_root = TRUE")
+    @Select("SELECT * FROM users WHERE account_id = #{accountId} AND is_root = true")
     @Results(value = {
             @Result(property = "id", column = "id"),
             @Result(property = "firstName", column = "first_name"),

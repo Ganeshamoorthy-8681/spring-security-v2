@@ -41,6 +41,9 @@ dependencies {
 	//For Sending Emails
 	implementation("org.springframework.boot:spring-boot-starter-mail:3.5.0")
 
+	//For Thymeleaf Email Templates
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
 	//For Map Struct
 	implementation("org.mapstruct:mapstruct:1.6.3")
 	annotationProcessor('org.mapstruct:mapstruct-processor:1.6.3')

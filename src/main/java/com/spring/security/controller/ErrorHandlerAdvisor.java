@@ -149,7 +149,7 @@ public class ErrorHandlerAdvisor {
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<ErrorResponseDto> handleAuthenticationException(
       AuthenticationException e, HttpServletRequest request) {
-    log.warn("Authentication failed: {}", e.getMessage());
+    log.warn("Authentication failed: {}", e.getMessage(),e);
     ErrorResponseDto errorResponse =
         createErrorResponse(
             "Authentication failed: " + e.getMessage(),
@@ -162,7 +162,7 @@ public class ErrorHandlerAdvisor {
   @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
   public ResponseEntity<ErrorResponseDto> handleAccessDeniedException(
       org.springframework.security.access.AccessDeniedException e, HttpServletRequest request) {
-    log.warn("Access denied: {}", e.getMessage());
+    log.warn("Access denied: {}", e.getMessage(),e);
     String userMessage = getCleanExceptionMessage(e);
     if (userMessage.isEmpty() || userMessage.toLowerCase().contains("access denied")) {
       userMessage = "You don't have permission to access this resource";

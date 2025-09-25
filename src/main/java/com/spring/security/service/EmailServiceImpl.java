@@ -4,8 +4,12 @@ import com.spring.security.exceptions.EmailServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 /**
  * EmailServiceImpl is a service class that implements the EmailService interface. It provides
@@ -48,6 +52,26 @@ public class EmailServiceImpl implements EmailService {
   }
 
   /**
+   * Sends an HTML email with the specified subject and HTML content to the given recipient.
+   *
+   * @param to the recipient's email address
+   * @param subject the subject of the email
+   * @param htmlContent the HTML content of the email
+   */
+  @Override
+  @Async("mailTaskExecutor")
+  public void sendHtmlEmail(String to, String subject, String htmlContent) throws EmailServiceException {
+    try {
+      log.info("Sending HTML email to: {}", to);
+      MimeMessage message = createHtmlEmail(to, subject, htmlContent);
+      javaMailSender.send(message);
+    } catch (Exception e) {
+      log.error("Failed to send HTML email to {}: {}", to, e.getMessage());
+      throw new EmailServiceException("Failed to send HTML email", e);
+    }
+  }
+
+  /**
    * Creates a SimpleMailMessage with the specified recipient, subject, and content.
    *
    * @param to the recipient's email address
@@ -60,6 +84,25 @@ public class EmailServiceImpl implements EmailService {
     message.setTo(to);
     message.setSubject(subject);
     message.setText(content);
+    return message;
+  }
+
+  /**
+   * Creates a MimeMessage with HTML content for the specified recipient, subject, and content.
+   *
+   * @param to the recipient's email address
+   * @param subject the subject of the email
+   * @param htmlContent the HTML content of the email
+   * @return a MimeMessage object ready to be sent
+   */
+  private MimeMessage createHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
+    MimeMessage message = javaMailSender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+    helper.setTo(to);
+    helper.setSubject(subject);
+    helper.setText(htmlContent, true); // true indicates HTML content
+
     return message;
   }
 }

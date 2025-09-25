@@ -93,5 +93,5 @@ public class User {
   /** The identifier of the user who deleted this record. */
   private String deletedBy;
 
-  private boolean isRoot;
+  private Boolean isRoot;
 }

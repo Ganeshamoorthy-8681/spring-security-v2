@@ -19,6 +19,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 /**
  * SecurityConfig is a configuration class that sets up the security settings for the application.
@@ -58,12 +63,12 @@ public class SecurityConfig {
     JwtFilter jwtFilter = new JwtFilter(jwtTokenGenerator, authenticationManager);
 
     return http.csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthenticationEntryPoint))
         .authorizeHttpRequests(
             auth ->
                 auth.requestMatchers(
                         "/api/v1/auth/**",
-                        "/api/v1/accounts/*/users/root/create",
                         "/api/v1/accounts/*/users/set-password",
                         "/api/v1/accounts/*/users/forgot-password",
                         "/api/v1/accounts/create",
@@ -78,4 +83,20 @@ public class SecurityConfig {
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Disable CORS restrictions
+        configuration.setAllowedOriginPatterns(List.of("*")); // allows all origins
+        configuration.setAllowedMethods(List.of("*"));        // allows all methods
+        configuration.setAllowedHeaders(List.of("*"));        // allows all headers
+        configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(List.of("Authorization"));// allow cookies/auth headers
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // apply to all paths
+        return source;
+    }
 }
