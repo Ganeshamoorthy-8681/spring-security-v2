@@ -152,7 +152,10 @@ public class AccountServiceImpl implements AccountService {
    * @return AccountStats containing various metrics for the account
    */
   @Override
-  @LogActivity(action = "READ", entityType = "ACCOUNT", description = "Account statistics retrieved")
+  @LogActivity(
+      action = "READ",
+      entityType = "ACCOUNT",
+      description = "Account statistics retrieved")
   public AccountStats getAccountStats(Long id) throws ServiceLayerException {
     try {
 

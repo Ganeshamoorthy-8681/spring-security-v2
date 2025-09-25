@@ -12,7 +12,6 @@ import com.spring.security.controller.dto.response.UserCreateResponseDto;
 import com.spring.security.dao.UserDao;
 import com.spring.security.domain.entity.Role;
 import com.spring.security.domain.entity.User;
-import com.spring.security.domain.entity.OtpCode;
 import com.spring.security.domain.entity.enums.UserStatus;
 import com.spring.security.domain.entity.enums.UserType;
 import com.spring.security.exceptions.DaoLayerException;
@@ -22,7 +21,6 @@ import com.spring.security.exceptions.ResourceAlreadyExistException;
 import com.spring.security.exceptions.ResourceNotFoundException;
 import com.spring.security.exceptions.ServiceLayerException;
 import io.jsonwebtoken.Claims;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,12 +87,7 @@ public class UserServiceImpl implements UserService {
       // Generate OTP and send user creation email with verification link
       String otp = generateAndStoreOtp(createdUser.getEmail());
       notificationService.sendUserCreationEmail(
-          createdUser.getFirstName(),
-          createdUser.getEmail(),
-          otp,
-          accountId,
-          false
-      );
+          createdUser.getFirstName(), createdUser.getEmail(), otp, accountId, false);
 
       return USER_MAPPER.convertUserToUserCreateResponseDto(createdUser);
     } catch (Exception e) {
@@ -115,14 +108,11 @@ public class UserServiceImpl implements UserService {
       User user = buildRootUser(requestDto, accountId, roles);
       User createdUser = persistUser(user);
 
-      // Generate OTP and send root user creation email with OTP displayed directly (no verification link)
+      // Generate OTP and send root user creation email with OTP displayed directly (no verification
+      // link)
       String otp = generateAndStoreOtp(createdUser.getEmail());
       notificationService.sendUserCreationEmailWithOtp(
-          createdUser.getFirstName(),
-          createdUser.getEmail(),
-          otp,
-          true
-      );
+          createdUser.getFirstName(), createdUser.getEmail(), otp, true);
 
       return createdUser;
     } catch (ResourceAlreadyExistException e) {
@@ -148,7 +138,7 @@ public class UserServiceImpl implements UserService {
 
   private User buildRootUser(RootUserCreateRequestDto dto, Long accountId, List<Role> roles) {
     return USER_MAPPER.convertRootUserCreateRequestDtoToUser(
-        dto, UserType.PASSWORD, UserStatus.CREATED, accountId, roles,true);
+        dto, UserType.PASSWORD, UserStatus.CREATED, accountId, roles, true);
   }
 
   private List<Role> buildRootRoles(Long accountId) throws ServiceLayerException {
@@ -200,23 +190,16 @@ public class UserServiceImpl implements UserService {
 
         if (isRoot) {
           // For root users, send OTP directly in email (no verification link)
-          notificationService.sendResendOtpEmailWithOtp(
-              user.getFirstName(),
-              email,
-              otp,
-              true
-          );
+          notificationService.sendResendOtpEmailWithOtp(user.getFirstName(), email, otp, true);
           log.info("Root user OTP email (direct OTP) sent to {}", email);
         } else {
           // For regular users, send professional resend OTP email with verification link
           notificationService.sendResendOtpEmail(
-              user.getFirstName(),
+              user.getFirstName(), email, otp, user.getAccountId(), false);
+          log.info(
+              "Regular user OTP email (with link) sent to {} for account: {}",
               email,
-              otp,
-              user.getAccountId(),
-              false
-          );
-          log.info("Regular user OTP email (with link) sent to {} for account: {}", email, user.getAccountId());
+              user.getAccountId());
         }
       } else {
         // Fallback to basic OTP email if user not found
@@ -242,8 +225,8 @@ public class UserServiceImpl implements UserService {
   }
 
   /**
-   * Safely finds a user by email address, checking both regular users and root users.
-   * Returns null if user is not found instead of throwing exception.
+   * Safely finds a user by email address, checking both regular users and root users. Returns null
+   * if user is not found instead of throwing exception.
    *
    * @param email the email address to search for
    * @return the User if found, null otherwise
@@ -396,28 +379,28 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-    /**
-     * Updates the status of a user identified by their account ID and user ID.
-     *
-     * @param accountId the ID of the account to which the user belongs
-     * @param userId    the ID of the user whose status is to be updated
-     * @param status   the new status to set for the user
-     */
-    @Override
-    @LogActivity(action = "UPDATE", entityType = "USER", description = "User status updated")
-    public void updateUserStatusById(Long accountId, Long userId, UserStatus status) throws ServiceLayerException {
-        try {
-            Map<String, Object> updateMap = Map.of("status", status);
-            Map<String, Object> conditionMap = Map.of("id", userId, "account_id", accountId);
-            userDao.update("users", updateMap, conditionMap);
-        } catch (DaoLayerException e) {
-            log.error("Failed to update user status for user ID {}: {}", userId, e.getMessage());
-            throw new ServiceLayerException("Failed to update user status");
-        }
+  /**
+   * Updates the status of a user identified by their account ID and user ID.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param userId the ID of the user whose status is to be updated
+   * @param status the new status to set for the user
+   */
+  @Override
+  @LogActivity(action = "UPDATE", entityType = "USER", description = "User status updated")
+  public void updateUserStatusById(Long accountId, Long userId, UserStatus status)
+      throws ServiceLayerException {
+    try {
+      Map<String, Object> updateMap = Map.of("status", status);
+      Map<String, Object> conditionMap = Map.of("id", userId, "account_id", accountId);
+      userDao.update("users", updateMap, conditionMap);
+    } catch (DaoLayerException e) {
+      log.error("Failed to update user status for user ID {}: {}", userId, e.getMessage());
+      throw new ServiceLayerException("Failed to update user status");
     }
+  }
 
-
-    /**
+  /**
    * Sends a forgot password request for the user identified by their account ID and email.
    *
    * @param accountId the ID of the account to which the user belongs
@@ -502,21 +485,21 @@ public class UserServiceImpl implements UserService {
   public void updateUser(Long accountId, Long userId, UserUpdateRequestDto requestDto)
       throws ServiceLayerException {
 
-      // First, update profile information
-      updateProfileInformation(accountId, userId, requestDto);
+    // First, update profile information
+    updateProfileInformation(accountId, userId, requestDto);
 
-      // Update roles if provided
-      if (requestDto.getRoleIds() != null && !requestDto.getRoleIds().isEmpty()) {
-          updateUserRoles(accountId, userId, requestDto.getRoleIds());
-      }
-      log.info(
-              "Successfully updated user profile and roles for user ID: {} in account: {}",
-              userId,
-              accountId);
+    // Update roles if provided
+    if (requestDto.getRoleIds() != null && !requestDto.getRoleIds().isEmpty()) {
+      updateUserRoles(accountId, userId, requestDto.getRoleIds());
+    }
+    log.info(
+        "Successfully updated user profile and roles for user ID: {} in account: {}",
+        userId,
+        accountId);
   }
 
-  private void updateProfileInformation(Long userId, Long accountId, UserUpdateRequestDto requestDto)
-      throws ServiceLayerException {
+  private void updateProfileInformation(
+      Long userId, Long accountId, UserUpdateRequestDto requestDto) throws ServiceLayerException {
     try {
       Map<String, Object> updateMap = new HashMap<>();
       updateMap.put("first_name", requestDto.getFirstName());
@@ -529,23 +512,22 @@ public class UserServiceImpl implements UserService {
       Map<String, Object> conditionMap = Map.of("id", userId, "account_id", accountId);
       userDao.update("users", updateMap, conditionMap);
     } catch (DaoLayerException e) {
-      log.error(
-          "Failed to update profile information for user ID {}: {}", userId, e.getMessage());
+      log.error("Failed to update profile information for user ID {}: {}", userId, e.getMessage());
       throw new ServiceLayerException("Failed to update user profile information", e);
     }
   }
 
-  private void updateUserRoles(Long accountId, Long userId,List<Long> roleIds)
+  private void updateUserRoles(Long accountId, Long userId, List<Long> roleIds)
       throws ServiceLayerException {
     try {
 
-        // Validate that all role IDs exist and belong to the same account
-        for (Long roleId : roleIds) {
-            Role role = roleService.findById(roleId, accountId);
-            if (role == null) {
-                throw new ResourceNotFoundException("Role with ID " + roleId + " not found");
-            }
+      // Validate that all role IDs exist and belong to the same account
+      for (Long roleId : roleIds) {
+        Role role = roleService.findById(roleId, accountId);
+        if (role == null) {
+          throw new ResourceNotFoundException("Role with ID " + roleId + " not found");
         }
+      }
       // Delete existing roles
       userDao.deleteUserRoles(userId, accountId);
 
@@ -581,22 +563,23 @@ public class UserServiceImpl implements UserService {
     return isRoot ? findByEmail(email) : findByAccountIdAndEmail(accountId, email);
   }
 
-    /**
-     * Retrieves a root user by their account ID.
-     * @param accountId the account ID of the root user to retrieve
-     * @return the root user associated with the specified account ID, or null if not found
-     */
-    @Override
-    public User findRootUserByAccountId(Long accountId) {
-        try {
-            return userDao.findRootUserByAccountId(accountId);
-        } catch (DaoLayerException e) {
-            log.error("Failed to find root user for account ID {}: {}", accountId, e.getMessage());
-            return null;
-        }
+  /**
+   * Retrieves a root user by their account ID.
+   *
+   * @param accountId the account ID of the root user to retrieve
+   * @return the root user associated with the specified account ID, or null if not found
+   */
+  @Override
+  public User findRootUserByAccountId(Long accountId) {
+    try {
+      return userDao.findRootUserByAccountId(accountId);
+    } catch (DaoLayerException e) {
+      log.error("Failed to find root user for account ID {}: {}", accountId, e.getMessage());
+      return null;
     }
+  }
 
-    /**
+  /**
    * Checks if the user is a root user.
    *
    * @param user the user to check

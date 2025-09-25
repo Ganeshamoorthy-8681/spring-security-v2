@@ -29,7 +29,10 @@ public class OtpController {
    * @param userService the UserService for OTP sending operations
    * @param orchestratorServiceImpl the orchestrator service
    */
-  public OtpController(OtpService otpService, UserService userService, OrchestratorServiceImpl orchestratorServiceImpl) {
+  public OtpController(
+      OtpService otpService,
+      UserService userService,
+      OrchestratorServiceImpl orchestratorServiceImpl) {
     this.otpService = otpService;
     this.userService = userService;
     this.orchestratorServiceImpl = orchestratorServiceImpl;

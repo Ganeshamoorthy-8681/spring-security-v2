@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: spring-security-db
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: ganesh
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - spring-security-network
+
+  # Spring Security Application
+  spring-security-app:
+    build: .
+    container_name: spring-security-app
+    depends_on:
+      - postgres
+    environment:
+      DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth
+      DATASOURCE_USERNAME: ganesh
+      DATASOURCE_PASSWORD: password
+      JWT_SECRET_KEY: dGhpcyBpcyBhIHNlY3JldCBrZXkgdGhhdCBpcyByYW5kb20gdGFuZCBsaWZlIFNlY3VyZSBpbiBqd3QgdG9rZW5z
+      UI_BASE_URL: http://localhost:4173
+    ports:
+      - "8080:8080"
+    networks:
+      - spring-security-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  spring-security-network:
+    driver: bridge

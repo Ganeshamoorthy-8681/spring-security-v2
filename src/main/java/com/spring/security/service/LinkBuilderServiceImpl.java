@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Implementation of LinkBuilderService that constructs application URLs.
- * Follows Single Responsibility Principle by focusing only on URL building.
+ * Implementation of LinkBuilderService that constructs application URLs. Follows Single
+ * Responsibility Principle by focusing only on URL building.
  */
 @Service
 public class LinkBuilderServiceImpl implements LinkBuilderService {

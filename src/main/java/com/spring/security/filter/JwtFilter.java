@@ -27,23 +27,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
   private final AuthenticationManager authenticationManager;
 
-    private final AntPathMatcher pathMatcher = new AntPathMatcher();
+  private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
-    private static final List<String> EXCLUDED_PATHS = List.of(
-            "/api/v1/auth/**",
-            "/api/v1/accounts/*/users/set-password",
-            "/api/v1/accounts/*/users/forgot-password",
-            "/api/v1/accounts/create",
-            "/api/v1/otp/**"
-    );
+  private static final List<String> EXCLUDED_PATHS =
+      List.of(
+          "/api/v1/auth/**",
+          "/api/v1/accounts/*/users/set-password",
+          "/api/v1/accounts/*/users/forgot-password",
+          "/api/v1/accounts/create",
+          "/api/v1/otp/**");
 
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return EXCLUDED_PATHS.stream()
-                .anyMatch(pattern -> pathMatcher.match(pattern, path));
-    }
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    String path = request.getServletPath();
+    return EXCLUDED_PATHS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+  }
 
   public JwtFilter(
       JwtTokenGenerator jwtTokenGenerator, AuthenticationManager authenticationManager) {

@@ -29,7 +29,9 @@ public interface NotificationService {
    * @param isRootUser whether this is for a root user creation
    * @throws ServiceLayerException if there is an error during the process
    */
-  void sendUserCreationEmail(String userName, String email, String otp, Long accountId, boolean isRootUser) throws ServiceLayerException;
+  void sendUserCreationEmail(
+      String userName, String email, String otp, Long accountId, boolean isRootUser)
+      throws ServiceLayerException;
 
   /**
    * Sends a user creation email with OTP displayed directly (for root users).
@@ -40,7 +42,8 @@ public interface NotificationService {
    * @param isRootUser whether this is for a root user creation
    * @throws ServiceLayerException if there is an error during the process
    */
-  void sendUserCreationEmailWithOtp(String userName, String email, String otp, boolean isRootUser) throws ServiceLayerException;
+  void sendUserCreationEmailWithOtp(String userName, String email, String otp, boolean isRootUser)
+      throws ServiceLayerException;
 
   /**
    * Sends a resend OTP email with professional template and verification link.
@@ -52,7 +55,9 @@ public interface NotificationService {
    * @param isRootUser whether this is for a root user
    * @throws ServiceLayerException if there is an error during the process
    */
-  void sendResendOtpEmail(String userName, String email, String otp, Long accountId, boolean isRootUser) throws ServiceLayerException;
+  void sendResendOtpEmail(
+      String userName, String email, String otp, Long accountId, boolean isRootUser)
+      throws ServiceLayerException;
 
   /**
    * Sends a resend OTP email with OTP displayed directly.
@@ -63,5 +68,6 @@ public interface NotificationService {
    * @param isRootUser whether this is for a root user
    * @throws ServiceLayerException if there is an error during the process
    */
-  void sendResendOtpEmailWithOtp(String userName, String email, String otp, boolean isRootUser) throws ServiceLayerException;
+  void sendResendOtpEmailWithOtp(String userName, String email, String otp, boolean isRootUser)
+      throws ServiceLayerException;
 }

@@ -1,8 +1,8 @@
 package com.spring.security.service;
 
 /**
- * Service interface for generating email templates.
- * Follows Single Responsibility Principle by handling only email template generation.
+ * Service interface for generating email templates. Follows Single Responsibility Principle by
+ * handling only email template generation.
  */
 public interface EmailTemplateService {
 
@@ -15,7 +15,8 @@ public interface EmailTemplateService {
    * @param isRootUser whether this is for a root user creation
    * @return the HTML email content
    */
-  String generateUserCreationTemplate(String userName, String email, String verificationLink, boolean isRootUser);
+  String generateUserCreationTemplate(
+      String userName, String email, String verificationLink, boolean isRootUser);
 
   /**
    * Generates a user creation email template with OTP displayed directly (for root users).
@@ -26,7 +27,8 @@ public interface EmailTemplateService {
    * @param isRootUser whether this is for a root user creation
    * @return the HTML email content
    */
-  String generateUserCreationTemplateWithOtp(String userName, String email, String otp, boolean isRootUser);
+  String generateUserCreationTemplateWithOtp(
+      String userName, String email, String otp, boolean isRootUser);
 
   /**
    * Generates a simple OTP email template.
@@ -46,7 +48,8 @@ public interface EmailTemplateService {
    * @param isRootUser whether this is for a root user
    * @return the HTML email content
    */
-  String generateResendOtpTemplate(String userName, String email, String verificationLink, String otp, boolean isRootUser);
+  String generateResendOtpTemplate(
+      String userName, String email, String verificationLink, String otp, boolean isRootUser);
 
   /**
    * Generates a resend OTP email template with OTP displayed directly.
@@ -57,5 +60,6 @@ public interface EmailTemplateService {
    * @param isRootUser whether this is for a root user
    * @return the HTML email content
    */
-  String generateResendOtpTemplateWithOtp(String userName, String email, String otp, boolean isRootUser);
+  String generateResendOtpTemplateWithOtp(
+      String userName, String email, String otp, boolean isRootUser);
 }

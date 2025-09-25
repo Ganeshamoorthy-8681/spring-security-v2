@@ -38,7 +38,6 @@ public interface AccountService {
    */
   void updateStatus(Long id, AccountStatus status) throws ServiceLayerException;
 
-
   /**
    * Gathers and processes statistics for the account with the given ID.
    *
@@ -46,7 +45,6 @@ public interface AccountService {
    * @return AccountStats containing various metrics for the account
    */
   AccountStats getAccountStats(Long id) throws ServiceLayerException;
-
 
   /**
    * Deletes an account by its ID. (Soft delete)

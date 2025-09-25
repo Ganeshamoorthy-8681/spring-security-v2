@@ -1,8 +1,8 @@
 package com.spring.security.service;
 
 /**
- * Service interface for building verification and other application links.
- * Follows Single Responsibility Principle by handling only URL construction.
+ * Service interface for building verification and other application links. Follows Single
+ * Responsibility Principle by handling only URL construction.
  */
 public interface LinkBuilderService {
 

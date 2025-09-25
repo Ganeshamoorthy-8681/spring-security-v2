@@ -84,6 +84,7 @@ public class AuthController {
   public ResponseEntity<UserResponseDto> whoAmI(@RequestHeader("Authorization") String jwtToken)
       throws JwtTokenParseException, ServiceLayerException, PreconditionViolationException {
     User userInfo = userService.whoami(jwtToken);
-    return new ResponseEntity<>(UserMapper.USER_MAPPER.convertUserToUserResponseDto(userInfo), HttpStatus.OK);
+    return new ResponseEntity<>(
+        UserMapper.USER_MAPPER.convertUserToUserResponseDto(userInfo), HttpStatus.OK);
   }
 }

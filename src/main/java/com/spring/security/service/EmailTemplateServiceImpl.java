@@ -23,11 +23,13 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
   }
 
   @Override
-  public String generateUserCreationTemplate(String userName, String email, String verificationLink, boolean isRootUser) {
+  public String generateUserCreationTemplate(
+      String userName, String email, String verificationLink, boolean isRootUser) {
     String userType = isRootUser ? "Root User" : "User";
-    String welcomeMessage = isRootUser ?
-        "You have been granted root user access to our system." :
-        "Welcome to our platform! Your account has been created.";
+    String welcomeMessage =
+        isRootUser
+            ? "You have been granted root user access to our system."
+            : "Welcome to our platform! Your account has been created.";
 
     Context context = new Context();
     context.setVariable("userName", userName);
@@ -40,11 +42,13 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
   }
 
   @Override
-  public String generateUserCreationTemplateWithOtp(String userName, String email, String otp, boolean isRootUser) {
+  public String generateUserCreationTemplateWithOtp(
+      String userName, String email, String otp, boolean isRootUser) {
     String userType = isRootUser ? "Root User" : "User";
-    String welcomeMessage = isRootUser ?
-        "You have been granted root user access to our system." :
-        "Welcome to our platform! Your account has been created.";
+    String welcomeMessage =
+        isRootUser
+            ? "You have been granted root user access to our system."
+            : "Welcome to our platform! Your account has been created.";
 
     Context context = new Context();
     context.setVariable("userName", userName);
@@ -65,7 +69,8 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
   }
 
   @Override
-  public String generateResendOtpTemplate(String userName, String email, String verificationLink, String otp, boolean isRootUser) {
+  public String generateResendOtpTemplate(
+      String userName, String email, String verificationLink, String otp, boolean isRootUser) {
     String userType = isRootUser ? "Root User" : "User";
 
     Context context = new Context();
@@ -79,7 +84,8 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
   }
 
   @Override
-  public String generateResendOtpTemplateWithOtp(String userName, String email, String otp, boolean isRootUser) {
+  public String generateResendOtpTemplateWithOtp(
+      String userName, String email, String otp, boolean isRootUser) {
     String userType = isRootUser ? "Root User" : "User";
 
     Context context = new Context();

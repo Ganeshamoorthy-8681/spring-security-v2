@@ -48,13 +48,16 @@ public class OrchestratorServiceImpl {
    * @throws ServiceLayerException if there is an error during account or user creation
    */
   @Transactional(rollbackFor = ServiceLayerException.class)
-  public AccountCreateResponseDto createAccountWithRootUser(AccountCreateRequestDto accountCreateRequestDto)
-      throws ServiceLayerException {
-      Account account = accountService.create(accountCreateRequestDto);
-      User user = userService.createRootUser(
-          UserMapper.USER_MAPPER.convertAccountCreateRequestToRootUserCreateRequest(
-              accountCreateRequestDto), account.getId());
-      return AccountMapper.ACCOUNT_MAPPER.convertAccountAndUserToAccountCreateResponseDto(account, user.getEmail(),user.getId());
+  public AccountCreateResponseDto createAccountWithRootUser(
+      AccountCreateRequestDto accountCreateRequestDto) throws ServiceLayerException {
+    Account account = accountService.create(accountCreateRequestDto);
+    User user =
+        userService.createRootUser(
+            UserMapper.USER_MAPPER.convertAccountCreateRequestToRootUserCreateRequest(
+                accountCreateRequestDto),
+            account.getId());
+    return AccountMapper.ACCOUNT_MAPPER.convertAccountAndUserToAccountCreateResponseDto(
+        account, user.getEmail(), user.getId());
   }
 
   /**
@@ -89,15 +92,15 @@ public class OrchestratorServiceImpl {
     }
   }
 
-
-  public AccountGetResponseDto getAccountAndRootUserByAccountId(Long accountId) throws ServiceLayerException {
+  public AccountGetResponseDto getAccountAndRootUserByAccountId(Long accountId)
+      throws ServiceLayerException {
     try {
       Account account = accountService.findById(accountId);
       User user = userService.findRootUserByAccountId(accountId);
-        return AccountMapper.ACCOUNT_MAPPER.convertAccountAndUserToAccountGetResponseDto(account,user);
+      return AccountMapper.ACCOUNT_MAPPER.convertAccountAndUserToAccountGetResponseDto(
+          account, user);
     } catch (ServiceLayerException e) {
-      throw new ServiceLayerException(
-          "Failed to get account and root user by account id", e);
+      throw new ServiceLayerException("Failed to get account and root user by account id", e);
     }
   }
 

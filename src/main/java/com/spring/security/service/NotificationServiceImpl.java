@@ -22,9 +22,10 @@ public class NotificationServiceImpl implements NotificationService {
    * @param emailTemplateService the service for generating email templates
    * @param linkBuilderService the service for building verification links
    */
-  public NotificationServiceImpl(EmailService emailService,
-                                EmailTemplateService emailTemplateService,
-                                LinkBuilderService linkBuilderService) {
+  public NotificationServiceImpl(
+      EmailService emailService,
+      EmailTemplateService emailTemplateService,
+      LinkBuilderService linkBuilderService) {
     this.emailService = emailService;
     this.emailTemplateService = emailTemplateService;
     this.linkBuilderService = linkBuilderService;
@@ -56,12 +57,19 @@ public class NotificationServiceImpl implements NotificationService {
    * @param isRootUser whether this is for a root user creation
    */
   @Override
-  public void sendUserCreationEmail(String userName, String email, String otp, Long accountId, boolean isRootUser) throws ServiceLayerException {
+  public void sendUserCreationEmail(
+      String userName, String email, String otp, Long accountId, boolean isRootUser)
+      throws ServiceLayerException {
     try {
       String verificationLink = linkBuilderService.buildUserVerificationLink(otp, accountId, email);
-      String htmlContent = emailTemplateService.generateUserCreationTemplate(userName, email, verificationLink, isRootUser);
+      String htmlContent =
+          emailTemplateService.generateUserCreationTemplate(
+              userName, email, verificationLink, isRootUser);
 
-      String subject = isRootUser ? "Root User Account Created - Verification Required" : "Account Created - Verification Required";
+      String subject =
+          isRootUser
+              ? "Root User Account Created - Verification Required"
+              : "Account Created - Verification Required";
 
       emailService.sendHtmlEmail(email, subject, htmlContent);
       log.debug("User creation email sent to: {} for account: {}", email, accountId);
@@ -80,11 +88,17 @@ public class NotificationServiceImpl implements NotificationService {
    * @param isRootUser whether this is for a root user creation
    */
   @Override
-  public void sendUserCreationEmailWithOtp(String userName, String email, String otp, boolean isRootUser) throws ServiceLayerException {
+  public void sendUserCreationEmailWithOtp(
+      String userName, String email, String otp, boolean isRootUser) throws ServiceLayerException {
     try {
-      String htmlContent = emailTemplateService.generateUserCreationTemplateWithOtp(userName, email, otp, isRootUser);
+      String htmlContent =
+          emailTemplateService.generateUserCreationTemplateWithOtp(
+              userName, email, otp, isRootUser);
 
-      String subject = isRootUser ? "Root User Account Created - OTP Verification" : "Account Created - OTP Verification";
+      String subject =
+          isRootUser
+              ? "Root User Account Created - OTP Verification"
+              : "Account Created - OTP Verification";
 
       emailService.sendHtmlEmail(email, subject, htmlContent);
       log.debug("User creation email with OTP sent to: {}", email);
@@ -104,10 +118,14 @@ public class NotificationServiceImpl implements NotificationService {
    * @param isRootUser whether this is for a root user
    */
   @Override
-  public void sendResendOtpEmail(String userName, String email, String otp, Long accountId, boolean isRootUser) throws ServiceLayerException {
+  public void sendResendOtpEmail(
+      String userName, String email, String otp, Long accountId, boolean isRootUser)
+      throws ServiceLayerException {
     try {
       String verificationLink = linkBuilderService.buildUserVerificationLink(otp, accountId, email);
-      String htmlContent = emailTemplateService.generateResendOtpTemplate(userName, email, verificationLink, otp, isRootUser);
+      String htmlContent =
+          emailTemplateService.generateResendOtpTemplate(
+              userName, email, verificationLink, otp, isRootUser);
 
       String subject = "Your New Verification Code";
 
@@ -128,9 +146,11 @@ public class NotificationServiceImpl implements NotificationService {
    * @param isRootUser whether this is for a root user
    */
   @Override
-  public void sendResendOtpEmailWithOtp(String userName, String email, String otp, boolean isRootUser) throws ServiceLayerException {
+  public void sendResendOtpEmailWithOtp(
+      String userName, String email, String otp, boolean isRootUser) throws ServiceLayerException {
     try {
-      String htmlContent = emailTemplateService.generateResendOtpTemplateWithOtp(userName, email, otp, isRootUser);
+      String htmlContent =
+          emailTemplateService.generateResendOtpTemplateWithOtp(userName, email, otp, isRootUser);
 
       String subject = "Your New Verification Code";
 

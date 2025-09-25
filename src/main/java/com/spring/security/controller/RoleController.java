@@ -7,7 +7,6 @@ import com.spring.security.domain.entity.Role;
 import com.spring.security.domain.mapper.RoleMapper;
 import com.spring.security.exceptions.ServiceLayerException;
 import com.spring.security.service.RoleService;
-import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -35,7 +35,8 @@ public class AccountController {
    *
    * @param accountService the service to handle account-related operations
    */
-  AccountController(AccountService accountService, OrchestratorServiceImpl orchestratorServiceImpl) {
+  AccountController(
+      AccountService accountService, OrchestratorServiceImpl orchestratorServiceImpl) {
     this.accountService = accountService;
     this.orchestratorServiceImpl = orchestratorServiceImpl;
   }
@@ -51,7 +52,8 @@ public class AccountController {
   public ResponseEntity<AccountGetResponseDto> getAccountDetails(@PathVariable Long id)
       throws ServiceLayerException {
 
-    return new ResponseEntity<>(orchestratorServiceImpl.getAccountAndRootUserByAccountId(id), HttpStatus.OK);
+    return new ResponseEntity<>(
+        orchestratorServiceImpl.getAccountAndRootUserByAccountId(id), HttpStatus.OK);
   }
 
   /**
@@ -63,7 +65,9 @@ public class AccountController {
   @PostMapping("/create")
   public ResponseEntity<AccountCreateResponseDto> createAccount(
       @RequestBody AccountCreateRequestDto accountCreateRequestDto) throws ServiceLayerException {
-    return new ResponseEntity<>(orchestratorServiceImpl.createAccountWithRootUser(accountCreateRequestDto), HttpStatus.CREATED);
+    return new ResponseEntity<>(
+        orchestratorServiceImpl.createAccountWithRootUser(accountCreateRequestDto),
+        HttpStatus.CREATED);
   }
 
   /**
@@ -89,7 +93,7 @@ public class AccountController {
   public ResponseEntity<AccountStatsDto> getAccountStats(@PathVariable Long id)
       throws ServiceLayerException {
     AccountStats stats = accountService.getAccountStats(id);
-    return new ResponseEntity<>(AccountMapper.ACCOUNT_MAPPER.convertAccountStatsToAccountStatsDto(stats), HttpStatus.OK);
+    return new ResponseEntity<>(
+        AccountMapper.ACCOUNT_MAPPER.convertAccountStatsToAccountStatsDto(stats), HttpStatus.OK);
   }
-
 }

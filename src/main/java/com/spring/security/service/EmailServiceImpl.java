@@ -1,15 +1,14 @@
 package com.spring.security.service;
 
 import com.spring.security.exceptions.EmailServiceException;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 
 /**
  * EmailServiceImpl is a service class that implements the EmailService interface. It provides
@@ -60,7 +59,8 @@ public class EmailServiceImpl implements EmailService {
    */
   @Override
   @Async("mailTaskExecutor")
-  public void sendHtmlEmail(String to, String subject, String htmlContent) throws EmailServiceException {
+  public void sendHtmlEmail(String to, String subject, String htmlContent)
+      throws EmailServiceException {
     try {
       log.info("Sending HTML email to: {}", to);
       MimeMessage message = createHtmlEmail(to, subject, htmlContent);
@@ -95,7 +95,8 @@ public class EmailServiceImpl implements EmailService {
    * @param htmlContent the HTML content of the email
    * @return a MimeMessage object ready to be sent
    */
-  private MimeMessage createHtmlEmail(String to, String subject, String htmlContent) throws MessagingException {
+  private MimeMessage createHtmlEmail(String to, String subject, String htmlContent)
+      throws MessagingException {
     MimeMessage message = javaMailSender.createMimeMessage();
     MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 

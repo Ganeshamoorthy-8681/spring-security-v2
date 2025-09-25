@@ -15,22 +15,22 @@ import lombok.Setter;
 @Setter
 public class AccountCreateResponseDto {
 
-    /** The unique identifier of the account. */
-    private Long id;
+  /** The unique identifier of the account. */
+  private Long id;
 
-    /** The name of the account holder. */
-    private String name;
+  /** The name of the account holder. */
+  private String name;
 
-    /** The description of the account holder. */
-    private String description;
+  /** The description of the account holder. */
+  private String description;
 
-    /** The type of the account. */
-    private AccountType type;
+  /** The type of the account. */
+  private AccountType type;
 
-    /** The current status of the account. */
-    private AccountStatus status;
+  /** The current status of the account. */
+  private AccountStatus status;
 
-    private Long userId;
+  private Long userId;
 
-    private String email;
+  private String email;
 }

@@ -147,21 +147,22 @@ public interface UserMapper {
       """)
   void insertUserRole(Long userId, Long roleId, Long accountId);
 
-    @Select("SELECT * FROM users WHERE account_id = #{accountId} AND is_root = true")
-    @Results(value = {
-            @Result(property = "id", column = "id"),
-            @Result(property = "firstName", column = "first_name"),
-            @Result(property = "lastName", column = "last_name"),
-            @Result(property = "middleName", column = "middle_name"),
-            @Result(property = "email", column = "email"),
-            @Result(property = "type", column = "type", javaType = UserType.class),
-            @Result(property = "status", column = "status", javaType = UserStatus.class),
-            @Result(property = "createdAt", column = "created_at", javaType = Instant.class),
-            @Result(property = "updatedAt", column = "updated_at", javaType = Instant.class),
-            @Result(property = "deletedAt", column = "deleted_at", javaType = Instant.class),
-            @Result(property = "currentLogin", column = "current_login", javaType = Instant.class),
-            @Result(property = "lastLogin", column = "last_login", javaType = Instant.class),
-            @Result(property = "failedLoginAttempts", column = "failed_login_attempts")
-    })
-    User findRootUserByAccountId(Long accountId);
+  @Select("SELECT * FROM users WHERE account_id = #{accountId} AND is_root = true")
+  @Results(
+      value = {
+        @Result(property = "id", column = "id"),
+        @Result(property = "firstName", column = "first_name"),
+        @Result(property = "lastName", column = "last_name"),
+        @Result(property = "middleName", column = "middle_name"),
+        @Result(property = "email", column = "email"),
+        @Result(property = "type", column = "type", javaType = UserType.class),
+        @Result(property = "status", column = "status", javaType = UserStatus.class),
+        @Result(property = "createdAt", column = "created_at", javaType = Instant.class),
+        @Result(property = "updatedAt", column = "updated_at", javaType = Instant.class),
+        @Result(property = "deletedAt", column = "deleted_at", javaType = Instant.class),
+        @Result(property = "currentLogin", column = "current_login", javaType = Instant.class),
+        @Result(property = "lastLogin", column = "last_login", javaType = Instant.class),
+        @Result(property = "failedLoginAttempts", column = "failed_login_attempts")
+      })
+  User findRootUserByAccountId(Long accountId);
 }

@@ -132,7 +132,6 @@ public interface UserService {
   User whoami(String jwtToken)
       throws ServiceLayerException, JwtTokenParseException, PreconditionViolationException;
 
-
   /**
    * Retrieves a root user by their account ID.
    *

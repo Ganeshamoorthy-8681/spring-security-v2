@@ -109,9 +109,10 @@ public class AccountDaoImpl implements AccountDao {
   @Override
   public AccountStats getAccountStats(Long accountId) throws DaoLayerException {
     try {
-        return accountMapper.getAccountStats(accountId);
+      return accountMapper.getAccountStats(accountId);
     } catch (Exception e) {
-      log.error("Error retrieving account statistics for account ID {}: {}", accountId, e.getMessage());
+      log.error(
+          "Error retrieving account statistics for account ID {}: {}", accountId, e.getMessage());
       throw new DaoLayerException("Failed to retrieve account statistics", e);
     }
   }

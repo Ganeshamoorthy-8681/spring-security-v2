@@ -14,17 +14,17 @@ import lombok.Setter;
 @Setter
 public class AccountStats {
 
-    private Long totalUsers = 0L;
+  private Long totalUsers = 0L;
 
-    private Long activeUsers = 0L;
+  private Long activeUsers = 0L;
 
-    private Long inactiveUsers = 0L;
+  private Long inactiveUsers = 0L;
 
-    private Long failedLoginAttempts = 0L;
+  private Long failedLoginAttempts = 0L;
 
-    private Long passwordExpiring = 0L;
+  private Long passwordExpiring = 0L;
 
-    private Long pendingInvitations = 0L;
+  private Long pendingInvitations = 0L;
 
-    private Long mfaEnabled = 0L;
+  private Long mfaEnabled = 0L;
 }

@@ -35,33 +35,34 @@ public interface AccountMapper {
    */
   AccountResponseDto convertAccountToAccountResponseDto(Account account);
 
-    /**
-     * Converts an AccountStats entity to an AccountStatsDto.
-     *
-     * @param accountStats the AccountStats entity to convert
-     * @return the converted AccountStatsDto
-     */
+  /**
+   * Converts an AccountStats entity to an AccountStatsDto.
+   *
+   * @param accountStats the AccountStats entity to convert
+   * @return the converted AccountStatsDto
+   */
   AccountStatsDto convertAccountStatsToAccountStatsDto(AccountStats accountStats);
 
-
-    /**
-     * Converts an Account entity and a User entity to an AccountGetResponseDto.
-     *
-     * @param account the Account entity to convert
-     * @param user the User entity to convert
-     * @return the converted AccountGetResponseDto
-     */
-    @Mapping(target = "userId", source = "user.id")
-    @Mapping(target = "status",source = "account.status")
-    @Mapping(target = "userStatus",source = "user.status")
-    @Mapping(target = "id",source = "account.id")
-    @Mapping(target = "type",source = "account.type")
+  /**
+   * Converts an Account entity and a User entity to an AccountGetResponseDto.
+   *
+   * @param account the Account entity to convert
+   * @param user the User entity to convert
+   * @return the converted AccountGetResponseDto
+   */
+  @Mapping(target = "userId", source = "user.id")
+  @Mapping(target = "status", source = "account.status")
+  @Mapping(target = "userStatus", source = "user.status")
+  @Mapping(target = "id", source = "account.id")
+  @Mapping(target = "type", source = "account.type")
   AccountGetResponseDto convertAccountAndUserToAccountGetResponseDto(Account account, User user);
 
-    /**
-     * Converts an Account entity and a User entity to an AccountCreateResponseDto.
-     * @param account the account entity
-     * @return the converted AccountCreateResponseDto
-     */
-    AccountCreateResponseDto convertAccountAndUserToAccountCreateResponseDto(Account account, String email, Long userId);
+  /**
+   * Converts an Account entity and a User entity to an AccountCreateResponseDto.
+   *
+   * @param account the account entity
+   * @return the converted AccountCreateResponseDto
+   */
+  AccountCreateResponseDto convertAccountAndUserToAccountCreateResponseDto(
+      Account account, String email, Long userId);
 }

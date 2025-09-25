@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /** User controller for handling user-related operations. */
@@ -56,29 +55,28 @@ public class UserController {
     return new ResponseEntity<>(userService.createUser(requestDto, accountId), HttpStatus.CREATED);
   }
 
+  /**
+   * Sets a new password for a user.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param requestDto the request data transfer object containing the email and new password
+   * @return a ResponseEntity indicating the result of the operation
+   */
+  @PatchMapping("/set-password")
+  public ResponseEntity<Void> setPassword(
+      @PathVariable Long accountId, @RequestBody SetUserPasswordRequestDto requestDto)
+      throws ServiceLayerException {
+    // Need to validate the user state and existence before setting the password
+    userService.updateUserPassword(accountId, requestDto.getEmail(), requestDto.getPassword());
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 
-    /**
-     * Sets a new password for a user.
-     *
-     * @param accountId the ID of the account to which the user belongs
-     * @param requestDto the request data transfer object containing the email and new password
-     * @return a ResponseEntity indicating the result of the operation
-     */
-    @PatchMapping("/set-password")
-    public ResponseEntity<Void> setPassword(
-            @PathVariable Long accountId, @RequestBody SetUserPasswordRequestDto requestDto)
-            throws ServiceLayerException {
-        // Need to validate the user state and existence before setting the password
-        userService.updateUserPassword(accountId, requestDto.getEmail(), requestDto.getPassword());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @PatchMapping("/forgot-password")
-    public ResponseEntity<Void> forgotPassword(
-            @PathVariable Long accountId, @RequestBody ForgotPasswordRequestDto requestDto) {
-        userService.forgotPassword(accountId, requestDto.getEmail());
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+  @PatchMapping("/forgot-password")
+  public ResponseEntity<Void> forgotPassword(
+      @PathVariable Long accountId, @RequestBody ForgotPasswordRequestDto requestDto) {
+    userService.forgotPassword(accountId, requestDto.getEmail());
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 
   /**
    * Retrieves a user by their ID.
@@ -127,7 +125,6 @@ public class UserController {
     return new ResponseEntity<>(userResponseDtos, HttpStatus.OK);
   }
 
-
   /**
    * Updates both profile information and roles for a user in a single operation. Note: Email
    * updates are not allowed for security reasons. Roles are optional - if not provided, only
@@ -159,8 +156,7 @@ public class UserController {
   @PatchMapping("/{userId}/enable")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:UPDATE')")
   public ResponseEntity<Void> updateUserStatus(
-          @PathVariable Long accountId,
-          @PathVariable Long userId) throws ServiceLayerException {
+      @PathVariable Long accountId, @PathVariable Long userId) throws ServiceLayerException {
     userService.updateUserStatusById(accountId, userId, UserStatus.ACTIVE);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
@@ -174,10 +170,9 @@ public class UserController {
    */
   @PatchMapping("/{userId}/disable")
   @PreAuthorize("hasRole('ROOT') or hasAuthority('IAM:USER:UPDATE')")
-  public ResponseEntity<Void> disableUser(
-          @PathVariable Long accountId,
-          @PathVariable Long userId) throws ServiceLayerException {
+  public ResponseEntity<Void> disableUser(@PathVariable Long accountId, @PathVariable Long userId)
+      throws ServiceLayerException {
     userService.updateUserStatusById(accountId, userId, UserStatus.INACTIVE);
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+  }
 }

@@ -32,9 +32,7 @@ public class OtpServiceImpl implements OtpService {
   private final OtpGenerator otpGenerator;
 
   /** Constructor for OtpServiceImpl. */
-  public OtpServiceImpl(
-      OtpDao otpDao,
-      OtpGenerator otpGenerator) {
+  public OtpServiceImpl(OtpDao otpDao, OtpGenerator otpGenerator) {
     this.otpDao = otpDao;
     this.otpGenerator = otpGenerator;
   }
@@ -183,7 +181,6 @@ public class OtpServiceImpl implements OtpService {
       throw new ServiceLayerException("Failed to mark OTP as used", e);
     }
   }
-
 
   /**
    * Generates and stores a new OTP for the specified email address.
