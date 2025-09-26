@@ -1,6 +1,8 @@
 package com.spring.security.service;
 
 import com.spring.security.exceptions.EmailServiceException;
+import com.spring.security.exceptions.ServiceLayerException;
+import jakarta.mail.MessagingException;
 
 /**
  * Service interface for sending emails.
@@ -9,15 +11,6 @@ import com.spring.security.exceptions.EmailServiceException;
  * users.
  */
 public interface EmailService {
-
-  /**
-   * Sends an email with the specified subject and content to the given recipient.
-   *
-   * @param to the recipient's email address
-   * @param subject the subject of the email
-   * @param content the content of the email
-   */
-  void sendEmail(String to, String subject, String content) throws EmailServiceException;
 
   /**
    * Sends an HTML email with the specified subject and HTML content to the given recipient.

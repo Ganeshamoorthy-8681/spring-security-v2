@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Created - Set Up Your Password</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+            color: white;
+        }
+        .cta-label {
+            font-size: 18px;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        .setup-button {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .setup-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        .instruction-box {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .instruction-box h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .info-notice {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            color: #0d47a1;
+        }
+        .info-notice strong {
+            color: #1565c0;
+        }
+        .security-tips {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            color: #856404;
+        }
+        .security-tips strong {
+            color: #d68910;
+        }
+        .footer {
+            background: #f8f9fc;
+            padding: 30px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .user-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .content { padding: 30px 20px; }
+            .header { padding: 30px 20px; }
+            .setup-button { padding: 12px 24px; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 User Created Successfully!</h1>
+            <p>Set up your password to get started</p>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                <div class="user-badge">👤 New User</div>
+                <br>
+                Hello <strong th:text="${userName}">User</strong>! 👋
+            </div>
+
+            <div class="success-message">
+                <strong>🎯 Your user account has been created successfully!</strong><br>
+                Click the link below to set up your password and start using the system.
+            </div>
+
+            <div class="cta-section">
+                <div class="cta-label">🔐 Ready to set up your password?</div>
+                <a href="#" th:href="${passwordSetupLink}" class="setup-button">
+                    Set Up Your Password
+                </a>
+            </div>
+
+            <div class="info-notice">
+                <strong>🚀 What happens next:</strong> After setting up your password, you'll be able to log in
+                and start using all the features available to you.
+            </div>
+
+            <div class="instruction-box">
+                <h3>🔑 Complete Your Account Setup:</h3>
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div><strong>Click the "Set Up Your Password" button</strong> above</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div><strong>Create a strong password</strong> for your account</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div><strong>Confirm your password</strong> and save your settings</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div><strong>Log in with your new credentials</strong></div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div><strong>Start exploring and using the platform!</strong></div>
+                </div>
+            </div>
+
+            <div class="security-tips">
+                <strong>🔒 Password Security Tips:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Use at least 8 characters with a mix of letters, numbers, and symbols</li>
+                    <li>Avoid using personal information or common words</li>
+                    <li>Make it unique - don't reuse passwords from other accounts</li>
+                    <li>Consider using a password manager for better security</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>🌟 Welcome to Our Platform!</strong></p>
+            <p>We're excited to have you on board. Set up your password to complete your account setup.</p>
+            <p>If you need assistance, our support team is here to help.</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

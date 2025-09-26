@@ -6,60 +6,48 @@ package com.spring.security.service;
  */
 public interface EmailTemplateService {
 
+
+    /**
+     * Generates an account creation email template with OTP.
+     * @param accountName account name
+     * @param email email address
+     * @param otp one-time password
+     * @return the HTML email content
+     */
+   String generateAccountCreationTemplate(String accountName, String email, String otp);
+
+
   /**
    * Generates a user creation email template with OTP verification link.
    *
    * @param userName the name of the user
    * @param email the user's email address
    * @param verificationLink the complete verification link with OTP and account ID
-   * @param isRootUser whether this is for a root user creation
    * @return the HTML email content
    */
   String generateUserCreationTemplate(
-      String userName, String email, String verificationLink, boolean isRootUser);
+      String userName, String email, String verificationLink);
+
 
   /**
-   * Generates a user creation email template with OTP displayed directly (for root users).
+   * Generates a resend OTP email template with OTP code (for account creation).
    *
    * @param userName the name of the user
    * @param email the user's email address
-   * @param otp the OTP code to display directly in email
-   * @param isRootUser whether this is for a root user creation
-   * @return the HTML email content
-   */
-  String generateUserCreationTemplateWithOtp(
-      String userName, String email, String otp, boolean isRootUser);
-
-  /**
-   * Generates a simple OTP email template.
-   *
    * @param otp the OTP code
    * @return the HTML email content
    */
-  String generateOtpTemplate(String otp);
+  String generateAccountCreationResendOtp(
+      String userName, String email, String otp);
 
   /**
-   * Generates a resend OTP email template with verification link.
+   * Generates a resend OTP email template with verification link (for user creation).
    *
    * @param userName the name of the user
    * @param email the user's email address
-   * @param verificationLink the complete verification link with OTP and account ID
-   * @param otp the OTP code
-   * @param isRootUser whether this is for a root user
+   * @param verificationLink the complete verification link
    * @return the HTML email content
    */
-  String generateResendOtpTemplate(
-      String userName, String email, String verificationLink, String otp, boolean isRootUser);
-
-  /**
-   * Generates a resend OTP email template with OTP displayed directly.
-   *
-   * @param userName the name of the user
-   * @param email the user's email address
-   * @param otp the OTP code to display directly in email
-   * @param isRootUser whether this is for a root user
-   * @return the HTML email content
-   */
-  String generateResendOtpTemplateWithOtp(
-      String userName, String email, String otp, boolean isRootUser);
+  String generateUserCreationResendOtp(
+      String userName, String email, String verificationLink);
 }

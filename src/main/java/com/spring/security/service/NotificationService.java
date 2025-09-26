@@ -3,71 +3,54 @@ package com.spring.security.service;
 import com.spring.security.exceptions.ServiceLayerException;
 
 /**
- * Service interface for managing notifications within the application.
- *
- * <p>This interface defines the contract for notification-related operations, such as sending
- * notifications to users via various channels (e.g., email, SMS, push notifications).
+ * Service interface for managing email notifications within the application.
+ * Provides simple, straightforward methods for common notification scenarios.
  */
 public interface NotificationService {
 
   /**
-   * Sends an OTP to the specified email address.
-   *
-   * @param otp the One-Time Password to be sent
-   * @param email the email address to which the OTP should be sent
-   * @throws ServiceLayerException if there is an error during the process
-   */
-  void sendOtp(String otp, String email) throws ServiceLayerException;
-
-  /**
-   * Sends a user creation email with verification link containing OTP and account ID.
+   * Sends account creation successful notification with OTP (only for root users).
+   * For regular users, this sends a success notification without OTP.
    *
    * @param userName the name of the user
    * @param email the user's email address
-   * @param otp the OTP code for verification
-   * @param accountId the account ID
-   * @param isRootUser whether this is for a root user creation
+   * @param otp the OTP code for verification (only used for root users)
    * @throws ServiceLayerException if there is an error during the process
    */
-  void sendUserCreationEmail(
-      String userName, String email, String otp, Long accountId, boolean isRootUser)
+  void sendAccountCreationSuccessfulWithOtp(String userName, String email, String otp)
       throws ServiceLayerException;
 
   /**
-   * Sends a user creation email with OTP displayed directly (for root users).
+   * Sends OTP for IAM user operations (generic OTP sending).
+   * Used for user verification, password reset, etc.
    *
    * @param userName the name of the user
    * @param email the user's email address
-   * @param otp the OTP code to display directly in email
-   * @param isRootUser whether this is for a root user creation
+   * @param verificationLink the verification link containing the OTP
    * @throws ServiceLayerException if there is an error during the process
    */
-  void sendUserCreationEmailWithOtp(String userName, String email, String otp, boolean isRootUser)
-      throws ServiceLayerException;
+  void sendUserCreationWithLink(String userName, String email, String verificationLink) throws ServiceLayerException;
 
   /**
-   * Sends a resend OTP email with professional template and verification link.
+   * Resends OTP when user requests a new one.
+   * Generic method for all OTP resend scenarios.
    *
    * @param userName the name of the user
    * @param email the user's email address
-   * @param otp the OTP code for verification
-   * @param accountId the account ID
-   * @param isRootUser whether this is for a root user
+   * @param otp the new OTP code
    * @throws ServiceLayerException if there is an error during the process
    */
-  void sendResendOtpEmail(
-      String userName, String email, String otp, Long accountId, boolean isRootUser)
-      throws ServiceLayerException;
+  void resendOtpForAccountCreation(String userName, String email, String otp) throws ServiceLayerException;
+
 
   /**
-   * Sends a resend OTP email with OTP displayed directly.
+   * Resends OTP for user creation when user requests a new one.
+   * Generic method for all OTP resend scenarios.
    *
    * @param userName the name of the user
    * @param email the user's email address
-   * @param otp the OTP code to display directly in email
-   * @param isRootUser whether this is for a root user
+   * @param verificationLink the verification link containing the OTP
    * @throws ServiceLayerException if there is an error during the process
    */
-  void sendResendOtpEmailWithOtp(String userName, String email, String otp, boolean isRootUser)
-      throws ServiceLayerException;
+  void resendOtpForUserCreation(String userName, String email, String verificationLink) throws ServiceLayerException;
 }

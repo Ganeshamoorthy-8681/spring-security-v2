@@ -93,5 +93,6 @@ public class User {
   /** The identifier of the user who deleted this record. */
   private String deletedBy;
 
+  /** Indicates if the user has root privileges. */
   private Boolean isRoot;
 }

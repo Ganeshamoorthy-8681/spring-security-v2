@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Created Successfully</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .welcome-message {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .welcome-message h3 {
+            color: #155724;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .instruction-box {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .instruction-box h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+        .step-number {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .footer {
+            background: #f8f9fc;
+            padding: 30px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .feature-highlight {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+            color: #0d47a1;
+        }
+        .feature-highlight h4 {
+            margin-top: 0;
+            color: #1565c0;
+        }
+        .otp-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+            color: white;
+        }
+        .otp-label {
+            font-size: 16px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        .otp-code {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 20px;
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: white;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            backdrop-filter: blur(10px);
+        }
+        .timer-info {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .timer-info strong {
+            color: #2980b9;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .content { padding: 30px 20px; }
+            .header { padding: 30px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎉 Welcome Aboard!</h1>
+            <p th:if="${otp}">Your account is ready - set your password</p>
+            <p th:unless="${otp}">Your account is ready to use</p>
+        </div>
+
+        <div class="content">
+            <div class="greeting">
+                Hello <strong th:text="${userName}">User</strong>! 👋
+            </div>
+
+            <div class="success-message">
+                <strong>🎉 Your account has been created successfully!</strong><br>
+                <span th:if="${otp}">Use the OTP below to set your password and start using the platform.</span>
+                <span th:unless="${otp}">You're all set and ready to explore our platform.</span>
+            </div>
+
+            <!-- OTP Section - Only show if OTP is provided -->
+            <div class="otp-section" th:if="${otp}">
+                <div class="otp-label">🔐 Your Password Setup Code</div>
+                <div class="otp-code">
+                    <span th:text="${otp}">123456</span>
+                </div>
+            </div>
+
+            <div class="timer-info" th:if="${otp}">
+                <strong>⏰ Time Limit</strong>
+                This verification code expires in <strong>15 minutes</strong>. Please set up your password promptly.
+            </div>
+
+            <div class="welcome-message" th:unless="${otp}">
+                <h3>Welcome to Our Platform! 🚀</h3>
+                <p>Your account is now active and ready to use. You can start exploring all the features available to you right away.</p>
+            </div>
+
+            <div class="feature-highlight" th:unless="${otp}">
+                <h4>🌟 What You Can Do Now:</h4>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>Access your personalized dashboard</li>
+                    <li>Explore all available features and tools</li>
+                    <li>Connect with other users</li>
+                    <li>Customize your profile and preferences</li>
+                </ul>
+            </div>
+
+            <div class="instruction-box">
+                <h3 th:if="${otp}">🔑 Set Up Your Password:</h3>
+                <h3 th:unless="${otp}">Next Steps to Get Started:</h3>
+
+                <!-- Steps with OTP -->
+                <div th:if="${otp}">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div><strong>Copy the OTP code</strong> displayed above</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div><strong>Go to the password setup page</strong></div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div><strong>Enter the OTP code</strong> to verify your account</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div><strong>Create a strong password</strong> for your account</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div><strong>Start using the platform!</strong></div>
+                    </div>
+                </div>
+
+                <!-- Steps without OTP -->
+                <div th:unless="${otp}">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>Log in to your account using your credentials</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>Complete your profile setup and preferences</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div>Take a tour of the dashboard and explore features</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div>Start using the platform and enjoy the experience!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Need Help Getting Started?</strong></p>
+            <p>If you have any questions or need assistance, our support team is here to help you every step of the way.</p>
+            <p>This is an automated welcome message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

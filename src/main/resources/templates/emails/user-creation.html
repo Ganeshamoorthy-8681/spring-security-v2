@@ -3,140 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Created</title>
+    <title>Account Created Successfully</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #333;
+            color: #2c3e50;
             margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
             color: white;
-            padding: 20px;
+            padding: 40px 30px;
             text-align: center;
-            border-radius: 10px 10px 0 0;
-            margin: -20px -20px 20px -20px;
+        }
+        .header.root-user {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
         }
         .content {
-            padding: 20px 0;
+            padding: 40px 30px;
         }
-        .button {
-            display: inline-block;
-            background: #4CAF50;
-            color: white;
-            padding: 12px 30px;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 20px 0;
-            font-weight: bold;
-        }
-        .button:hover {
-            background: #45a049;
-        }
-        .info-box {
-            background: #f8f9fa;
-            border-left: 4px solid #007bff;
-            padding: 15px;
-            margin: 20px 0;
-        }
-        .footer {
+        .greeting {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 25px;
             text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #666;
-            font-size: 14px;
         }
-        .warning {
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .success-message.root-user {
             background: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 20px 0;
+            border: 1px solid #ffeaa7;
             color: #856404;
         }
-        .otp-code {
-            background: #f8f9fa;
-            border: 2px solid #007bff;
-            padding: 20px;
+        .otp-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 30px;
             text-align: center;
-            font-size: 24px;
+            margin: 30px 0;
+            color: white;
+        }
+        .otp-label {
+            font-size: 16px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+        .otp-code {
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 20px;
+            font-size: 36px;
             font-weight: bold;
-            letter-spacing: 3px;
-            color: #007bff;
-            margin: 20px 0;
+            letter-spacing: 8px;
+            color: white;
             border-radius: 8px;
             font-family: 'Courier New', monospace;
+            backdrop-filter: blur(10px);
+        }
+        .instruction-box {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        .instruction-box h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        .step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .timer-info {
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .timer-info strong {
+            color: #2980b9;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        .welcome-message {
+            background: #e8f5e8;
+            border: 1px solid #c3e6cb;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .welcome-message h3 {
+            color: #155724;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .footer {
+            background: #f8f9fc;
+            padding: 30px;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .security-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 25px 0;
+            color: #856404;
+        }
+        .security-notice strong {
+            color: #d68910;
+        }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .content { padding: 30px 20px; }
+            .header { padding: 30px 20px; }
+            .otp-code { font-size: 28px; letter-spacing: 6px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🎉 <span th:text="${userType}">User</span> Account Created!</h1>
+        <!-- Root User Header -->
+        <div class="header root-user" th:if="${isRootUser}">
+            <h1>🎉 Root Account Created!</h1>
+            <p>Now complete your setup</p>
+        </div>
+
+        <!-- Regular User Header -->
+        <div class="header" th:unless="${isRootUser}">
+            <h1>🎉 Welcome Aboard!</h1>
+            <p>Your account is ready</p>
         </div>
 
         <div class="content">
-            <h2>Hello <span th:text="${userName}">User</span>,</h2>
+            <!-- Root User Content -->
+            <div th:if="${isRootUser}">
+                <div class="greeting">
+                    Hello <strong th:text="${userName}">Admin</strong>! 👋
+                </div>
 
-            <p th:text="${welcomeMessage}">Welcome message</p>
+                <div class="success-message root-user">
+                    <strong>🎯 Your root account has been created successfully!</strong><br>
+                    Now enter the OTP below to set up your password and complete the setup.
+                </div>
 
-            <div class="info-box">
-                <strong>Account Details:</strong><br>
-                📧 Email: <span th:text="${email}">user@example.com</span><br>
-                👤 Account Type: <span th:text="${userType}">User</span>
+                <div class="otp-section">
+                    <div class="otp-label">Enter this OTP to set up your password</div>
+                    <div class="otp-code">
+                        <span th:text="${otp}">123456</span>
+                    </div>
+                </div>
+
+                <div class="timer-info">
+                    <strong>⏰ Time Limit</strong>
+                    This verification code expires in <strong>15 minutes</strong>. Please complete your setup promptly.
+                </div>
+
+                <div class="instruction-box">
+                    <h3>Complete Your Root Account Setup:</h3>
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>Copy the OTP code above</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>Return to the application setup page</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div>Enter the OTP code in the verification field</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div>Create a strong password for your root account</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div>Complete the setup and start managing your system</div>
+                    </div>
+                </div>
+
+                <div class="security-notice">
+                    <strong>🔒 Security Notice:</strong> As a root user, you have full system access.
+                    Please choose a strong password and keep your credentials secure.
+                </div>
             </div>
 
-            <!-- Show OTP directly if provided -->
-            <div th:if="${otp}">
-                <p>To activate your account and set up your password, please use the following One-Time Password (OTP):</p>
-
-                <div class="otp-code">
-                    <span th:text="${otp}">123456</span>
+            <!-- Regular User Content -->
+            <div th:unless="${isRootUser}">
+                <div class="greeting">
+                    Hello <strong th:text="${userName}">User</strong>! 👋
                 </div>
 
-                <div class="warning">
-                    <strong>⚠️ Important:</strong> This OTP will expire in 15 minutes for security reasons.
-                    Please use it to complete your account verification.
+                <div class="success-message">
+                    <strong>🎉 Your account has been created successfully!</strong><br>
+                    You're all set and ready to go.
                 </div>
 
-                <p>Enter this OTP in the application to verify your account and set up your password.</p>
-            </div>
-
-            <!-- Fallback to verification link if OTP is not provided -->
-            <div th:unless="${otp}">
-                <p>To activate your account and set up your password, please click the verification button below:</p>
-
-                <div style="text-align: center;">
-                    <a th:href="${verificationLink}" class="button">✅ Verify Account & Set Password</a>
+                <div class="welcome-message">
+                    <h3>Welcome to Our Platform! 🚀</h3>
+                    <p>Your account is now active and ready to use. You can start exploring all the features available to you.</p>
                 </div>
 
-                <div class="warning">
-                    <strong>⚠️ Important:</strong> This verification link will expire in 15 minutes for security reasons.
-                    If you don't verify within this time, please contact your administrator.
+                <div class="instruction-box">
+                    <h3>What's Next:</h3>
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div>Log in to your account using your credentials</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div>Complete your profile setup</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div>Explore the dashboard and available features</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div>Start using the platform!</div>
+                    </div>
                 </div>
-
-                <p>If you're unable to click the button above, copy and paste the following link into your browser:</p>
-                <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace;" th:text="${verificationLink}">
-                    Verification Link
-                </p>
             </div>
         </div>
 
         <div class="footer">
+            <p><strong>Need Help?</strong></p>
+            <p>If you have any questions or need assistance, our support team is here to help.</p>
             <p>This is an automated message. Please do not reply to this email.</p>
-            <p>If you did not expect this email, please contact our support team immediately.</p>
         </div>
     </div>
 </body>

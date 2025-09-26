@@ -141,18 +141,21 @@ public interface UserService {
   User findRootUserByAccountId(Long accountId);
 
   /**
-   * Sends an OTP (One-Time Password) to the specified email.
-   *
-   * @param email the email to which the OTP should be sent
-   * @throws ServiceLayerException if there is an error during the process
-   */
-  void sendOtp(String email) throws ServiceLayerException;
-
-  /**
    * Resends the OTP (One-Time Password) to the specified email.
    *
+   * @param accountId the ID of the account to which the user belongs
    * @param email the email to which the OTP should be resent
    * @throws ServiceLayerException if there is an error during the process
    */
-  void resendOtp(String email) throws ServiceLayerException;
+  void resendOtpForUserCreation(Long accountId, String email) throws ServiceLayerException;
+
+
+  /**
+   * Resends the OTP (One-Time Password) to the specified email for account creation.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param email the email to which the OTP should be resent
+   * @throws ServiceLayerException if there is an error during the process
+   */
+  void resendOtpForAccountCreation(Long accountId, String email) throws ServiceLayerException;
 }

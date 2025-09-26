@@ -50,24 +50,27 @@ public class UserServiceImpl implements UserService {
 
   private final JwtTokenGenerator jwtTokenGenerator;
 
+  private final LinkBuilderServiceImpl linkBuilderService;
+
   /**
    * Constructor for UserServiceImpl.
    *
    * @param userDao the UserDao to be used for database operations
    */
   public UserServiceImpl(
-      UserDao userDao,
-      BCryptPasswordEncoder passwordEncoder,
-      RoleService roleService,
-      OtpService otpService,
-      NotificationService notificationService,
-      JwtTokenGenerator jwtTokenGenerator) {
+          UserDao userDao,
+          BCryptPasswordEncoder passwordEncoder,
+          RoleService roleService,
+          OtpService otpService,
+          NotificationService notificationService,
+          JwtTokenGenerator jwtTokenGenerator, LinkBuilderServiceImpl linkBuilderService) {
     this.passwordEncoder = passwordEncoder;
     this.userDao = userDao;
     this.roleService = roleService;
     this.otpService = otpService;
     this.notificationService = notificationService;
     this.jwtTokenGenerator = jwtTokenGenerator;
+      this.linkBuilderService = linkBuilderService;
   }
 
   /**
@@ -86,8 +89,8 @@ public class UserServiceImpl implements UserService {
 
       // Generate OTP and send user creation email with verification link
       String otp = generateAndStoreOtp(createdUser.getEmail());
-      notificationService.sendUserCreationEmail(
-          createdUser.getFirstName(), createdUser.getEmail(), otp, accountId, false);
+      notificationService.sendUserCreationWithLink(
+          createdUser.getFirstName(), createdUser.getEmail(), otp);
 
       return USER_MAPPER.convertUserToUserCreateResponseDto(createdUser);
     } catch (Exception e) {
@@ -108,12 +111,8 @@ public class UserServiceImpl implements UserService {
       User user = buildRootUser(requestDto, accountId, roles);
       User createdUser = persistUser(user);
 
-      // Generate OTP and send root user creation email with OTP displayed directly (no verification
-      // link)
       String otp = generateAndStoreOtp(createdUser.getEmail());
-      notificationService.sendUserCreationEmailWithOtp(
-          createdUser.getFirstName(), createdUser.getEmail(), otp, true);
-
+      notificationService.sendAccountCreationSuccessfulWithOtp(createdUser.getFirstName(), createdUser.getEmail(), otp);
       return createdUser;
     } catch (ResourceAlreadyExistException e) {
       log.error("Root user already exists: {}", e.getMessage());
@@ -162,7 +161,6 @@ public class UserServiceImpl implements UserService {
    */
   private String generateAndStoreOtp(String email) throws ServiceLayerException {
     try {
-      // Use OtpService's new generateAndStoreOtp method instead of manual generation
       return otpService.generateAndStoreOtp(email);
     } catch (Exception e) {
       log.error("Failed to generate and store OTP for email {}: {}", email, e.getMessage());
@@ -170,78 +168,7 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  /**
-   * Sends an OTP (One-Time Password) to the specified email.
-   *
-   * @param email the email to which the OTP should be sent
-   * @throws ServiceLayerException if there is an error during the process
-   */
-  @Override
-  public void sendOtp(String email) throws ServiceLayerException {
-    try {
-      // Generate and store OTP
-      String otp = otpService.generateAndStoreOtp(email);
 
-      // Try to find user details for professional email template
-      User user = findUserByEmailSafely(email);
-
-      if (user != null) {
-        boolean isRoot = isRootUser(user);
-
-        if (isRoot) {
-          // For root users, send OTP directly in email (no verification link)
-          notificationService.sendResendOtpEmailWithOtp(user.getFirstName(), email, otp, true);
-          log.info("Root user OTP email (direct OTP) sent to {}", email);
-        } else {
-          // For regular users, send professional resend OTP email with verification link
-          notificationService.sendResendOtpEmail(
-              user.getFirstName(), email, otp, user.getAccountId(), false);
-          log.info(
-              "Regular user OTP email (with link) sent to {} for account: {}",
-              email,
-              user.getAccountId());
-        }
-      } else {
-        // Fallback to basic OTP email if user not found
-        notificationService.sendOtp(otp, email);
-        log.info("Basic OTP email sent to {} (user details not found)", email);
-      }
-    } catch (Exception e) {
-      log.error("Failed to send OTP to email {}: {}", email, e.getMessage());
-      throw new ServiceLayerException("Failed to send OTP", e);
-    }
-  }
-
-  /**
-   * Resends the OTP (One-Time Password) to the specified email.
-   *
-   * @param email the email to which the OTP should be resent
-   * @throws ServiceLayerException if there is an error during the process
-   */
-  @Override
-  public void resendOtp(String email) throws ServiceLayerException {
-    // Delegate to sendOtp method since the logic is the same
-    sendOtp(email);
-  }
-
-  /**
-   * Safely finds a user by email address, checking both regular users and root users. Returns null
-   * if user is not found instead of throwing exception.
-   *
-   * @param email the email address to search for
-   * @return the User if found, null otherwise
-   */
-  private User findUserByEmailSafely(String email) {
-    try {
-      // First try to find as a root user (no account ID)
-      return findByEmail(email);
-    } catch (ServiceLayerException e) {
-      // If not found as root user, we can't easily search all accounts
-      // since we don't have the account ID. This is a design limitation.
-      log.debug("User not found as root user for email: {}", email);
-      return null;
-    }
-  }
 
   /**
    * Checks if a user with the specified account ID and email already exists.
@@ -325,7 +252,7 @@ public class UserServiceImpl implements UserService {
   public User findByEmail(String email) throws ServiceLayerException {
     try {
       User user = userDao.findByEmail(email);
-      if (user == null || !isRootUser(user)) {
+      if (user == null || !user.getIsRoot()) {
         log.warn("Root user with email {} not found", email);
         throw new ResourceNotFoundException("Root User not found");
       }
@@ -579,13 +506,41 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  /**
-   * Checks if the user is a root user.
-   *
-   * @param user the user to check
-   * @return true if the user is a root user, false otherwise
-   */
-  private boolean isRootUser(User user) {
-    return user.getRoles().stream().anyMatch(role -> role.getName().equalsIgnoreCase("ROOT"));
-  }
+
+    /**
+     * Resends the OTP (One-Time Password) to the specified email.
+     *
+     * @param accountId the ID of the account to which the user belongs
+     * @param email     the email to which the OTP should be resent
+     * @throws ServiceLayerException if there is an error during the process
+     */
+    @Override
+    public void resendOtpForUserCreation(Long accountId, String email) throws ServiceLayerException {
+
+        try {
+          User user = findByAccountIdAndEmail(accountId, email);
+          String otp = generateAndStoreOtp(user.getEmail());
+          notificationService.resendOtpForUserCreation(user.getFirstName(), user.getEmail(),linkBuilderService.buildUserVerificationLink(otp,accountId,email));
+        } catch (Exception e) {
+            throw new ServiceLayerException("Failed to resend OTP for User creation", e);
+        }
+    }
+
+    /**
+     * Resends the OTP (One-Time Password) to the specified email for account creation.
+     *
+     * @param accountId the ID of the account to which the user belongs
+     * @param email     the email to which the OTP should be resent
+     * @throws ServiceLayerException if there is an error during the process
+     */
+    @Override
+    public void resendOtpForAccountCreation(Long accountId, String email) throws ServiceLayerException {
+        try {
+            User user = findByAccountIdAndEmail(accountId, email);
+            String otp = generateAndStoreOtp(user.getEmail());
+            notificationService.resendOtpForAccountCreation(user.getFirstName(), user.getEmail(),otp);
+        } catch (Exception e) {
+            throw new ServiceLayerException("Failed to resend OTP for Account creation OTP", e);
+        }
+    }
 }

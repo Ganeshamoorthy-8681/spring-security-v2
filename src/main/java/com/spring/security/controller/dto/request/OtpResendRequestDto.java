@@ -12,4 +12,8 @@ import lombok.Setter;
 public class OtpResendRequestDto {
 
   private String email;
+
+  private Long accountId;
+
+  private boolean isRoot;
 }

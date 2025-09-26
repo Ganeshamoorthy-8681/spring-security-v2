@@ -5,160 +5,107 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
- * Service implementation for handling notification operations, specifically sending OTPs via email.
+ * Service implementation for handling notification operations with simplified, straightforward methods.
  */
 @Service
 @Slf4j
 public class NotificationServiceImpl implements NotificationService {
 
   private final EmailService emailService;
+
   private final EmailTemplateService emailTemplateService;
-  private final LinkBuilderService linkBuilderService;
 
   /**
    * Constructs a NotificationServiceImpl with the necessary dependencies.
    *
    * @param emailService the email service to send notifications
    * @param emailTemplateService the service for generating email templates
-   * @param linkBuilderService the service for building verification links
    */
   public NotificationServiceImpl(
       EmailService emailService,
-      EmailTemplateService emailTemplateService,
-      LinkBuilderService linkBuilderService) {
+      EmailTemplateService emailTemplateService) {
     this.emailService = emailService;
     this.emailTemplateService = emailTemplateService;
-    this.linkBuilderService = linkBuilderService;
   }
 
   /**
-   * Verifies the email address of an account.
-   *
-   * @param email the email address to verify
+   * Sends account creation successful notification with OTP.
+   * Uses account-created-success template.
    */
-  public void sendOtp(String otp, String email) throws ServiceLayerException {
+  @Override
+  public void sendAccountCreationSuccessfulWithOtp(String userName, String email, String otp)
+      throws ServiceLayerException {
     try {
-      String htmlContent = emailTemplateService.generateOtpTemplate(otp);
-      emailService.sendHtmlEmail(email, "Your OTP Code", htmlContent);
-      log.debug("OTP sent to email: {}", email);
+      String htmlContent = emailTemplateService.generateAccountCreationTemplate(userName, email, otp);
+      String subject = "Account Created Successfully - Set Up Your Password";
+      log.info("Sending account creation email with OTP to: {}", email);
+
+      emailService.sendHtmlEmail(email, subject, htmlContent);
+      log.info("Account creation email successfully sent to: {}", email);
+
     } catch (Exception e) {
-      log.error("Failed to send OTP to email {}: {}", email, e.getMessage());
-      throw new ServiceLayerException("Failed to send OTP to email", e);
+      log.error("Failed to send account creation email to {}: {}", email, e.getMessage());
+      throw new ServiceLayerException("Failed to send account creation notification", e);
     }
   }
 
   /**
-   * Sends a user creation email with verification link containing OTP and account ID.
-   *
-   * @param userName the name of the user
-   * @param email the user's email address
-   * @param otp the OTP code for verification
-   * @param accountId the account ID
-   * @param isRootUser whether this is for a root user creation
+   * Sends user creation notification with verification link.
+   * Uses account-setup-otp template.
    */
   @Override
-  public void sendUserCreationEmail(
-      String userName, String email, String otp, Long accountId, boolean isRootUser)
+  public void sendUserCreationWithLink(String userName, String email, String verificationLink)
       throws ServiceLayerException {
     try {
-      String verificationLink = linkBuilderService.buildUserVerificationLink(otp, accountId, email);
-      String htmlContent =
-          emailTemplateService.generateUserCreationTemplate(
-              userName, email, verificationLink, isRootUser);
-
-      String subject =
-          isRootUser
-              ? "Root User Account Created - Verification Required"
-              : "Account Created - Verification Required";
+      log.info("Sending user creation email with verification link to: {}", email);
+      String htmlContent = emailTemplateService.generateUserCreationTemplate(userName, email, verificationLink);
+      String subject = "User Created - Set Up Your Password";
 
       emailService.sendHtmlEmail(email, subject, htmlContent);
-      log.debug("User creation email sent to: {} for account: {}", email, accountId);
+      log.info("User creation email successfully sent to: {}", email);
     } catch (Exception e) {
       log.error("Failed to send user creation email to {}: {}", email, e.getMessage());
-      throw new ServiceLayerException("Failed to send user creation email", e);
+      throw new ServiceLayerException("Failed to send user creation notification", e);
     }
   }
 
   /**
-   * Sends a user creation email with OTP displayed directly in the email body.
-   *
-   * @param userName the name of the user
-   * @param email the user's email address
-   * @param otp the OTP code for verification
-   * @param isRootUser whether this is for a root user creation
+   * Resends OTP for account creation when user requests a new one.
+   * Uses resend-otp template.
    */
   @Override
-  public void sendUserCreationEmailWithOtp(
-      String userName, String email, String otp, boolean isRootUser) throws ServiceLayerException {
-    try {
-      String htmlContent =
-          emailTemplateService.generateUserCreationTemplateWithOtp(
-              userName, email, otp, isRootUser);
-
-      String subject =
-          isRootUser
-              ? "Root User Account Created - OTP Verification"
-              : "Account Created - OTP Verification";
-
-      emailService.sendHtmlEmail(email, subject, htmlContent);
-      log.debug("User creation email with OTP sent to: {}", email);
-    } catch (Exception e) {
-      log.error("Failed to send user creation email with OTP to {}: {}", email, e.getMessage());
-      throw new ServiceLayerException("Failed to send user creation email with OTP", e);
-    }
-  }
-
-  /**
-   * Sends a resend OTP email with professional template and verification link.
-   *
-   * @param userName the name of the user
-   * @param email the user's email address
-   * @param otp the OTP code for verification
-   * @param accountId the account ID
-   * @param isRootUser whether this is for a root user
-   */
-  @Override
-  public void sendResendOtpEmail(
-      String userName, String email, String otp, Long accountId, boolean isRootUser)
+  public void resendOtpForAccountCreation(String userName, String email, String otp)
       throws ServiceLayerException {
     try {
-      String verificationLink = linkBuilderService.buildUserVerificationLink(otp, accountId, email);
-      String htmlContent =
-          emailTemplateService.generateResendOtpTemplate(
-              userName, email, verificationLink, otp, isRootUser);
-
+      log.info("Resending OTP for account creation to user: {}", email);
+      String htmlContent = emailTemplateService.generateAccountCreationResendOtp(userName, email, otp);
       String subject = "Your New Verification Code";
 
       emailService.sendHtmlEmail(email, subject, htmlContent);
-      log.debug("Resend OTP email sent to: {} for account: {}", email, accountId);
+      log.info("OTP successfully resent for account creation to user: {}", email);
     } catch (Exception e) {
-      log.error("Failed to send resend OTP email to {}: {}", email, e.getMessage());
-      throw new ServiceLayerException("Failed to send resend OTP email", e);
+      log.error("Failed to resend OTP for account creation to {}: {}", email, e.getMessage());
+      throw new ServiceLayerException("Failed to resend OTP for account creation", e);
     }
   }
 
   /**
-   * Sends a resend OTP email with OTP displayed directly in the email body.
-   *
-   * @param userName the name of the user
-   * @param email the user's email address
-   * @param otp the OTP code for verification
-   * @param isRootUser whether this is for a root user
+   * Resends OTP for user creation with verification link when user requests a new one.
+   * Uses resend-otp-link template.
    */
   @Override
-  public void sendResendOtpEmailWithOtp(
-      String userName, String email, String otp, boolean isRootUser) throws ServiceLayerException {
+  public void resendOtpForUserCreation(String userName, String email, String verificationLink)
+      throws ServiceLayerException {
     try {
-      String htmlContent =
-          emailTemplateService.generateResendOtpTemplateWithOtp(userName, email, otp, isRootUser);
-
-      String subject = "Your New Verification Code";
+      log.info("Resending verification link for user creation to: {}", email);
+      String htmlContent = emailTemplateService.generateUserCreationResendOtp(userName, email, verificationLink);
+      String subject = "Your New Verification Link";
 
       emailService.sendHtmlEmail(email, subject, htmlContent);
-      log.debug("Resend OTP email with OTP sent to: {}", email);
+      log.info("Verification link successfully resent for user creation to: {}", email);
     } catch (Exception e) {
-      log.error("Failed to send resend OTP email with OTP to {}: {}", email, e.getMessage());
-      throw new ServiceLayerException("Failed to send resend OTP email with OTP", e);
+      log.error("Failed to resend verification link for user creation to {}: {}", email, e.getMessage());
+      throw new ServiceLayerException("Failed to resend verification link for user creation", e);
     }
   }
 }
