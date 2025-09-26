@@ -149,7 +149,6 @@ public interface UserService {
    */
   void resendOtpForUserCreation(Long accountId, String email) throws ServiceLayerException;
 
-
   /**
    * Resends the OTP (One-Time Password) to the specified email for account creation.
    *

@@ -44,8 +44,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
   }
 
   @Override
-  public String generateAccountCreationResendOtp(
-      String userName, String email, String otp) {
+  public String generateAccountCreationResendOtp(String userName, String email, String otp) {
     Context context = new Context();
     context.setVariable("userName", userName);
     context.setVariable("email", email);

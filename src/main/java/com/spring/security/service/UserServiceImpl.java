@@ -58,19 +58,20 @@ public class UserServiceImpl implements UserService {
    * @param userDao the UserDao to be used for database operations
    */
   public UserServiceImpl(
-          UserDao userDao,
-          BCryptPasswordEncoder passwordEncoder,
-          RoleService roleService,
-          OtpService otpService,
-          NotificationService notificationService,
-          JwtTokenGenerator jwtTokenGenerator, LinkBuilderServiceImpl linkBuilderService) {
+      UserDao userDao,
+      BCryptPasswordEncoder passwordEncoder,
+      RoleService roleService,
+      OtpService otpService,
+      NotificationService notificationService,
+      JwtTokenGenerator jwtTokenGenerator,
+      LinkBuilderServiceImpl linkBuilderService) {
     this.passwordEncoder = passwordEncoder;
     this.userDao = userDao;
     this.roleService = roleService;
     this.otpService = otpService;
     this.notificationService = notificationService;
     this.jwtTokenGenerator = jwtTokenGenerator;
-      this.linkBuilderService = linkBuilderService;
+    this.linkBuilderService = linkBuilderService;
   }
 
   /**
@@ -112,7 +113,8 @@ public class UserServiceImpl implements UserService {
       User createdUser = persistUser(user);
 
       String otp = generateAndStoreOtp(createdUser.getEmail());
-      notificationService.sendAccountCreationSuccessfulWithOtp(createdUser.getFirstName(), createdUser.getEmail(), otp);
+      notificationService.sendAccountCreationSuccessfulWithOtp(
+          createdUser.getFirstName(), createdUser.getEmail(), otp);
       return createdUser;
     } catch (ResourceAlreadyExistException e) {
       log.error("Root user already exists: {}", e.getMessage());
@@ -167,8 +169,6 @@ public class UserServiceImpl implements UserService {
       throw new ServiceLayerException("Failed to generate OTP", e);
     }
   }
-
-
 
   /**
    * Checks if a user with the specified account ID and email already exists.
@@ -506,41 +506,44 @@ public class UserServiceImpl implements UserService {
     }
   }
 
+  /**
+   * Resends the OTP (One-Time Password) to the specified email.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param email the email to which the OTP should be resent
+   * @throws ServiceLayerException if there is an error during the process
+   */
+  @Override
+  public void resendOtpForUserCreation(Long accountId, String email) throws ServiceLayerException {
 
-    /**
-     * Resends the OTP (One-Time Password) to the specified email.
-     *
-     * @param accountId the ID of the account to which the user belongs
-     * @param email     the email to which the OTP should be resent
-     * @throws ServiceLayerException if there is an error during the process
-     */
-    @Override
-    public void resendOtpForUserCreation(Long accountId, String email) throws ServiceLayerException {
-
-        try {
-          User user = findByAccountIdAndEmail(accountId, email);
-          String otp = generateAndStoreOtp(user.getEmail());
-          notificationService.resendOtpForUserCreation(user.getFirstName(), user.getEmail(),linkBuilderService.buildUserVerificationLink(otp,accountId,email));
-        } catch (Exception e) {
-            throw new ServiceLayerException("Failed to resend OTP for User creation", e);
-        }
+    try {
+      User user = findByAccountIdAndEmail(accountId, email);
+      String otp = generateAndStoreOtp(user.getEmail());
+      notificationService.resendOtpForUserCreation(
+          user.getFirstName(),
+          user.getEmail(),
+          linkBuilderService.buildUserVerificationLink(otp, accountId, email));
+    } catch (Exception e) {
+      throw new ServiceLayerException("Failed to resend OTP for User creation", e);
     }
+  }
 
-    /**
-     * Resends the OTP (One-Time Password) to the specified email for account creation.
-     *
-     * @param accountId the ID of the account to which the user belongs
-     * @param email     the email to which the OTP should be resent
-     * @throws ServiceLayerException if there is an error during the process
-     */
-    @Override
-    public void resendOtpForAccountCreation(Long accountId, String email) throws ServiceLayerException {
-        try {
-            User user = findByAccountIdAndEmail(accountId, email);
-            String otp = generateAndStoreOtp(user.getEmail());
-            notificationService.resendOtpForAccountCreation(user.getFirstName(), user.getEmail(),otp);
-        } catch (Exception e) {
-            throw new ServiceLayerException("Failed to resend OTP for Account creation OTP", e);
-        }
+  /**
+   * Resends the OTP (One-Time Password) to the specified email for account creation.
+   *
+   * @param accountId the ID of the account to which the user belongs
+   * @param email the email to which the OTP should be resent
+   * @throws ServiceLayerException if there is an error during the process
+   */
+  @Override
+  public void resendOtpForAccountCreation(Long accountId, String email)
+      throws ServiceLayerException {
+    try {
+      User user = findByAccountIdAndEmail(accountId, email);
+      String otp = generateAndStoreOtp(user.getEmail());
+      notificationService.resendOtpForAccountCreation(user.getFirstName(), user.getEmail(), otp);
+    } catch (Exception e) {
+      throw new ServiceLayerException("Failed to resend OTP for Account creation OTP", e);
     }
+  }
 }

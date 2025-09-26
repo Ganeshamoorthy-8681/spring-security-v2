@@ -1,8 +1,6 @@
 package com.spring.security.service;
 
 import com.spring.security.exceptions.EmailServiceException;
-import com.spring.security.exceptions.ServiceLayerException;
-import jakarta.mail.MessagingException;
 
 /**
  * Service interface for sending emails.

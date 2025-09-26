@@ -65,11 +65,11 @@ public class OtpController {
   @PostMapping("/resend")
   public ResponseEntity<Void> resendOtp(@RequestBody OtpResendRequestDto requestDto)
       throws ServiceLayerException {
-      if (requestDto.isRoot()){
-          userService.resendOtpForAccountCreation(requestDto.getAccountId(), requestDto.getEmail());
-      }else {
-          userService.resendOtpForUserCreation(requestDto.getAccountId(), requestDto.getEmail());
-      }
+    if (requestDto.isRoot()) {
+      userService.resendOtpForAccountCreation(requestDto.getAccountId(), requestDto.getEmail());
+    } else {
+      userService.resendOtpForUserCreation(requestDto.getAccountId(), requestDto.getEmail());
+    }
     return new ResponseEntity<>(HttpStatus.NO_CONTENT);
   }
 }
