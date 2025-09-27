@@ -58,7 +58,7 @@ public class BrevoEmailServiceImpl implements EmailService {
       // Set up HTTP headers with content type and authorization.
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_JSON);
-      headers.setBearerAuth(apiKey);
+      headers.set("API-key", apiKey);
 
       // Create the request body with sender, recipient, subject, and content.
       Map<String, Object> body = new HashMap<>();
