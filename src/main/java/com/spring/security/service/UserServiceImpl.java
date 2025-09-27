@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
       // Generate OTP and send user creation email with verification link
       String otp = generateAndStoreOtp(createdUser.getEmail());
       notificationService.sendUserCreationWithLink(
-          createdUser.getFirstName(), createdUser.getEmail(), otp);
+          createdUser.getFirstName(), createdUser.getEmail(), linkBuilderService.buildUserVerificationLink(otp, accountId, createdUser.getEmail()));
 
       return USER_MAPPER.convertUserToUserCreateResponseDto(createdUser);
     } catch (Exception e) {
