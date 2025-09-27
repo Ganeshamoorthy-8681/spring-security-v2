@@ -26,6 +26,7 @@ RUN ./gradlew build -x test -x spotlessCheck --no-daemon
 EXPOSE 8080
 
 # Set environment variables with defaults (can be overridden at runtime)
+ENV SPRING_PROFILES_ACTIVE=prod
 #ENV DATASOURCE_URL=jdbc:postgresql://postgres:5432/auth
 #ENV DATASOURCE_USERNAME=ganesh
 #ENV DATASOURCE_PASSWORD=password
