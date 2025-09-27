@@ -11,7 +11,7 @@ public class UserSqlProvider {
             SELECT(
                 "u.id AS user_id, u.first_name, u.last_name, u.middle_name, u.email, u.type, u.status, u.password, u.account_id, "
                     + "u.created_at, u.updated_at, u.deleted_at, u.current_login, u.last_login, u.failed_login_attempts, u.last_failed_login, "
-                    + "u.created_by, u.updated_by, u.deleted_by, u.additional_attributes, "
+                    + "u.created_by, u.updated_by, u.deleted_by, u.additional_attributes, u.is_root, "
                     + "r.id AS role_id, r.name AS role_name, r.description AS role_description, "
                     + "p.id AS permission_id, p.name AS permission_name, p.description AS permission_description, p.action AS permission_action");
 
