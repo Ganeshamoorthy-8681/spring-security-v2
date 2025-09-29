@@ -80,7 +80,7 @@ public interface UserMapper {
             javaType = List.class,
             column = "role_id",
             many = @Many(resultMap = "roleWithPermissionsResultMap")),
-            @Result(property = "isRoot", column = "is_root", javaType = Boolean.class)
+        @Result(property = "isRoot", column = "is_root", javaType = Boolean.class)
       })
   User findByAccountIdAndEmail(Long accountId, String email);
 
